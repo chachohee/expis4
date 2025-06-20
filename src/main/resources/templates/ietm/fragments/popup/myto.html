@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MYTO 관리</title>
+  <link href="/component/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/component/fontawesome/css/all.min.css" rel="stylesheet">
+  <link href="/css/ietm/popup/myto.css" rel="stylesheet">
+  <script th:src="@{/component/jquery/jquery-3.7.1.min.js}" type="text/javascript"></script>
+  <script th:src="@{/component/bootstrap/js/bootstrap.bundle.min.js}" type="text/javascript"></script>
+  <script th:src="@{/js/ietm/popup/myto.js}" type="text/javascript"></script>
+</head>
+<body>
+<script th:inline="javascript">
+  var bizCode = [[${bizCode}]];
+  console.log("bizCode : ", bizCode);
+</script>
+<div class="container h-100">
+  <!-- 상단바 추가 -->
+  <div class="row">
+    <div class="col-12 text-center myto-header"
+         style="background-image: url('/img/ietm/popup/bg_pup_header.gif');
+                background-size: cover;
+                background-position: center;">
+      <h1 style="color: white; font-weight: bold;">MY T.O</h1>
+    </div>
+  </div>
+
+  <input type="hidden" id="selected_key" value="" />
+  <input type="hidden" id="selected_seq" value="" />
+  <input type="hidden" id="ietm_manual_already_exists" value='<spring:message code="ietm.manual.already.exists" />' />
+  <input type="hidden" id="ietm_select_correct_to" value='<spring:message code="ietm.select.correct.to" />' />
+  <input type="hidden" id="myto_position" value="" />
+  <input type="hidden" id="selected_co_seq" value="" />
+  <input type="hidden" id="parent_seq" value="" />
+  <input type="hidden" id="selected_toco_key" value="" />
+  <input type="hidden" id="selected_type" value="" />
+  <input type="hidden" id="child_status" value="parents" />
+  <input type="hidden" id="ietm_delete_error" value='<spring:message code="ietm.delete.error" />' />
+  <!--  <input type="text" id="folder_name" class="input_folder" title='<spring:message code="ietm.enter.new.folder" />' />-->
+
+  <div class="row h-100 p-3">
+    <!-- TO 목록 -->
+    <div class="col-md-5 border h-100">
+      <div class="row row-cols-1 h-50">
+        <div class="col border myto-title d-flex justify-content-between">
+          <i class="fas fa-list"></i> TO 목록
+          <input type="checkbox" class="ml-auto" id="to-checkbox-all" disabled>
+        </div>
+        <div class="col border myto-tree tree_list">
+          <div class="to_list tree"></div>
+        </div>
+      </div>
+
+      <!-- TO 목차 -->
+      <div class="row row-cols-1 h-50">
+        <div class="col border myto-title d-flex justify-content-between">
+          <i class="fas fa-book"></i> TO 목차
+          <input type="checkbox" class="ml-auto" id="toco-checkbox-all">
+        </div>
+        <div class="col border myto-tree tree_list">
+          <div class="toco_list tree"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 메뉴바 (TO 목록과 MYTO 목록 사이에 배치) -->
+    <div class="col-md-2 border h-100">
+      <div class="menu-bar">
+        <!--        <h5><i class="fa-solid fa-bars"></i> <span>Menu Bar</span></h5>-->
+        <h5><span>Menu Bar</span></h5>
+        <div class="menu-item" onclick="createFolder();">
+          <i class="fa-solid fa-folder-plus"></i> <span>폴더 생성</span>
+        </div>
+        <div class="menu-item" onclick="toggleDeleteMode();">
+          <i class="fa-solid fa-folder-minus"></i> <span>폴더 삭제</span>
+        </div>
+        <!--        <div class="menu-item" onclick="addMyToco();">-->
+        <div class="menu-item" onclick="addMyToco();">
+          <i class="fa-solid fa-plus"></i> <span>T.O 추가</span>
+        </div>
+        <!--        <div class="menu-item" onclick="delMyToco();">-->
+        <div class="menu-item" onclick="delMyToco();">
+          <i class="fa-solid fa-trash"></i> <span>T.O 삭제</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MYTO 목록 -->
+    <div class="col-md-5 border h-100">
+      <div class="row row-cols-1 h-50">
+        <div class="col border myto-title d-flex justify-content-between">
+          <i class="fas fa-list"></i> MYTO 목록
+          <input type="checkbox" class="ml-auto" id="myto-checkbox-all">
+        </div>
+        <div class="col border myto-tree tree_list">
+          <div class="myto_list tree">
+            <!--            <ul class="collapse show nav flex-cloumn ps-3"></ul>-->
+          </div>
+        </div>
+      </div>
+
+      <!-- MYTO 목차 -->
+      <div class="row row-cols-1 h-50">
+        <div class="col border myto-title d-flex justify-content-between">
+          <i class="fas fa-list-ol"></i> MYTO 목차
+          <input type="checkbox" class="ml-auto" id="mytoco-checkbox-all">
+        </div>
+        <div class="col border myto-tree tree_list">
+          <div class="mytoco_list tree">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

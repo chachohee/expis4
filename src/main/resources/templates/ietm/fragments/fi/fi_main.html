@@ -1,0 +1,47 @@
+<div th:fragment="fi_main" class="row">
+<!--  컨텐츠 영역 변경 이전 내용 팝업 -->
+        <div class="pup_ver_wrap" style="display:none;" id="ver_link_layer">
+            <div class="pup_form" id="ver_link_div">
+                <div class="pup_header">
+                    <span id="version_title_set" title="변경 이전 내용"></span>
+                </div>
+                <div class="ver_cont">
+                    <table cellspacing="0" cellpadding="0">
+                        <colgroup>
+                            <col width="200" />
+                            <col />
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th>변경 번호 : <span id="chg_num">2</span></th>
+                            <th>변경 일자 : <span id="chg_date">2016-04-20</span></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td colspan="2">
+                                <div class="table_scroll">
+                                    <p id="link_text">내용이 변경되었습니다.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="table_scroll">
+                                    <p id="link_text2">내용이 변경되었습니다.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <form name="frmVersionPup" id="frmVersionPup" method="post" action="versionOpenWin.do" target="frmVersionPup">
+                <input type="hidden" id="pop_ver_no" name="verChgNo">
+                <input type="hidden" id="pop_ver_date" name="verChgDate">
+                <input type="hidden" id="pop_ver_title" name="title">
+                <input type="hidden" id="pop_ver_html" name="verHtml">
+                <input type="hidden" id="pop_ver_changebasis" name="changebasis">
+            </form>
+        </div>
+</div>

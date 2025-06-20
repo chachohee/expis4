@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.ietm.dao.MainMapper">
+
+    <!-- ResultMap -->
+    <resultMap id="mainResultMap" type="com.expis.ietm.dto.MainDto">
+        <id property="toKey" 			column="to_key"			javaType="string" />
+        <id property="tocoId" 			column="toco_id"		javaType="string" />
+        <result property="toName"		column="to_name"		javaType="string" />
+        <result property="tocoName"		column="toco_name"		javaType="string" />
+        <result property="sessionId"	column="session_id"		javaType="string" />
+        <result property="userId"		column="user_id"		javaType="string" />
+        <result property="statusKind"	column="status_kind"	javaType="string" />
+        <result property="targetKind"	column="target_kind"	javaType="string" />
+        <result property="userPw"		column="user_pw"		javaType="string" />
+        <result property="ipAddress"	column="conn_ip"		javaType="string" />
+        <result property="connDate"		column="conn_date"		javaType="string" />
+        <result property="disconnDate"	column="disconn_date"	javaType="string" />
+<!--        <result property="mainDto"		column="mainDto"		javaType="list"/>-->
+        <result property="vcKind"		column="vcont_kind"		javaType="string"/>
+        <result property="num"			column="num"			javaType="int" />
+
+        <result property="coverTitle"			column="cover_title"			javaType="string" />
+        <result property="coverSubTitle"		column="cover_sub_title"		javaType="string" />
+        <result property="coverImg"				column="cover_img"				javaType="int" />
+        <result property="coverDistCont"		column="cover_dist_cont"		javaType="string" />
+        <result property="coverWarnningCont"	column="cover_warnning_cont"	javaType="string" />
+        <result property="coverCont"			column="cover_cont"				javaType="string" />
+        <result property="coverDate"			column="cover_date"				javaType="string" />
+        <result property="coverVerDate"			column="cover_ver_date"			javaType="string" />
+    </resultMap>
+<!--    <resultMap id="partInfotMap" type="com.expis.ietm.dto.PartInfoDto">-->
+<!--        <id property="toKey" 			column="to_key"			javaType="string" />-->
+<!--        <id property="tocoId" 			column="toco_id"		javaType="string" />-->
+<!--        <result property="partName"		column="part_name"		javaType="string" />-->
+<!--    </resultMap>-->
+
+    <!-- Select List/One -->
+    <select id="selectToListDto" resultMap="mainResultMap"	parameterType="com.expis.ietm.dto.MainDto">
+
+        SELECT t1.to_key
+        , t1.to_name
+        , t1.conn_date
+        FROM (
+        SELECT row_number() over(order by uct.conn_date desc) as rNum
+        , uct.to_key
+        , tti.to_name
+        , uct.conn_date
+        FROM (
+        SELECT uct.to_key
+        , max(uct.conn_date) AS conn_date
+        FROM ur_conn_to_history uct
+        WHERE uct.status_kind != '40'
+        AND uct.user_id = #{userId}
+        group by uct.to_key, uct.user_id ) uct
+        LEFT JOIN tm_to_info tti on	uct.to_key = tti.to_key ) t1
+        WHERE t1.rNum &lt;= 5
+    </select>
+
+
+
+    <!-- Select List/One -->
+    <select id="selectToCoListDto" resultMap="mainResultMap"	parameterType="com.expis.ietm.dto.MainDto">
+        SELECT toco_id
+        , toco_name
+        , conn_date
+        FROM (
+        SELECT row_number() over(order by uct.conn_date desc) as rNum
+        , uct.toco_id
+        , tti.toco_name
+        , uct.conn_date
+        FROM (
+        SELECT uct.toco_id		 AS toco_id
+        , max(uct.conn_date) AS conn_date
+        FROM ur_conn_to_history uct
+        WHERE uct.status_kind != '40'
+        AND uct.user_id = #{userId}
+        GROUP BY uct.toco_id ) uct
+        LEFT JOIN tm_toco_info tti ON uct.toco_id = tti.toco_id )
+        WHERE rNum &lt;= 5
+    </select>
+
+    <!-- toKey 중복제거 -->
+    <select id="selectToKeyDao" resultMap="mainResultMap" 	parameterType="com.expis.ietm.dto.MainDto">
+        SELECT to_key
+        , conn_date
+        FROM (
+        SELECT row_number() over(order by uct.conn_date desc) as rNum
+        , uct.to_key
+        , uct.conn_date
+        FROM (
+        select	to_key
+        ,max(conn_date)	as conn_date
+        from	ur_conn_to_history
+        where	status_kind != '40'
+        and		to_key not in ('blank', 'undefined')
+        and		user_id = #{userId}
+        group by to_key, user_id ) uct )
+        WHERE rNum &lt;= 3
+    </select>
+
+    <!-- tocoName 중복제거 -->
+    <select id="selectTocoNameDao" resultMap="mainResultMap" parameterType="com.expis.ietm.dto.MainDto">
+
+        SELECT toco_id
+        , toco_name
+        FROM (
+        SELECT row_number() over(order by uct.conn_date desc) as rNum
+        , uct.toco_id
+        , tti.toco_name
+        FROM (
+        select	toco_id
+        ,max(conn_date)	as conn_date
+        from	ur_conn_to_history
+        where	status_kind != '40'
+        and		user_id = #{userId}
+        group by toco_id, user_id ) uct
+        left join tm_toco_info tti	on	uct.toco_id = tti.toco_id )
+        WHERE rNum &lt;= 3
+    </select>
+
+    <!--  최근 TOCO 5개 가져오기 // 2017-02-20 check by JS -->
+    <!-- MySQL to AccessDB // 2017-10-19 ahj test 필요 -->
+    <select id="selectTocoList" resultMap="mainResultMap" parameterType="com.expis.ietm.dto.MainDto">
+        SELECT toco_id
+        , toco_name
+        , to_key
+        , vcont_kind
+        , connDate
+        FROM (
+        SELECT row_number() over(order by uct.conn_date desc) as rNum
+        , uct.toco_id
+        , uct.to_key
+        , uct.vcont_kind
+        , uct.conn_date AS connDate
+        , tti.toco_name
+        FROM (
+        select	toco_id
+        ,to_key
+        ,vcont_kind
+        ,max(conn_date)	as conn_date
+        from	ur_conn_to_history
+        where	status_kind != '40'
+        and		user_id = #{userId}
+        group by toco_id, user_id, to_key, vcont_kind ) uct
+        left join tm_toco_info tti	on	uct.toco_id = tti.toco_id )
+        WHERE toco_name is not NULL
+        AND rNum &lt;= 5
+    </select>
+
+    <!--  최근 TO 5개 가져오기 // 2017-02-20 check by JS -->
+    <!-- MySQL to AccessDB // 2017-10-19 ahj -->
+    <select id="selectToList" resultMap="mainResultMap" parameterType="com.expis.ietm.dto.MainDto">
+        SELECT to_key
+        , to_name
+        , connDate
+        FROM (
+        select	 row_number() over(order by uct.connDate desc) as rNum
+        ,uct.to_key
+        ,tti.to_name
+        ,uct.connDate
+        from
+        (
+        select	 to_key
+        ,max(conn_date)	as connDate
+        from	ur_conn_to_history
+        where	status_kind != '40'
+        and		to_key not in ('blank', 'undefined')
+        and		user_id =  #{userId}
+        group by to_key, user_id
+        )	uct
+        left join tm_to_info tti on	uct.to_key = tti.to_key )
+        WHERE rNum &lt;= 5
+    </select>
+
+
+
+    <update id="updateToDao" parameterType="com.expis.ietm.dto.MainDto">
+        update 	ur_conn_to_history
+        <trim prefix="SET" suffixOverrides=",">
+            status_kind = '40',
+            conn_date = sysdate,
+        </trim>
+        where 	user_id = #{userId}
+        and 	toco_id = #{tocoId}
+        and		status_kind = '10'
+    </update>
+
+    <delete id="deleteToTestDao" parameterType="com.expis.ietm.dto.MainDto">
+        delete
+        from 	ur_conn_to_history
+        where	user_id = #{userId}
+        and		status_kind = '40'
+    </delete>
+
+    <!-- selectUserToDao -->
+    <select id="selectUserToDao" parameterType="com.expis.ietm.dto.MainDto"
+            resultType="int">
+        select 	count(toco_id)
+        from 	ur_conn_to_history
+        where	status_Kind = '10'
+        and 	user_id=#{userId}
+    </select>
+
+    <!-- 본 TO 목록 저장 -->
+    <!-- by ejkim 2022.01.17 mdb의 경우 conn_seq가 자동채번되어 아마도  시퀀스 채번이 적용되어 있는 것으로 판단.
+         mssql/oracle의 경우 max(conn_seq)+1 적용 함)-->
+    <insert id="insertToDao" parameterType="com.expis.ietm.dto.MainDto">
+        <selectKey keyProperty="connSeq" resultType="int" order="BEFORE">
+            select case when max(conn_seq) is null then 1 else max(conn_seq)+1 end conn_seq from ur_conn_to_history
+        </selectKey>
+
+        insert into ur_conn_to_history
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            conn_seq,
+            session_id,
+            user_id,
+            to_key,
+            toco_id,
+            vcont_kind,
+            target_kind,
+            conn_date,
+            status_kind
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{connSeq},
+            #{sessionId},
+            #{userId},
+            #{toKey},
+            #{tocoId},
+            #{vcKind},
+            #{targetKind},
+            SYSDATE,
+            '10'
+        </trim>
+    </insert>
+
+    <select id="selectSessionId" parameterType="com.expis.ietm.dto.MainDto"
+            resultType="int">
+        select	count(user_id)
+        from	ur_conn_user_history
+        where	session_id=#{sessionId}
+    </select>
+
+    <!-- 표지관리 2017-05-15 -->
+    <select id="getCoverCont" resultMap="mainResultMap" parameterType="com.expis.ietm.dto.MainDto">
+        select	to_key
+        ,cover_title
+        ,cover_sub_title
+        ,cover_img
+        ,cover_dist_cont
+        ,cover_warnning_cont
+        ,cover_cont
+        from	ad_cover_manage
+        where	to_key = #{toKey} and status_kind = '10'
+    </select>
+
+    <!-- 2018-05-23 kgs -->
+    <select id="getCoverDate" resultType="String">
+        SELECT chg_date
+        FROM (
+        select  chg_date
+        from	tm_ver_info
+        where	to_key = #{toKey}
+        order by to_number(chg_no) )
+        WHERE rownum &lt;= 1
+    </select>
+
+    <select id="getCoverVerDate" resultType="String">
+        SELECT chg_date
+        FROM (
+        select  chg_date
+        from	tm_ver_info
+        where	to_key = #{toKey}
+        order by to_number(chg_no) desc )
+        WHERE rownum &lt;= 1
+    </select>
+
+<!--    &lt;!&ndash; 2021-10-22 Park js RDN(참조지시번호) 이용해서 부품명 확인 하는 내용으로 수정-->
+<!--         2022-09-07 Park js 동일 조건이 겹칠경우 문제 발생해서 완전 일치 일 경우 최상단 추가-->
+<!--         2022-10-05 ejkim rdn 조건 수정 rdn like #{rdn} -> rdn = #{rdn}-->
+<!--    &ndash;&gt;-->
+<!--    <select id="getPartInfo" resultMap="partInfotMap">-->
+<!--        select PART_NAME as partName, TOCO_ID as tocoId from (-->
+<!--        select	PART_NAME,TOCO_ID-->
+<!--        from	TM_SC_PARTINFO-->
+<!--        where	to_key = #{toKey}	and rdn = #{rdn}-->
+<!--        union all-->
+<!--        select	PART_NAME,TOCO_ID-->
+<!--        from	TM_SC_PARTINFO-->
+<!--        where	to_key = #{toKey}	and rdn like '%'||#{rdn}||'%'-->
+<!--        )-->
+<!--    </select>-->
+
+
+<!--    &lt;!&ndash; by ejkim 2022.01.17 cm_notice table 존재하지 않아 해당 쿼리 skip  &ndash;&gt;-->
+<!--    <select id="noticeIntroList" resultType="com.expis.ietm.dto.MaintDtoSub">-->
+<!--        select	cn.notice_seq		as	noticeSeq-->
+<!--        ,cn.subject			as	subject-->
+<!--        ,cn.contents		as	contents-->
+<!--        ,cn.file_yn			as	fileYn-->
+<!--        ,cn.hits			as	hits-->
+<!--        ,cn.status_kind		as	statusKind-->
+<!--        ,cn.create_user_id	as	createUserId-->
+<!--        ,to_char(cn.create_date, 'YYYY-MM-DD')		as	createDate-->
+<!--        ,rownum				as	rNum-->
+<!--        from	cm_notice cn-->
+<!--        where	rownum &lt; 6-->
+<!--        order	by	cn.notice_seq desc-->
+<!--    </select>-->
+
+<!--    &lt;!&ndash; by ejkim 2022.01.17 cm_board table 존재하지 않아 해당 쿼리 skip  &ndash;&gt;-->
+<!--    <select id="boardIntoList" resultType="com.expis.ietm.dto.MaintDtoSub">-->
+<!--        select-->
+<!--        board_seq		as	boardSeq-->
+<!--        ,subject-->
+<!--        ,contents-->
+<!--        ,file_yn		as	fileYn-->
+<!--        ,hits-->
+<!--        ,status_kind	as statusKind-->
+<!--        ,create_user_id	as	createUserId-->
+<!--        ,to_char(create_date, 'YYYY-MM-DD')		as	createDate-->
+<!--        from	cm_board-->
+<!--        where	rownum &lt; 6-->
+<!--        order	by	board_seq desc-->
+<!--    </select>-->
+
+</mapper>

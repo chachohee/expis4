@@ -1,0 +1,183 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.expis.ietm.dao.SearchIPBMapper">
+
+	<!-- ResultMap -->
+	<resultMap id="searchResultMap" type="searchPartinfoDto">
+		<id		property="toKey"					column="to_key"					javaType="string" />
+		<result	property="tocoId"				column="toco_id"					javaType="string" />
+		<result	property="ipbCode"				column="ipb_code"				javaType="string" />
+		<result	property="createUserId"		column="create_user_id"	javaType="string" />
+		<result	property="createDate"		column="create_date"			javaType="date" />
+	</resultMap>
+	
+	
+	<!-- ResultCount -->
+	<resultMap id="searchResultCount" type="int">
+		<result property="cnt" column="cnt" />
+	</resultMap>
+	
+	
+	<!-- Column -->
+	<sql id="searchColumn">
+		  tsp.to_key					AS to_key
+		, tsp.toco_id					AS toco_id
+		, tsp.ipb_code				AS ipb_code
+		, tsp.create_user_id		AS create_user_id
+		, tsp.create_date			AS create_date
+	</sql>
+	
+	<select id="selectIpb" resultType="searchPartinfoDto" parameterType="searchPartinfoDto">
+		select	tsp.to_key		as	toKey
+				,tsp.toco_id	as	tocoId
+				,tsp.grph_no	as	grphNo
+				,tsp.ipb_code	as	ipbCode
+				,tsp.part_no	as	partNo
+				,tsp.part_name	as	partName
+				,tsp.nsn		as	nsn
+				,tsp.cage		as	cage
+				,tsp.rdn		as	rdn
+				,tsp.upa		as	upa
+				,tsp.smr		as	smr
+				,tsp.std_mngt	as	std_mngy
+				,to_char(tsp.modify_date, 'YYYY-MM-DD hh24:mi:ss')	as	modifyDate
+				,tsp.modify_user_id	as	modifyUserId
+		from	tm_sc_partinfo tsp
+		where	tsp.nsn = #{nsn}
+		and		tsp.to_key = #{toKey}
+		order by tsp.modify_date
+	</select>
+	
+	<!--  2021.06.07 by ejkim  tm_sc_ipb 테이블에 컬럼(index_no, grph_no)이 없어 컬럼 추가 -->
+	<!--  Select List -->
+	<select id="selectListDao" resultMap="searchResultMap">
+		SELECT
+		<include refid="searchColumn" />
+		FROM tm_sc_ipb tsp
+
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">tsp.to_key = #{toKey}</if>
+				<if test="tocoId != null">tsp.toco_id = #{tocoId}</if>
+				<if test="ipbCode != null">tsp.ipb_code = #{ipbCode}</if>
+			</trim>
+		</where>
+
+		ORDER BY tsp.to_key ASC, tsp.toco_id ASC, tsp.index_no ASC, tsp.grph_no ASC, tsp.ipb_code ASC
+	</select>
+	
+	
+	<!--  Select One -->
+	<select id="selectDetailDao" resultMap="searchResultMap">
+		SELECT
+		<include refid="searchColumn" />
+		FROM tm_sc_ipb tsp
+		WHERE tsp.to_key = #{toKey}
+
+		<trim prefix="AND">
+			<if test="tocoId != null">tsp.toco_id = #{tocoId}</if>
+			<if test="ipbCode != null">tsp.ipb_code = #{ipbCode}</if>
+		</trim>
+
+	</select>
+	
+	
+	<!--  Select Count -->
+	<select id="selectCountDao" resultMap="searchResultCount">
+		SELECT
+			COUNT(*) AS cnt
+		FROM tm_sc_ipb
+		
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+				<if test="ipbCode != null">ipb_code = #{ipbCode}</if>
+			</trim>
+		</where>
+		
+	</select>
+	
+	
+	<!-- Insert -->
+	<insert id="insertDao" parameterType="com.expis.ietm.dto.SearchPartinfoDto">
+		INSERT INTO tm_sc_ipb
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			to_key,
+			toco_id,
+			<if test="ipbCode != null">ipb_code,</if>
+			<if test="createUserId != null">create_user_id,</if>
+			create_date
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			#{toKey},
+			#{tocoId},
+			<if test="ipbCode != null">#{ipbCode},</if>
+			<if test="createUserId != null">#{createUserId},</if>
+			SYSDATE
+		</trim>
+	</insert>
+	
+	
+	<!-- Insert All --><!-- 사용 20160924 -->
+	<insert id="insertAllDao" parameterType="com.expis.ietm.dto.SearchPartinfoDto">
+		<foreach index="index" item="item" collection="list" open="INSERT ALL " separator=" " close="SELECT * FROM DUAL">
+			INTO tm_sc_ipb
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				to_key,
+				toco_id,
+				<if test="item.ipbCode != null">ipb_code,</if>
+				<if test="item.createUserId != null">create_user_id,</if>
+				create_date
+			</trim>
+			VALUES
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				#{item.toKey},
+				#{item.tocoId},
+				<if test="item.ipbCode != null">#{item.ipbCode},</if>
+				<if test="item.createUserId != null">#{item.createUserId},</if>
+				SYSDATE
+			</trim>
+		</foreach>
+	</insert>
+	
+	
+	<!--  2021.06.07 by ejkim  tm_sc_ipb 테이블에 컬럼(cont)이 없어 컬럼 추가 -->
+	<!--  2022.01.17 by ejkim  tm_sc_ipb 테이블 컬럼(cont)에 ipb_code 값을 변경하는데
+	      아마도 cont가 아닌 ipb_code 컬럼에 넣어주는 것 같음(추측). 그래서 ipb_code컬럼에 ipb_code값을 넣어주는 것으로 추가-->
+	<!-- Update -->
+	<update id="updateDao" parameterType="com.expis.ietm.dto.SearchPartinfoDto">
+		UPDATE tm_sc_ipb
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="ipbCode != null">cont = #{ipbCode},</if>
+			<if test="ipbCode != null">ipb_code = #{ipbCode},</if>
+			<if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+			modify_date = SYSDATE
+		</trim>
+
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+			</trim>
+		</where>
+
+	</update>
+
+	
+	<!-- Delete --><!-- 사용 20160924 -->
+	<delete id="deleteDao" parameterType="com.expis.ietm.dto.SearchPartinfoDto">
+		DELETE FROM tm_sc_ipb
+		WHERE to_key = #{toKey}
+		<trim prefix="AND">
+			<if test="tocoId != null">toco_id = #{tocoId}</if>
+		</trim>
+	</delete>
+	
+	
+	<!-- Delete --><!-- 사용 20160924 -->
+	<delete id="deleteAllDao">
+		DELETE FROM tm_sc_ipb
+	</delete>
+
+</mapper>

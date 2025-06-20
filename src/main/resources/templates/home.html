@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <link th:href="@{/component/bootstrap/css/bootstrap.min.css}"
+          href="/component/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <title>eXPIS-III</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+
+        .form-signin {
+            max-width: 330px;
+            padding: 1rem;
+        }
+
+        .form-signin .form-floating:focus-within {
+            z-index: 2;
+        }
+
+        .form-signin input[type="email"] {
+            margin-bottom: -1px;
+            border-bottom-right-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .form-signin input[type="password"] {
+            margin-bottom: 10px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+    </style>
+</head>
+<body class="d-flex align-items-center py-4 bg-body-tertiary">
+<div>
+
+</div>
+<main class="form-signin w-100 m-auto">
+    <form>
+        <h1 class="h3 mb-3 fw-normal">Member Login</h1>
+
+        <div class="form-floating">
+            <input type="email" class="form-control" id="floatingInput" placeholder="UserId">
+            <label for="floatingInput">ID</label>
+        </div>
+        <div class="form-floating">
+            <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
+            <label for="floatingPassword">Password</label>
+        </div>
+
+        <!-- div class="form-check text-start my-3">
+            <input class="form-check-input" type="checkbox" value="remember-me" id="flexCheckDefault">
+            <label class="form-check-label" for="flexCheckDefault">
+                Remember me
+            </label>
+        </div -->
+        <div class="row text-center">
+            <div class="col-6">
+                <button class="btn btn-primary w-100 py-2" type="submit"
+                        onclick="location.href='/login/${bizCode})}'"
+                        th:onclick="|location.href='@{/login/{bizCode}(bizCode=${bizCode})}'|" >Sign in</button>
+            </div>
+            <div class="col-6">
+                <button class="btn btn-primary w-100 py-2" type="button">Join in</button>
+            </div>
+        </div>
+        <p class="mt-5 mb-3 text-body-secondary">© 2017–2024</p>
+    </form>
+</main>
+</body>
+</html>

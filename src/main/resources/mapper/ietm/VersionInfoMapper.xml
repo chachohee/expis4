@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.ietm.dao.VersionInfoMapper">
+
+	<!-- ResultMap -->
+	<resultMap id="versionResultMap" type="com.expis.ietm.dto.VersionInfoDto">
+		<id		property="toKey"					column="to_key"					javaType="string" />
+		<result	property="verId"					column="ver_id"					javaType="string" />
+		<result	property="chgNo"				column="chg_no"					javaType="string" />
+		<result	property="chgDate"				column="chg_date"				javaType="string" />
+		<result	property="revNo"				column="rev_no"					javaType="string" />
+		<result	property="revDate"				column="rev_date"				javaType="string" />
+		<result	property="statusKind"			column="status_kind"			javaType="string" />
+		<result	property="createUserId"		column="create_user_id"	javaType="string" />
+		<result	property="createDate"		column="create_date"			javaType="date" />
+	</resultMap>
+	
+	<!-- ResultCount -->
+	<resultMap id="versionResultCount" type="int">
+		<result property="cnt" column="cnt" />
+	</resultMap>
+	
+	<!-- Column -->
+	<sql id="versionColumn">
+		  tvi.to_key				AS to_key 
+		, tvi.ver_id				AS ver_id
+		, tvi.chg_no				AS chg_no
+		, tvi.chg_date			AS chg_date
+		, tvi.rev_no				AS rev_no
+		, tvi.rev_date			AS rev_date
+		, tvi.status_kind		AS status_kind
+		, tvi.create_user_id	AS create_user_id
+		, tvi.create_date		AS create_date
+	</sql>
+	
+	
+	<!-- Select Last Version Info -->
+<!--	<select id="selectLastVersion" resultType="String">
+		select	ver_id
+		from	(
+					select	rownum as rnum
+						 ,ver_id
+					from	tm_ver_info
+					order by create_date desc
+				)
+		where	rnum = 1
+
+	</select>-->
+	<!--
+	2025.06.10 - osm
+	- 쿼리 실행 순서 보장을 통해 최신 버전 조회 정확도 개선
+	-->
+
+	<!--
+	2025.06.17 - osm
+	chg_no 컬럼 문자열 고려하여 최신 버전 조회할 수 있도록 쿼리 수정
+	 -->
+	<select id="selectLastVersion" resultType="String">
+		select ver_id
+		from (
+				 select rownum as rnum, ver_id
+				 from (
+						  select ver_id
+						  from tm_ver_info
+						  where to_key = #{toKey}
+						  order by create_date desc, TO_NUMBER(chg_no) desc
+					  )
+			 )
+		where rnum = 1
+	</select>
+	
+	<select id="getLastVersionInfo" resultType="String">
+		select	chg_no
+		  from (
+		  	select chg_no
+			from	tm_ver_info
+			where	to_key = #{toKey}
+			order by chg_date desc )
+		where rownum = 1
+	</select>
+	
+	
+	<!--  Select Count -->
+	<select id="selectCountDao" resultMap="versionResultCount">
+		SELECT
+			COUNT(to_key) AS cnt
+		FROM tm_ver_info tvi
+		<where>
+			<choose>
+				<when test="statusKind != null">
+					status_kind = #{statusKind}
+				</when>
+				<otherwise>
+					status_kind = '10'
+				</otherwise>
+			</choose>
+		</where>
+		<if test="toKey != null">
+			AND to_key = #{toKey}
+		</if>
+		
+	</select>
+	
+	
+	<!--  Select List -->
+	<select id="selectListDao" resultMap="versionResultMap">
+		SELECT
+		<include refid="versionColumn" />
+		FROM (
+		
+			SELECT rownum rn,
+			<include refid="versionColumn" />
+			FROM
+				(
+				
+				SELECT 
+				<include refid="versionColumn" />
+				FROM tm_ver_info tvi
+				
+				<where>
+					<choose>
+						<when test="statusKind != null">
+							status_kind = #{statusKind}
+						</when>
+						<otherwise>
+							status_kind = '10'
+						</otherwise>
+					</choose>
+				</where>
+				<if test="toKey != null">
+					AND to_key = #{toKey}
+				</if>
+				ORDER BY LENGTH(chg_no) ASC, chg_no ASC
+				
+				) tvi
+			) tvi
+			
+	</select>
+	
+	
+	<!--  Select One --><!-- 사용 20161116 -->
+	<select id="selectDetailDao" resultMap="versionResultMap">
+		SELECT
+		<include refid="versionColumn" />
+		FROM tm_ver_info tvi
+		WHERE to_key like #{toKey}
+		<trim prefix="AND" prefixOverrides="AND | OR">
+			<if test="verId != null">ver_id = #{verId}</if>
+		</trim>
+	</select>
+	
+	
+	<!-- Insert -->
+	<insert id="insertDao" parameterType="com.expis.ietm.dto.VersionInfoDto">
+		INSERT INTO tm_ver_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			to_key,
+			ver_id,
+			<if test="chgNo != null">chg_no,</if>
+			<if test="chgDate != null">chg_date,</if>
+			<if test="revNo != null">rev_no,</if>
+			<if test="revDate != null">rev_date,</if>
+			<if test="statusKind != null">status_kind,</if>
+			<if test="createUserId != null">create_user_id,</if>
+			create_date
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			#{toKey},
+			#{verId},
+			<if test="chgNo != null">#{chgNo},</if>
+			<if test="chgDate != null">#{chgDate},</if>
+			<if test="revNo != null">#{revNo},</if>
+			<if test="revDate != null">#{revDate},</if>
+			<if test="statusKind != null">#{statusKind},</if>
+			<if test="createUserId != null">#{createUserId},</if>
+			SYSDATE
+		</trim>
+	</insert>
+	
+	
+	<!-- Insert --><!-- 사용 20160913 -->
+	<insert id="insertAllDao" parameterType="com.expis.ietm.dto.VersionInfoDto">
+		<foreach index="index" item="item" collection="list" open="INSERT ALL " separator=" " close="SELECT * FROM DUAL">
+			INTO tm_ver_info
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				to_key,
+				ver_id,
+				<if test="item.chgNo != null">chg_no,</if>
+				<if test="item.chgDate != null">chg_date,</if>
+				<if test="item.revNo != null">rev_no,</if>
+				<if test="item.revDate != null">rev_date,</if>
+				<if test="item.statusKind != null">status_kind,</if>
+				<if test="item.createUserId != null">create_user_id,</if>
+				create_date
+			</trim>
+			VALUES
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				#{item.toKey},
+				#{item.verId},
+				<if test="item.chgNo != null">#{item.chgNo},</if>
+				<if test="item.chgDate != null">#{item.chgDate},</if>
+				<if test="item.revNo != null">#{item.revNo},</if>
+				<if test="item.revDate != null">#{item.revDate},</if>
+				<if test="item.statusKind != null">#{item.statusKind},</if>
+				<if test="item.createUserId != null">#{item.createUserId},</if>
+				SYSDATE
+			</trim>
+		</foreach>
+	</insert>
+	
+	<insert id="insertAllDaoMDB" parameterType="com.expis.ietm.dto.VersionInfoDto">
+		insert into	tm_ver_info
+		(
+			to_key,
+			ver_id,
+			chg_no,
+			chg_date,
+			rev_no,
+			rev_date,
+			status_kind,
+			create_user_id,
+			create_date
+		)
+		values
+		(
+			#{toKey},
+			#{verId},
+			#{chgNo},
+			#{chgDate},
+			#{revNo},
+			#{revDate},
+			#{statusKind},
+			#{createUserId},
+			sysdate
+		)
+		
+	</insert>
+	
+	<!-- Update -->
+	<update id="updateDao" parameterType="com.expis.ietm.dto.VersionInfoDto">
+		UPDATE tm_ver_info
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="chgNo != null">chg_no = #{chgNo},</if>
+			<if test="chgDate != null">chg_date = #{chgDate},</if>
+			<if test="revNo != null">rev_no = #{revNo},</if>
+			<if test="revDate != null">rev_date = #{revDate},</if>
+			<if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+			modify_date = SYSDATE
+		</trim>
+		WHERE to_key = #{toKey} AND ver_id = #{verId}
+	</update>
+	
+	
+	<!-- Delete --><!-- 사용 20160912 -->
+	<delete id="deleteDao" parameterType="com.expis.ietm.dto.VersionInfoDto">
+		DELETE FROM tm_ver_info
+		WHERE to_key = #{toKey}
+		<if test="verId != null">ver_id = #{verId}</if>
+	</delete>
+	<!-- 
+	<delete id="deleteDao" parameterType="com.soltworks.expis.ietm.tm.dto.VersionInfoDto">
+		DELETE FROM tm_ver_info2
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="verId != null">ver_id = #{verId}</if>
+			</trim>
+		</where>
+	</delete>
+	 -->
+
+
+	<!-- Delete --><!-- 사용 20160912 수정 20160920 -->
+	<delete id="deleteAllDao">
+		DELETE FROM tm_ver_info
+	</delete>
+
+	<!-- 2023.08.25. toco_id 추가 - jingi.kim -->
+	<select id="getVersionInfoList" resultType="String">
+		select	xcont
+		from	tm_ver_xcont
+		where	to_key = #{toKey}
+		<if test="tocoId != null">and		toco_id = #{tocoId}</if>
+		and		cont_id = #{contId}
+		and		ver_id = #{verId}
+		order by to_key asc, toco_id asc, cont_id asc, ver_id asc, xth asc
+	</select>
+	
+	<select id="getVersionName" resultType="String">
+		select	ver_name
+		from	tm_ver_xcont
+		where	to_key = #{toKey}
+		and		ver_id = #{verId}
+		group by ver_name;
+	</select>
+</mapper>

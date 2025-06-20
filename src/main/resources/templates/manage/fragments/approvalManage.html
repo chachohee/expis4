@@ -1,0 +1,220 @@
+<div th:fragment="approvalManage" xmlns:th="http://www.w3.org/1999/xhtml">
+    <div th:if="${secondId == 'account'}" >
+        <!-- 승인관리 -->
+        <div class="d-flex flex-column flex-shrink-0 p-1">
+<!--            <h5>전체 승인 대기자 [ 0 ]</h5>-->
+            <div class="table-responsive small">
+                <table class="table table-striped table-sm caption-top">
+                    <caption><label th:text="#{admin.accountMng.waitList}">전체 승인 대기자</label> [<span th:text="${userCount}">0</span>]</caption>
+                    <colgroup>
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:auto;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th scope="col"><label th:text="#{admin.accountMng.no}">순번</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.id}">아이디(ID)</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.name}">이름</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.email}">e-mail</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.reqDate}">요청시간</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.accountStatus}">계정상태</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.approvalStatus}">승인여부</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.delete}">삭제</label></th>
+                    </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                    <tr>
+                        <td colspan="8"><label th:text="#{admin.accountMng.notFoundUser}">등록된 사용자가 없습니다.</label></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${secondId == 'user'}" >
+        <!-- 사용자관리 -->
+        <div class="d-flex flex-column flex-shrink-0 p-3">
+<!--            <h5>전체 사용자 [ 0 ]</h5>-->
+            <div class="table-responsive small">
+                <table class="table table-striped table-sm caption-top">
+                    <caption><label th:text="#{admin.accountMng.totalList}">전체 사용자</label> [<span th:text="${userCount}">0</span>]</caption>
+                    <colgroup>
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:auto;">
+                        <col style="width:20%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th scope="col"><label th:text="#{admin.accountMng.no}">순번</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.id}">아이디(ID)</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.name}">이름</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.email}">e-mail</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.printRole}">출력권한</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.userRole}">사용자권한</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.accountStatus}">계정상태</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.delete}">삭제</label></th>
+                    </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                    <tr>
+                        <td colspan="8"><label th:text="#{admin.accountMng.notFoundUser}">등록된 사용자가 없습니다.</label></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${secondId == 'nonuser'}" >
+        <!-- 미접속자관리 -->
+        <div class="d-flex flex-column flex-shrink-0 p-3">
+<!--            <h5>미접속 사용자 [ 0 ]</h5>-->
+            <div class="table-responsive small">
+                <table class="table table-striped table-sm caption-top">
+                    <caption><label th:text="#{admin.accountMng.notLoginList}">미접속 사용자</label> [<span th:text="${userCount}">0</span>]</caption>
+                    <colgroup>
+                        <col style="width:5%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:auto;">
+                        <col style="width:20%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th scope="col">ㅁ</th>
+                        <th scope="col"><label th:text="#{admin.accountMng.no}">순번</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.id}">아이디(ID)</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.name}">이름</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.email}">e-mail</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.printRole}">출력권한</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.userRole}">사용자권한</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.accountStatus}">계정상태</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.delete}">삭제</label></th>
+                    </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                    <tr>
+                        <td colspan="9"><label th:text="#{admin.accountMng.notFoundUser}">등록된 사용자가 없습니다.</label></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${secondId == 'locked'}" >
+        <!-- 비활성화사용자관리 -->
+        <div class="d-flex flex-column flex-shrink-0 p-3">
+<!--            <h5>비활성 사용자 [ 0 ]</h5>-->
+            <div class="table-responsive small">
+                <table class="table table-striped table-sm caption-top">
+                    <caption><label th:text="#{admin.accountMng.lockList}">비활성 사용자</label> [<span th:text="${userCount}">0</span>]</caption>
+                    <colgroup>
+                        <col style="width:5%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:auto;">
+                        <col style="width:20%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th scope="col">ㅁ</th>
+                        <th scope="col"><label th:text="#{admin.accountMng.no}">순번</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.id}">아이디(ID)</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.name}">이름</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.email}">e-mail</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.printRole}">출력권한</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.userRole}">사용자권한</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.accountStatus}">계정상태</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.delete}">삭제</label></th>
+                    </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                    <tr>
+                        <td colspan="9"><label th:text="#{admin.accountMng.notFoundUser}">등록된 사용자가 없습니다.</label></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${secondId == 'history'}" >
+        <!-- 사용자이력관리 -->
+        <div class="d-flex flex-column flex-shrink-0 p-3">
+<!--            <h5>전체 사용자 이력 [ 0 ]</h5>-->
+            <div class="table-responsive small">
+                <table class="table table-striped table-sm caption-top">
+                    <caption><label th:text="#{admin.accountMng.historyList}">전체 사용자 이력</label> [<span th:text="${userCount}">0</span>]</caption>
+                    <colgroup>
+                        <col style="width:10%;">
+                        <col style="width:auto;">
+                        <col style="width:25%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th scope="col"><label th:text="#{admin.accountMng.no}">순번</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.historyInfo}">이력정보</label></th>
+                        <th scope="col"><label th:text="#{admin.accountMng.updateDate}">변경시간</label></th>
+                    </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                    <tr>
+                        <td colspan="3"><label th:text="#{admin.accountMng.notFoundHistory}">등록된 이력이 없습니다.</label></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${secondId == 'password'}" >
+        <!-- 비밀번호관리 -->
+        <div class="d-flex flex-column flex-shrink-0 p-3">
+            <h5>비밀번호 관리</h5>
+            <div class="table-responsive small">
+                <table class="table table-striped table-sm">
+                    <colgroup>
+                        <col style="width:10%;">
+                        <col style="width:auto;">
+                        <col style="width:25%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+                    </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>비밀번호관리</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

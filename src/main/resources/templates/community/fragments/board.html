@@ -1,0 +1,402 @@
+<div th:fragment="board">
+    <div th:if="${secondId == 'board'}">
+        <div th:if="${thirdId == 'boardMain'}">
+            <div class="col-md-12 col-lg-12">
+                <div class="content">
+                    <div class="row">
+                        <div class="banner" th:switch="${cmnt.boardOption.className}">
+                            <img th:case="'Board'" src="/img/community/bg_sub_title_02.jpg">
+                            <img th:case="'Notice'" src="/img/community/bg_sub_title_03.jpg">
+                            <img th:case="'Custom'" src="/img/community/bg_sub_title_04.jpg">
+                            <img th:case="'Download'" src="/img/community/bg_sub_title_05.jpg">
+                        </div>
+                        <div class="row-8">
+                            <hr>
+                            <div class="text-right">
+                                <span th:text="#{cmnt.view.content.type1}">페이지</span> :
+                                <span th:text="${cmnt.nPage}"></span> /
+                                <span th:text="${cmnt.pagingDTO.totalPage}"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <form th:action="@{/EXPIS/{bizCode}/cmnt/boardList.do(bizCode=${BIZ_CODE})}" method="get"
+                                  class="d-flex justify-content-end align-items-center">
+                                <select class="form-select" name="searchCate" style="width: auto;">
+                                    <option value="title" th:selected="${cmnt.searchCate == 'title'}" th:text="#{cmnt.title}">제목</option>
+                                    <option value="contents" th:selected="${cmnt.searchCate == 'contents'}" th:text="#{cmnt.content}">내용</option>
+                                    <option value="writer" th:selected="${cmnt.searchCate == 'writer'}" th:text="#{cmnt.writer}">작성자</option>
+                                </select>
+                                <div class="input-group" style="width: auto;">
+                                    <input type="text" class="form-control" name="searchValue" placeholder="검색어 입력">
+                                    <button type="submit" class="btn btn-outline-secondary">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table table-bordered">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th style="width: 5%;" th:text="#{cmnt.table.number}">번호</th>
+                                    <th style="width: 55%;" th:text="#{cmnt.table.title}">제목</th>
+                                    <th style="width: 20%;" th:text="#{cmnt.table.userId}">작성자</th>
+                                    <th style="width: 10%;" th:text="#{cmnt.table.data}">작성일</th>
+                                    <th style="width: 10%;" th:text="#{cmnt.table.count}">조회수</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="board : ${cmnt.boardList}" th:if="${board.boardTopYn == 'Y'}">
+                                    <td><i class="fa-solid fa-bell"></i></i></td>
+                                    <td>
+                                        <a th:href="@{/EXPIS/{bizCode}/cmnt/boardDetail.do(boardDSeq=${board.boardDSeq}, nPage=${cmnt.nPage}, bizCode=${BIZ_CODE})}"
+                                           th:text="${board.boardTitle}">
+                                            제목
+                                        </a>
+                                        <span th:text="'[' + ${board.commentsCount} + ']'"></span>
+                                    </td>
+                                    <td th:text="${board.viewUserId}"></td>
+                                    <td th:text="${board.createDate}"></td>
+                                    <td th:text="${board.boardCount}"></td>
+                                </tr>
+
+                                <tr th:each="board, status : ${cmnt.boardList}" th:if="${board.boardTopYn != 'Y'}">
+                                    <td>
+                                        <th:block th:if="${board.boardPSeq == 0}"
+                                                  th:text="${board.boardDSeq}"></th:block>
+                                    </td>
+                                    <td>
+                                        <th:block th:if="${board.boardPSeq != 0}"
+                                                  th:utext="'<i class=\'fa-solid fa-reply fa-rotate-180\'></i>'"></th:block>
+                                        <a th:href="@{/EXPIS/{bizCode}/cmnt/boardDetail.do(boardDSeq=${board.boardDSeq}, nPage=${cmnt.nPage}, bizCode=${BIZ_CODE})}"
+                                           th:text="${board.boardTitle}">
+                                        </a>
+                                        <span th:text="'[' + ${board.commentsCount} + ']'"></span>
+                                    </td>
+                                    <td th:text="${board.viewUserId}"></td>
+                                    <td th:text="${board.createDate}"></td>
+                                    <td th:text="${board.boardCount}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div class="col-12 text-center" th:if="${#lists.isEmpty(cmnt.boardList)}">
+                                <p class="text-muted mt-4" th:text="#{cmnt.cmnt.board.not.exist}">현재 등록된 게시글이 없습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="pagination-container text-center mt-4">
+                                <nav th:replace="community/fragments/pagination :: pagination"></nav>
+                            </div>
+                        </div>
+                        <div class="col-12 text-end">
+                            <form th:action="@{/EXPIS/{bizCode}/cmnt/boardWrite.do(bizCode=${BIZ_CODE})}" method="get">
+                                <input type="hidden" name="boardMSeq" th:value="${cmnt.boardMSeq}">
+                                <input type="hidden" name="nPage" th:value="${cmnt.nPage}">
+                                <th:block th:if="${cmnt.roleCode} == 'S' or ${cmnt.boardOption.boardWriteYn} == 'Y'">
+                                    <button type="submit" class="btn btn-outline-secondary" th:text="#{cmnt.write}">글쓰기</button>
+                                </th:block>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div th:if="${thirdId == 'boardWrite'}">
+            <div class="col-md-12 col-lg-12">
+                <div class="content">
+                    <div class="row mb-4">
+                        <div class="banner" th:switch="${cmnt.boardClass}">
+                            <img th:case="'Board'" src="/img/community/bg_sub_title_02.jpg">
+                            <img th:case="'Notice'" src="/img/community/bg_sub_title_03.jpg">
+                            <img th:case="'Custom'" src="/img/community/bg_sub_title_04.jpg">
+                            <img th:case="'Download'" src="/img/community/bg_sub_title_05.jpg">
+                            <img th:case="'Default'" src="/img/community/bg_sub_title_02.jpg">
+                        </div>
+                    </div>
+                    <div class="row mb-8">
+                        <form th:action="@{/EXPIS/{bizCode}/cmnt/boardInsert.do(bizCode=${BIZ_CODE})}" method="post"
+                              enctype="multipart/form-data">
+                            <input type="hidden" name="boardDSeq" th:value="${cmnt.boardDSeq}">
+                            <input type="hidden" name="nPage" th:value="${cmnt.nPage}">
+                            <div class="mb-3 row align-items-center">
+                                <label for="boardTitle" class="col-sm-2 col-form-label fw-bold" th:text="#{cmnt.title}">제목</label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="boardTitle" name="boardTitle"
+                                           placeholder="제목을 입력하세요" required>
+                                </div>
+                                <div class="col-sm-1 d-flex align-items-center">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="topYn" name="boardTopYn"
+                                               value="Y">
+                                        <label class="form-check-label" for="topYn" th:text="#{cmnt.top.post}">상단표시</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3 row">
+                                <label for="boardContents" class="col-sm-2 col-form-label fw-bold" th:text="#{cmnt.detail.contents}">본문</label>
+                                <div class="col-sm-10">
+                                    <textarea class="form-control content-area" id="boardContents" name="boardContents"
+                                              rows="10" placeholder="내용을 입력하세요" required></textarea>
+                                </div>
+                            </div>
+                            <div class="mb-3 row"
+                                 th:if="${cmnt.roleCode} == 'S' or ${cmnt.boardOption.boardFileYn} == 'Y'">
+                                <label class="col-sm-2 col-form-label fw-bold" th:text="#{cmnt.detail.file}">첨부파일</label>
+                                <div class="col-sm-10">
+                                    <input type="file" class="form-control file-upload" name="pup_imgFile">
+                                    <small class="form-text text-muted" th:text="#{cmnt.detail.file.msg}">첨부파일이 존재하지 않습니다.</small>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <a class="btn btn-outline-secondary"
+                                   th:href="@{/EXPIS/{bizCode}/cmnt/boardList.do(nPage=${cmnt.nPage}, boardMSeq=${cmnt.boardMSeq}, bizCode=${BIZ_CODE})}" th:text="#{cmnt.list}">목록</a>
+                                <button class="btn btn-outline-secondary" type="submit" th:text="#{cmnt.write}">글쓰기</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content" th:if="${thirdId == 'boardDetail'}">
+            <div class="row board-detail-content">
+                <div class="col-12">
+                    <div class="banner" th:switch="${cmnt.boardClass}">
+                        <img th:case="'Board'" src="/img/community/bg_sub_title_02.jpg">
+                        <img th:case="'Notice'" src="/img/community/bg_sub_title_03.jpg">
+                        <img th:case="'Custom'" src="/img/community/bg_sub_title_04.jpg">
+                        <img th:case="'Download'" src="/img/community/bg_sub_title_05.jpg">
+                    </div>
+                    <div class="row card-header">
+                        <h2 class="col-3" th:text="${cmnt.detailData.boardTitle}"></h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <small class="text-muted" th:text="#{cmnt.table.data}">작성일</small>
+                                <p class="fw-bold mb-0" th:text="${cmnt.detailData.createDate}"></p>
+                            </div>
+                            <div class="col">
+                                <small class="text-muted" th:text="#{cmnt.writer}">작성자</small>
+                                <p class="fw-bold mb-0" th:text="${cmnt.detailData.viewUserId}"></p>
+                            </div>
+                            <div class="col">
+                                <small class="text-muted" th:text="#{cmnt.table.count}">조회수</small>
+                                <p class="fw-bold mb-0" th:text="${cmnt.detailData.boardCount}"></p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-12 board-contents" th:text="${cmnt.detailData.boardContents}"></div>
+                            <hr>
+                            <div class="col-12 text-end file-upload1">
+                                <div class="file-upload1" th:if="${cmnt.detailData.boardFSeq == 0}">
+                                    <small class="text-muted" th:text="#{cmnt.detail.file.msg}">첨부파일이 없습니다.</small>
+                                </div>
+                                <div class="file-upload2"
+                                     th:if="${cmnt.detailData.boardFSeq != null && cmnt.detailData.boardFSeq != 0}">
+                                    <h6 th:text="#{cmnt.detail.file}">첨부파일</h6>
+                                    <a th:href="@{/EXPIS/{bizCode}/cmnt/doDownload.do(fileSeq=${cmnt.detailData.boardFSeq}, bizCode=${BIZ_CODE})}"
+                                       class="btn btn-link">
+                                        <span th:text="${cmnt.detailData.fileOrgNm}"></span>
+                                    </a>
+                                </div>
+                            </div>
+                            <hr>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row board-detail-comment"
+                 th:if="${cmnt.roleCode} == 'S' or ${cmnt.boardOption.boardCommentYn} == 'Y'">
+                <div class="col-12 comment-content">
+                    <div class="row" th:each="comment : ${cmnt.commentList}">
+                        <div class="col-4">
+                            <p>
+                                <strong th:text="${comment.viewUserId}">작성자</strong>
+                                <span class="text-muted small" th:text="${comment.createDate}">작성일</span>
+                            </p>
+                        </div>
+                        <div class="col text-end comment-detail">
+                            <div th:if="${cmnt.roleCode} == 'S' or ${comment.createUserId} == ${cmnt.userId}">
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                        data-bs-toggle="modal"
+                                        th:attr="data-bs-target='#editCommentModal-' + ${comment.boardCSeq}" th:text="#{cmnt.modify}">
+                                    수정
+                                </button>
+                                <form th:action="@{/EXPIS/{bizCode}/cmnt/boardCommentDelete.do(boardCSeq=${comment.boardCSeq}, bizCode=${BIZ_CODE})}"
+                                      method="post" class="d-inline">
+                                    <input type="hidden" name="boardCSeq" th:value="${comment.boardCSeq}">
+                                    <input type="hidden" name="boardDSeq" th:value="${cmnt.detailData.boardDSeq}">
+                                    <input type="hidden" name="boardMSeq" th:value="${cmnt.detailData.boardMSeq}">
+                                    <input type="hidden" name="nPage" th:value="${cmnt.nPage}">
+                                    <button type="submit" class="btn btn-danger btn-sm"
+                                            onclick="return confirm('댓글을 삭제하시겠습니까?');" th:text="#{cmnt.delete}">삭제
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="modal fade" th:id="'editCommentModal-' + ${comment.boardCSeq}" tabindex="-1"
+                             aria-labelledby="editCommentModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editCommentModalLabel" th:text="#{cmnt.comment.edit}">댓글 수정</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form th:action="@{/EXPIS/{bizCode}/cmnt/boardCommentUpdate.do(boardDSeq=${cmnt.detailData.boardDSeq}, boardCSeq=${comment.boardCSeq}, bizCode=${BIZ_CODE})}"
+                                              method="post">
+                                            <input type="hidden" name="boardCSeq"
+                                                   th:value="${comment.boardCSeq}">
+                                            <input type="hidden" name="boardMSeq"
+                                                   th:value="${cmnt.detailData.boardMSeq}">
+                                            <input type="hidden" name="nPage" th:value="${cmnt.nPage}">
+                                            <div class="mb-3">
+                                                <label for="editComment" class="form-label" th:text="#{cmnt.comment.content}">댓글 내용</label>
+                                                <textarea id="editComment" class="form-control"
+                                                          name="boardComments" rows="3"
+                                                          th:text="${comment.boardComments}"></textarea>
+                                            </div>
+                                            <div class="text-end">
+                                                <button type="submit" class="btn btn-primary" th:text="#{cmnt.modify}">수정</button>
+                                                <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal" th:text="#{cmnt.cancel}">취소
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="co1-12" th:text="${comment.boardComments}">댓글 내용</div>
+                    </div>
+
+                    <hr>
+                    <div class="row">
+                        <form th:action="@{/EXPIS/{bizCode}/cmnt/boardCommentInsert.do(bizCode=${BIZ_CODE})}"
+                              method="post">
+                            <input type="hidden" name="boardDSeq" th:value="${cmnt.detailData.boardDSeq}">
+                            <input type="hidden" name="nPage" th:value="${cmnt.nPage}">
+                            <input type="hidden" name="boardMSeq" th:value="${cmnt.detailData.boardMSeq}">
+                            <div class="mb-3">
+                                <label for="commentContent" class="form-label" th:text="#{cmnt.comment.write}">댓글 작성</label>
+                                <textarea class="form-control" id="commentContent" name="boardComments" rows="3"
+                                          required></textarea>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm" th:text="#{cmnt.comment.insert}">댓글 등록</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="row board-detail-footer">
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <th:block
+                            th:if="${cmnt.roleCode} == 'S' or ${cmnt.detailData.createUserId} == ${cmnt.userId} or ${cmnt.boardOption.boardReplyYn} == 'Y'">
+                        <a th:href="@{/EXPIS/{bizCode}/cmnt/boardWrite.do(boardDSeq=${cmnt.detailData.boardDSeq}, pSeq=1, bizCode=${BIZ_CODE})}"
+                           class="btn btn-outline-secondary" th:text="#{cmnt.reply}">덧글</a>
+                    </th:block>
+                    <a th:href="@{/EXPIS/{bizCode}/cmnt/boardList.do(nPage=${cmnt.nPage}, boardMSeq=${cmnt.detailData.boardMSeq}, bizCode=${BIZ_CODE})}"
+                       class="btn btn-outline-secondary" th:text="#{cmnt.list}">목록</a>
+                    <th:block
+                            th:if="${cmnt.roleCode} == 'S' or ${cmnt.detailData.createUserId} == ${cmnt.userId}">
+                        <a th:href="@{/EXPIS/{bizCode}/cmnt/boardModify.do(boardMSeq=${cmnt.detailData.boardMSeq}, boardDSeq=${cmnt.detailData.boardDSeq}, nPage=${cmnt.nPage}, bizCode=${BIZ_CODE})}"
+                           class="btn btn-outline-secondary" th:text="#{cmnt.modify}">수정</a>
+                        <form th:action="@{/EXPIS/{bizCode}/cmnt/boardDelete.do(bizCode=${BIZ_CODE})}" method="get"
+                              class="d-inline">
+                            <input type="hidden" name="boardDSeq" th:value="${cmnt.detailData.boardDSeq}">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('정말 삭제하시겠습니까?');" th:text="#{cmnt.delete}">삭제
+                            </button>
+                        </form>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${thirdId == 'boardEdit'}">
+            <div class="col-md-12 col-lg-12">
+                <div class="content">
+                    <div class="row mb-4">
+                        <div class="row mb-4">
+                            <div class="banner" th:switch="${cmnt.boardClass}">
+                                <img th:case="'Board'" src="/img/community/bg_sub_title_02.jpg">
+                                <img th:case="'Notice'" src="/img/community/bg_sub_title_03.jpg">
+                                <img th:case="'Custom'" src="/img/community/bg_sub_title_04.jpg">
+                                <img th:case="'Download'" src="/img/community/bg_sub_title_05.jpg">
+                            </div>
+                        </div>
+                        <h2 class="mb-4 form-header" th:text="${cmnt.boardName}"></h2>
+                    </div>
+                    <div class="row mb-8">
+                        <form th:action="@{/EXPIS/{bizCode}/cmnt/boardUpdate.do(bizCode=${BIZ_CODE})}" method="post"
+                              enctype="multipart/form-data">
+                            <input type="hidden" name="boardDSeq" th:value="${cmnt.detailData.boardDSeq}">
+                            <input type="hidden" name="boardMSeq" th:value="${cmnt.detailData.boardCSeq}">
+                            <input type="hidden" name="nPage" th:value="${cmnt.nPage}">
+                            <input type="hidden" name="BoardMasterDTO" th:value="${cmnt.detailData}">
+                            <input type="hidden" name="fileTranYn" value="Y">
+                            <input type="hidden" name="boardKind" value="Modify">
+                            <input type="hidden" name="pSeq" th:value="${cmnt.detailData.boardFSeq}">
+                            <div class="mb-3 row align-items-center">
+                                <label for="boardEditTitle" class="col-sm-2 col-form-label fw-bold" th:text="#{cmnt.title}">제목</label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="boardEditTitle" name="boardTitle" class="form-control"
+                                           th:value="${cmnt.detailData.boardTitle}" required>
+                                </div>
+                                <div class="col-sm-1 d-flex align-items-center">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="boardEditTopYn"
+                                               name="boardTopYn" value="Y">
+                                        <label class="form-check-label" for="topYn" th:text="#{cmnt.top.post}">상단표시</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3 row">
+                                <label for="boardEditContents" class="col-sm-2 col-form-label fw-bold" th:text="#{cmnt.detail.contents}">본문</label>
+                                <div class="col-sm-10">
+                                    <textarea id="boardEditContents" name="boardContents" class="form-control" rows="8"
+                                              th:text="${cmnt.detailData.boardContents}" required></textarea>
+                                </div>
+                            </div>
+                            <div class="mb-3 row"
+                                 th:if="${cmnt.roleCode} == 'S' or ${cmnt.boardOption.boardFileYn} == 'Y'">
+                                <label class="col-sm-2 col-form-label fw-bold" th:text="#{cmnt.detail.file}">첨부파일</label>
+                                <div class="col-sm-10">
+                                    <input type="file" class="form-control file-upload" name="pup_imgFile"
+                                           id="file_upload">
+                                    <div th:if="${cmnt.detailData.fileOrgNm != null}" id="fileNameDisplay">
+                                        <small class="form-text text-muted" th:text="${cmnt.detailData.fileOrgNm}">
+                                        </small>
+                                        <a href='javascript:void(0)' onclick="deleteFile()">
+                                            <i class="fa-solid fa-xmark text-danger"></i>
+                                        </a>
+                                    </div>
+                                    <div th:if="${cmnt.detailData.fileOrgNm == null}">
+                                        <small class="form-text text-muted" th:text="#{cmnt.detail.file.msg}">첨부파일이 존재하지 않습니다.</small>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-outline-secondary" th:text="#{cmnt.modify}">수정</button>
+                                    <a th:href="@{/EXPIS/{bizCode}/cmnt/boardDetail.do(boardDSeq=${cmnt.detailData.boardDSeq}, nPage=${cmnt.nPage}, bizCode=${BIZ_CODE})}"
+                                       class="btn btn-outline-secondary" th:text="#{cmnt.cancel}">취소</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- secondId -->
+</div> <!-- fragment -->

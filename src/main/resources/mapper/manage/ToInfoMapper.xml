@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.manage.dao.ToInfoMapper">
+
+    <!-- ResultMap -->
+    <resultMap id="toResultMap" type="com.expis.manage.dto.ToInfoDto">
+        <id		property="toKey"					column="to_key"					javaType="string" />
+        <result	property="toId"					column="to_id"					javaType="string" />
+        <result	property="toName"				column="to_name"				javaType="string" />
+        <result	property="toSubname"		column="to_subname"		javaType="string" />
+        <result	property="toType"				column="to_type"				javaType="string" />
+        <result	property="toToType"			column="to_totype"				javaType="string" />
+        <result	property="toVehicleType"	column="to_vehicle_type"	javaType="string" />
+        <result	property="toPart"				column="to_part"				javaType="string" />
+        <result	property="toRevNo"			column="to_rev_no"			javaType="string" />
+        <result	property="toRevDate"			column="to_rev_date"			javaType="string" />
+        <result	property="toChgNo"			column="to_chg_no"			javaType="string" />
+        <result	property="toChgDate"			column="to_chg_date"		javaType="string" />
+        <result	property="toDesc"				column="to_desc"				javaType="string" />
+        <result	property="toSaveYn"			column="to_save_yn"			javaType="string" />
+        <result	property="toFviewYn"			column="to_fview_yn"			javaType="string" />
+        <result	property="statusKind"			column="status_kind"			javaType="string" />
+        <result	property="createUserId"		column="create_user_id"	javaType="string" />
+        <result	property="createDate"		column="create_date"			javaType="date" />
+    </resultMap>
+
+
+    <!-- ResultCount -->
+    <resultMap id="toResultCount" type="int">
+        <result property="cnt" column="cnt" />
+    </resultMap>
+
+
+    <!-- Column -->
+    <sql id="toColumn">
+        tti.to_key						AS to_key
+        , tti.to_id							AS to_id
+        , NVL(tti.to_name, '-')		AS to_name
+        , NVL(tti.to_subname, '-')	AS to_subname
+        , NVL(tti.to_type, '-')			AS to_type
+        , NVL(tti.to_totype, '-')		AS to_totype
+        , NVL(tti.to_vehicle_type, '-')	AS to_vehicle_type
+        , NVL(tti.to_part, '-')			AS to_part
+        , NVL(tti.to_rev_no, '-')	AS to_rev_no
+        , NVL(tti.to_rev_date, '-')	AS to_rev_date
+        , NVL(tti.to_chg_no, '-')	AS to_chg_no
+        , NVL(tti.to_chg_date, '-')	AS to_chg_date
+        , tti.to_desc						AS to_desc
+        , tti.to_save_yn				AS to_save_yn
+        , tti.to_fview_yn				AS to_fview_yn
+        , tti.status_kind				AS status_kind
+        , tti.create_user_id			AS create_user_id
+        , tti.create_date				AS create_date
+    </sql>
+
+
+    <!--  Select List -->
+    <select id="selectListDao" resultMap="toResultMap">
+        SELECT
+        <include refid="toColumn" />
+        FROM tm_to_info tti
+
+        <where>
+            <if test="statusKind != null">
+                status_kind = #{statusKind}
+            </if>
+            <if test="statusKind == null">
+                status_kind = '10'
+            </if>
+        </where>
+
+        ORDER BY to_key ASC
+    </select>
+
+
+    <!--  Select One -->
+    <select id="selectDetailDao" resultMap="toResultMap">
+        SELECT
+        <include refid="toColumn" />
+        FROM tm_to_info tti
+        WHERE to_key = #{toKey}
+    </select>
+
+
+    <!--  Select Count -->
+    <select id="selectCountDao" resultMap="toResultCount">
+        SELECT
+        COUNT(*) AS cnt
+        FROM tm_to_info tti
+
+        <where>
+            <if test="statusKind != null">
+                status_kind = #{statusKind}
+            </if>
+            <if test="statusKind == null">
+                status_kind = '10'
+            </if>
+        </where>
+
+    </select>
+
+    <!-- Insert -->
+    <insert id="insertDao" parameterType="com.expis.manage.dto.ToInfoDto">
+        INSERT INTO tm_to_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            to_key,
+            to_id,
+            to_name,
+            <if test="toSubname != null">to_subname,</if>
+            <if test="toType != null">to_type,</if>
+            <if test="toToType != null">to_totype,</if>
+            <if test="toVehicleType != null">to_vehicle_type,</if>
+            <if test="toPart != null">to_part,</if>
+            <if test="toRevNo != null">to_rev_no,</if>
+            <if test="toRevDate != null">to_rev_date,</if>
+            <if test="toChgNo != null">to_chg_no,</if>
+            <if test="toChgDate != null">to_chg_date,</if>
+            <if test="toDesc != null">to_desc,</if>
+            <if test="toSaveYn != null">to_save_yn,</if>
+            <if test="toFviewYn != null">to_fview_yn,</if>
+            <if test="statusKind != null">status_kind,</if>
+            <if test="createUserId != null">create_user_id,</if>
+            create_date
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{toKey},
+            #{toId},
+            #{toName},
+            <if test="toSubname != null">#{toSubname},</if>
+            <if test="toType != null">#{toType},</if>
+            <if test="toToType != null">#{toToType},</if>
+            <if test="toVehicleType != null">#{toVehicleType},</if>
+            <if test="toPart != null">#{toPart},</if>
+            <if test="toRevNo != null">#{toRevNo},</if>
+            <if test="toRevDate != null">#{toRevDate},</if>
+            <if test="toChgNo != null">#{toChgNo},</if>
+            <if test="toChgDate != null">#{toChgDate},</if>
+            <if test="toDesc != null">#{toDesc},</if>
+            <if test="toSaveYn != null">#{toSaveYn},</if>
+            <if test="toFviewYn != null">#{toFviewYn},</if>
+            <if test="statusKind != null">#{statusKind},</if>
+            <if test="createUserId != null">#{createUserId},</if>
+            SYSDATE
+        </trim>
+    </insert>
+
+    <!-- Insert All -->
+    <insert id="insertAllDaoMDB" parameterType="com.expis.manage.dto.ToInfoDto">
+        insert into	tm_to_info
+        (
+        to_key,
+        to_id,
+        to_name,
+        to_subname,
+        to_type,
+        to_totype,
+        to_vehicle_type,
+        to_part,
+        to_rev_no,
+        to_rev_date,
+        to_chg_no,
+        to_chg_date,
+        to_desc,
+        to_save_yn,
+        to_fview_yn,
+        status_kind,
+        create_user_id,
+        create_date
+        )
+        values
+        (
+        #{toKey},
+        #{toId},
+        #{toName},
+        #{toSubname},
+        #{toType},
+        #{toToType},
+        #{toVehicleType},
+        #{toPart},
+        #{toRevNo},
+        #{toRevDate},
+        #{toChgNo},
+        #{toChgDate},
+        #{toDesc},
+        #{toSaveYn},
+        #{toFviewYn},
+        #{statusKind},
+        #{createUserId},
+        sysdate
+        )
+
+    </insert>
+
+    <!-- Insert All -->
+    <insert id="insertAllDao" parameterType="com.expis.manage.dto.ToInfoDto">
+        <foreach index="index" item="item" collection="list" open="INSERT ALL " separator=" " close="SELECT * FROM DUAL">
+            INTO tm_to_info
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                to_key,
+                to_id,
+                to_name,
+                <if test="item.toSubname != null">to_subname,</if>
+                <if test="item.toType != null">to_type,</if>
+                <if test="item.toToType != null">to_totype,</if>
+                <if test="item.toVehicleType != null">to_vehicle_type,</if>
+                <if test="item.toPart != null">to_part,</if>
+                <if test="item.toRevNo != null">to_rev_no,</if>
+                <if test="item.toRevDate != null">to_rev_date,</if>
+                <if test="item.toChgNo != null">to_chg_no,</if>
+                <if test="item.toChgDate != null">to_chg_date,</if>
+                <if test="item.toDesc != null">to_desc,</if>
+                <if test="item.toSaveYn != null">to_save_yn,</if>
+                <if test="item.toFviewYn != null">to_fview_yn,</if>
+                <if test="item.statusKind != null">status_kind,</if>
+                <if test="item.createUserId != null">create_user_id,</if>
+                create_date
+            </trim>
+            VALUES
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                #{item.toKey},
+                #{item.toId},
+                #{item.toName},
+                <if test="item.toSubname != null">#{item.toSubname},</if>
+                <if test="item.toType != null">#{item.toType},</if>
+                <if test="item.toToType != null">#{item.toToType},</if>
+                <if test="item.toVehicleType != null">#{item.toVehicleType},</if>
+                <if test="item.toPart != null">#{item.toPart},</if>
+                <if test="item.toRevNo != null">#{item.toRevNo},</if>
+                <if test="item.toRevDate != null">#{item.toRevDate},</if>
+                <if test="item.toChgNo != null">#{item.toChgNo},</if>
+                <if test="item.toChgDate != null">#{item.toChgDate},</if>
+                <if test="item.toDesc != null">#{item.toDesc},</if>
+                <if test="item.toSaveYn != null">#{item.toSaveYn},</if>
+                <if test="item.toFviewYn != null">#{item.toFviewYn},</if>
+                <if test="item.statusKind != null">#{item.statusKind},</if>
+                <if test="item.createUserId != null">#{item.createUserId},</if>
+                SYSDATE
+            </trim>
+        </foreach>
+    </insert>
+
+    <!-- Insert (Merge) -->
+    <insert id="insertMergeDao">
+        MERGE INTO tm_to_info tti
+        USING DUAL ON ( tti.to_key = #{item.toKey} )
+        WHEN MATCHED THEN
+        UPDATE SET
+        <if test="toId != null">to_id = #{toId},</if>
+        <if test="toName != null">to_name = #{toName},</if>
+        <if test="toSubname != null">to_subname = #{toSubname},</if>
+        <if test="toType != null">to_type = #{toType},</if>
+        <if test="toToType != null">to_totype = #{toToType},</if>
+        <if test="toVehicleType != null">to_vehicle_type = #{toVehicleType},</if>
+        <if test="toPart != null">to_part = #{toPart},</if>
+        <if test="toRevNo != null">to_rev_no = #{toRevNo},</if>
+        <if test="toRevDate != null">to_rev_date = #{toRevDate},</if>
+        <if test="toChgNo != null">to_chg_no = #{toChgNo},</if>
+        <if test="toChgDate != null">to_chg_date = #{toChgDate},</if>
+        <if test="toDesc != null">to_desc = #{toDesc},</if>
+        <if test="toSaveYn != null">to_save_yn = #{toSaveYn},</if>
+        <if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+        modify_date = sysdate
+        WHEN NOT MATCHED THEN
+        INSERT
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            to_key,
+            to_id,
+            to_name,
+            <if test="toSubname != null">to_subname,</if>
+            <if test="toType != null">to_type,</if>
+            <if test="toToType != null">to_totype,</if>
+            <if test="toVehicleType != null">to_vehicle_type,</if>
+            <if test="toPart != null">to_part,</if>
+            <if test="toRevNo != null">to_rev_no,</if>
+            <if test="toRevDate != null">to_rev_date,</if>
+            <if test="toChgNo != null">to_chg_no,</if>
+            <if test="toChgDate != null">to_chg_date,</if>
+            <if test="toDesc != null">to_desc,</if>
+            <if test="toSaveYn != null">to_save_yn,</if>
+            <if test="toFviewYn != null">to_fview_yn,</if>
+            <if test="statusKind != null">status_kind,</if>
+            <if test="createUserId != null">create_user_id,</if>
+            create_date
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{item.toKey},
+            #{item.toId},
+            #{item.toName},
+            <if test="toSubname != null">#{item.toSubname},</if>
+            <if test="toType != null">#{item.toType},</if>
+            <if test="toToType != null">#{item.toToType},</if>
+            <if test="toVehicleType != null">#{item.toVehicleType},</if>
+            <if test="toPart != null">#{item.toPart},</if>
+            <if test="toRevNo != null">#{item.toRevNo},</if>
+            <if test="toRevDate != null">#{item.toRevDate},</if>
+            <if test="toChgNo != null">#{item.toChgNo},</if>
+            <if test="toChgDate != null">#{item.toChgDate},</if>
+            <if test="toDesc != null">#{item.toDesc},</if>
+            <if test="toSaveYn != null">#{item.toSaveYn},</if>
+            <if test="toFviewYn != null">#{item.toFviewYn},</if>
+            <if test="statusKind != null">#{item.statusKind},</if>
+            <if test="createUserId != null">#{item.createUserId},</if>
+            sysdate
+        </trim>
+    </insert>
+
+    <select id="mergeDaoChkMDB" parameterType="com.expis.manage.dto.ToInfoDto" resultType="int">
+        select	count(to_key)
+        from	tm_to_info
+        where	status_kind = '10'
+        and		to_key = #{toKey}
+    </select>
+
+
+    <insert id="insertMergeDaoMDB" parameterType="com.expis.manage.dto.ToInfoDto">
+        insert into tm_to_info (
+        to_key,
+        to_id,
+        to_name,
+        to_subname,
+        to_type,
+        to_totype,
+        to_vehicle_type,
+        to_part,
+        to_rev_no,
+        to_rev_date,
+        to_chg_no,
+        to_chg_date,
+        to_desc,
+        to_save_yn,
+        to_fview_yn,
+        status_kind,
+        create_user_id,
+        create_date
+        )
+        values
+        (
+        #{toKey},
+        #{toId},
+        #{toName},
+        #{toSubname},
+        #{toType},
+        #{toToType},
+        #{toVehicleType},
+        #{toPart},
+        #{toRevNo},
+        #{toRevDate},
+        #{toChgNo},
+        #{toChgDate},
+        #{toDesc},
+        #{toSaveYn},
+        #{toFviewYn},
+        #{statusKind},
+        #{createUserId},
+        sysdate
+        )
+    </insert>
+
+    <update id="updateMergeDaoMDB" parameterType="com.expis.manage.dto.ToInfoDto">
+        update	tm_to_info
+        set		to_id = #{toId},
+        to_name = #{toName},
+        to_subname = #{toSubname},
+        to_type = #{toType},
+        to_totype = #{toToType},
+        to_vehicle_type = #{toVehicleType},
+        to_part = #{toPart},
+        to_rev_no = #{toRevNo},
+        to_rev_date = #{toRevDate},
+        to_chg_no = #{toChgNo},
+        to_chg_date = #{toChgDate},
+        to_desc = #{toDesc},
+        to_save_yn = #{toSaveYn},
+        modify_user_id = #{modifyUserId},
+        modify_date = sysdate
+        where	to_key = #{toKey}
+    </update>
+
+    <!-- Update -->
+    <update id="updateDao" parameterType="com.expis.manage.dto.ToInfoDto">
+        UPDATE tm_to_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="toId != null">to_id = #{toId},</if>
+            <if test="toName != null">to_name = #{toName},</if>
+            <if test="toSubname != null">to_subname = #{toSubname},</if>
+            <if test="toType != null">to_type = #{toType},</if>
+            <if test="toToType != null">to_totype = #{toToType},</if>
+            <if test="toVehicleType != null">to_vehicle_type = #{toVehicleType},</if>
+            <if test="toPart != null">to_part = #{toPart},</if>
+            <if test="toRevNo != null">to_rev_no = #{toRevNo},</if>
+            <if test="toRevDate != null">to_rev_date = #{toRevDate},</if>
+            <if test="toChgNo != null">to_chg_no = #{toChgNo},</if>
+            <if test="toChgDate != null">to_chg_date = #{toChgDate},</if>
+            <if test="toDesc != null">to_desc = #{toDesc},</if>
+            <if test="toSaveYn != null">to_save_yn = #{toSaveYn},</if>
+            <if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+            modify_date = SYSDATE
+        </trim>
+        WHERE to_key = #{toKey}
+    </update>
+
+
+    <!-- Update Properties -->
+    <update id="updatePropertyDao" parameterType="com.expis.manage.dto.ToInfoDto">
+        UPDATE tm_to_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="propertyKind == '01'">
+                <if test="toSaveYn != null">to_save_yn = #{toSaveYn},</if>
+            </if>
+            <if test="propertyKind == '02'">
+                <if test="toFviewYn != null">to_fview_yn = #{toFviewYn},</if>
+            </if>
+            <if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+            modify_date = SYSDATE
+        </trim>
+        WHERE to_key = #{toKey}
+    </update>
+
+
+    <!-- Delete -->
+    <delete id="deleteDao" parameterType="com.expis.manage.dto.ToInfoDto">
+        DELETE FROM tm_to_info
+        WHERE to_key = #{toKey}
+    </delete>
+
+
+    <!-- Delete All -->
+    <delete id="deleteAllDao">
+        DELETE FROM tm_to_info
+    </delete>
+
+
+    <!-- Delete Merge -->
+    <delete id="deleteMergeDao">
+        DELETE FROM tm_to_info
+    </delete>
+
+
+    <!-- Select (TOP에서 TO의 발행일(원판) 정보) -->
+    <select id="selectToVerDate" parameterType="com.expis.manage.dto.ToInfoDto" resultMap="toResultMap">
+        SELECT	NVL(to_chg_date, '-')	AS to_chg_date
+        FROM	tm_to_info
+        WHERE	to_key = #{toKey}
+    </select>
+
+    <!-- Select Ipb PartInfo -->
+    <select id="selectPartInfo">
+        select	toco_id
+        from	tm_sc_partinfo
+        where	rdn = #{rdn}
+    </select>
+
+    <!-- SysTree 등록 유무 확인 -->
+    <select id="getSysInfoCount" resultType="int">
+        select	count(status_kind)
+        from	tm_sys_info
+        where	status_kind = '10'
+    </select>
+
+</mapper>

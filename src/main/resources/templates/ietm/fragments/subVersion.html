@@ -1,0 +1,58 @@
+<div th:fragment="subVersion">
+    <div class="panel-header">
+        <span class="panel-title"><i class="fa-solid fa-book"></i>
+            <span th:text="#{ietm.valid.list}"></span></span>
+        <span class="close-btn" onclick="closeSubVersion()"><i class="fa-solid fa-xmark"></i></span>
+    </div>
+    <p class="notice" th:text="#{ietm.important}">
+    </p>
+    <!-- 유효목록 list -->
+    <div class="version_list">
+        <ul class="d-none" id="avail_version_list">
+        </ul>
+    </div>
+
+    <!-- 유효목록 table -->
+    <div class="version_con_list d-none" id="version_con_list">
+        <select class="version_select_list" onchange="callEvalFunction(this)"></select>
+        <span id="pageNum"></span>
+        <table border="1" width="100%">
+            <colgroup>
+                <col style="width: 80%"/>
+                <col style="width: 20%"/>
+            </colgroup>
+            <thead>
+            <tr>
+                <th th:text="#{ietm.table.of.contents}"></th>
+                <th th:text="#{ietm.modified.version}"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td colspan="2">
+                    <div class="table_scroll">
+                        <table cellspacing="0" cellpadding="0">
+                            <colgroup>
+                                <col/>
+                                <col width="80"/>
+                            </colgroup>
+                            <tbody id="avail_detail_list">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <span class='btn_list'>
+
+					</span>
+    </div>
+    <br>
+    <div class="row row-cols-1 text-end">
+        <div class="col">
+            <button class="btn btn-dark" href="javascript:void(0);" onclick="openSubVersion()" th:text="#{ietm.list}"></button>
+        </div>
+    </div>
+</div>

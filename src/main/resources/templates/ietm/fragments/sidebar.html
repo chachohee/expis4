@@ -1,0 +1,40 @@
+<div th:fragment="sidebar" class="d-flex flex-column flex-shrink-0" id="sidebar" xmlns:th="http://www.w3.org/1999/xhtml">
+  <ul class="nav flex-column mb-auto menu_to">
+    <li>
+      <a href="javascript:void(0);" class="btn_menu_to" aria-current="page" title="목록"
+         data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="목록"
+         onclick="showTo(); openSubSidebar();">
+      </a>
+    </li>
+    <li>
+      <a href="javascript:void(0);" class="btn_menu_myto" title="MY T.O"
+         data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="MY T.O"
+         onclick="showMyTo(); loadMyFolder();">
+      </a>
+    </li>
+    <li>
+      <a id="side_sub_version" href="javascript:void(0);" class="btn_menu_version disabled" title="유효목록"
+         data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="유효목록"
+         onclick="subMenuEvent('version');">
+      </a>
+    </li>
+    <li>
+      <a id="side_sub_search" href="javascript:void(0);" class="btn_menu_search disabled" title="검색"
+         data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="검색"
+         onclick="subMenuEvent('search');" >
+      </a>
+    </li>
+    <li>
+      <a href="javascript:void(0);" class="btn_menu_memo" title="메모장" onclick="openMemoLayer()">
+      </a>
+    </li>
+    <li>
+      <a href="javascript:void(0);" class="btn_menu_option" title="옵션" onclick="optionMain(true)">
+      </a>
+    </li>
+  </ul>
+
+  <!-- 모달 -->
+  <div th:replace="~{ietm/fragments/memo :: memo}"></div>
+  <div th:replace="~{ietm/fragments/option :: option}"></div>
+</div>

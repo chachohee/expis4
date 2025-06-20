@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.ietm.dao.XContWCMapper">
+
+	<!-- ResultMap -->
+	<resultMap id="xcontResultMap" type="com.expis.ietm.dto.XContDto">
+		<id		property="toKey"				column="to_key"					javaType="string" />
+		<result	property="tocoId"				column="toco_id"				javaType="string" />
+		<result	property="cardNo"				column="card_no"				javaType="string" />
+		<result	property="wcType"				column="wc_type"				javaType="string" />
+		<result	property="xth"					column="xth"					javaType="long" />
+		<result	property="xcont"				column="xcont"					javaType="string" />
+		<result	property="createUserId"			column="create_user_id"			javaType="string" />
+		<result	property="createDate"			column="create_date"			javaType="date" />
+		
+		<result	property="wcSystem"				column="wc_system"				javaType="string" />
+		<result	property="wcName"				column="wc_name"				javaType="string" />
+		<result	property="wcSteptime"			column="wc_steptime"			javaType="string" />
+		<result	property="wcSteparea"			column="wc_steparea"			javaType="string" />
+		<result	property="wcSubsystem"			column="wc_subsystem"			javaType="string" />
+		<result	property="wcContent"			column="wc_content"				javaType="string" />
+	</resultMap>
+	
+	
+	<!-- ResultCount -->
+	<resultMap id="xcontResultCount" type="int">
+		<result property="cnt" column="cnt" />
+	</resultMap>
+	
+	
+	<!-- Column -->
+	<sql id="xcontColumn">
+		  twx.to_key						AS to_key
+		, twx.toco_id					AS toco_id
+		, twx.card_no					AS card_no
+		, case twx.wc_type 
+		   when null THEN '99'
+		   when '' THEN '99'
+		   ELSE twx.wc_type  END as wc_type 
+		, twx.xth							AS xth
+		, twx.xcont						AS xcont
+		, twx.create_user_id		AS create_user_id
+		, twx.create_date			AS create_date
+	</sql>
+	
+	<sql id="temp">
+		  #{tocoRefId}
+	</sql>
+	
+	<sql id="xcontSingleCondition">
+	    FROM tm_wc_xcont twx
+		WHERE to_key = #{toKey}
+		AND card_no in (
+			SELECT DISTINCT(card_no) FROM tm_wc_xcont
+			WHERE to_key = #{toKey}
+			AND toco_id = #{tocoId}
+			AND ROWNUM = 1
+		)
+	</sql>
+	
+	<sql id="xcontMultiCondition">
+	    FROM
+		(
+			SELECT LEVEL toco_level, tti.*
+			FROM tm_toco_info tti
+			WHERE to_key = #{toKey}
+			START WITH toco_id = #{tocoId}
+			CONNECT BY PRIOR toco_id = p_toco_id
+			ORDER BY to_key ASC, toco_ord ASC
+		) tti, tm_wc_xcont twx
+		
+        WHERE twx.to_key = #{toKey}
+        AND twx.toco_id = tti.toco_id
+	</sql>
+	
+	
+	<!--  Select List (단일목차로 WC 추출시) --><!-- 20170110 edit L.Y.M. -->
+	<select id="selectListDao" resultMap="xcontResultMap">
+		SELECT
+		<include refid="xcontColumn" />
+		
+		<include refid="xcontSingleCondition" />
+
+		ORDER BY to_key ASC, wc_type ASC, card_no ASC, wc_type ASC, xth ASC
+	</select>
+	
+	
+	<!--  Select Multi List (다중목차로 WC 추출시) --><!-- 20170110 edit L.Y.M. -->
+	<select id="selectMultiListDao" resultMap="xcontResultMap">
+		SELECT
+		<include refid="xcontColumn" />
+		
+		<include refid="xcontSingleCondition" />
+		
+        ORDER BY to_key ASC, wc_type ASC, card_no ASC, wc_type ASC, xth ASC
+	</select>
+	
+	
+	<!-- Select All Multi List --><!-- 20170110 edit L.Y.M. WC의 상위 '장'(section)이 선택될 경우 하위 목차의 WC 적용 -->
+	<select id="selectAllMultiListDao" resultMap="xcontResultMap">
+		SELECT		tot.to_key, twx2.toco_id, twx2.card_no, twx2.wc_type, twx2.xth, twx2.xcont
+		FROM (
+			SELECT		tti.to_key, tti.toco_ord, tti.toco_id, twx.card_no
+        	FROM
+            (
+	            SELECT LEVEL toco_level, tti.to_key, tti.toco_ord, tti.toco_id
+	            FROM tm_toco_info tti
+	            WHERE to_key = #{toKey}
+	            START WITH p_toco_id = #{tocoId}
+	            CONNECT BY PRIOR toco_id = p_toco_id
+	            ORDER BY to_key ASC, toco_ord ASC
+			) tti, tm_wc_xcont twx
+			WHERE tti.to_key = twx.to_key
+			AND tti.toco_id = twx.toco_id
+			GROUP BY tti.to_key, tti.toco_ord, tti.toco_id, twx.card_no
+			ORDER BY tti.to_key ASC, tti.toco_ord ASC, tti.toco_id ASC, twx.card_no
+		) tot, tm_wc_xcont twx2
+		WHERE tot.to_key = twx2.to_key
+        AND tot.card_no = twx2.card_no
+        ORDER BY tot.to_key ASC, tot.toco_ord ASC, twx2.card_no ASC, twx2.wc_type ASC, twx2.xth ASC
+	</select>
+	
+	
+	<!--  Select One -->
+	<select id="selectDetailDao" resultMap="xcontResultMap">
+		SELECT
+		<include refid="xcontColumn" />
+		FROM tm_wc_xcont twx
+		WHERE to_key = #{toKey}
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			<if test="toKey != null">to_key = #{toKey}</if>
+			<if test="tocoId != null">toco_id = #{tocoId}</if>
+			<if test="cardNo != null">card_no = #{cardNo}</if>
+			<if test="wcType != null">wc_type = #{wcType}</if>
+		</trim>
+	</select>
+	
+	
+	<!--  Select Count -->
+	<select id="selectCountDao" resultMap="xcontResultCount">
+		SELECT
+			COUNT(*) AS cnt
+		FROM tm_wc_xcont twx
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			<if test="toKey != null">to_key = #{toKey}</if>
+			<if test="tocoId != null">toco_id = #{tocoId}</if>
+			<if test="cardNo != null">card_no = #{cardNo}</if>
+			<if test="wcType != null">wc_type = #{wcType}</if>
+		</trim>
+	</select>
+	
+	
+	<!-- Insert -->
+	<insert id="insertDao" parameterType="com.expis.ietm.dto.XContDto">
+		INSERT INTO tm_wc_xcont
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			to_key,
+			toco_id,
+			<if test="cardNo != null">card_no,</if>
+			<if test="wcType != null">wc_type,</if>
+			<if test="xth != null">xth,</if>
+			<if test="xcont != null">xcont,</if>
+			<if test="createUserId != null">create_user_id,</if>
+			create_date
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			#{toKey},
+			#{tocoId},
+			<if test="cardNo != null">#{cardNo},</if>
+			<if test="wcType != null">#{wcType},</if>
+			<if test="xth != null">#{xth},</if>
+			<if test="xcont != null">#{xcont},</if>
+			<if test="createUserId != null">#{createUserId},</if>
+			SYSDATE
+		</trim>
+	</insert>
+	
+	
+	<!-- Insert All --><!-- 사용 20160921 -->
+	<insert id="insertAllDao" parameterType="com.expis.ietm.dto.XContDto">
+		<foreach index="index" item="item" collection="list" open="INSERT ALL " separator=" " close="SELECT * FROM DUAL">
+			INTO tm_wc_xcont
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				to_key,
+				toco_id,
+				<if test="item.cardNo != null">card_no,</if>
+				<if test="item.wcType != null">wc_type,</if>
+				<if test="item.xth != null">xth,</if>
+				<if test="item.xcont != null">xcont,</if>
+				<if test="item.createUserId != null">create_user_id,</if>
+				create_date
+			</trim>
+			VALUES
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				#{item.toKey},
+				#{item.tocoId},
+				<if test="item.cardNo != null">#{item.cardNo},</if>
+				<if test="item.wcType != null">#{item.wcType},</if>
+				<if test="item.xth != null">#{item.xth},</if>
+				<if test="item.xcont != null">#{item.xcont},</if>
+				<if test="item.createUserId != null">#{item.createUserId},</if>
+				SYSDATE
+			</trim>
+		</foreach>
+	</insert>
+	
+	
+	<insert id="insertAllDaoMDB" parameterType="com.expis.ietm.dto.XContDto">
+		
+		insert into	tm_wc_xcont
+		(
+			to_key,
+			toco_id,
+			card_no,
+			wc_type,
+			xth,
+			xcont,
+			create_user_id,
+			create_date
+		)
+		values
+		(
+			#{toKey},
+			#{tocoId},
+			#{cardNo},
+			#{wcType},
+			${xth},
+			#{xcont},
+			#{createUserId},
+			sysdate
+		)
+	</insert>
+	
+	<!-- Update -->
+	<update id="updateDao" parameterType="com.expis.ietm.dto.XContDto">
+		UPDATE tm_wc_xcont
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="cardNo != null">card_no = #{cardNo},</if>
+			<if test="wcType != null">wc_type = #{wcType},</if>
+			<if test="xth != null">xth = #{xth},</if>
+			<if test="xcont != null">xcont = #{xcont},</if>
+			<if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+			modify_date = SYSDATE
+		</trim>
+
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+				<if test="cardNo != null">card_no = #{cardNo}</if>
+			</trim>
+		</where>
+
+	</update>
+
+	
+	<!-- Delete --><!-- 사용 20160912 -->
+	<delete id="deleteDao" parameterType="com.expis.ietm.dto.XContDto">
+		DELETE FROM tm_wc_xcont
+		WHERE to_key = #{toKey}
+		<trim prefix="AND">
+			<if test="tocoId != null">toco_id = #{tocoId}</if>
+			<if test="cardNo != null">card_no = #{cardNo}</if>
+		</trim>
+	</delete>
+	
+	
+	<!-- Delete --><!-- 사용 20160912 -->
+	<delete id="deleteAllDao">
+		DELETE FROM tm_wc_xcont
+	</delete>
+	
+	<!--  2023 01 13 Park.J.S. ADD : 2023 01 12 Park.J.S. ADD : WC 카드 내 계통별 링크 조회 -->
+	<select id="viewWCLinkDao" resultMap="xcontResultMap">
+		SELECT
+			to_key
+			,toco_id
+			,wc_system
+			,wc_name
+			,wc_steptime
+			,wc_steparea
+			,wc_subsystem
+			,wc_content
+			,create_date
+		FROM tm_wc_system_link
+		WHERE to_key = #{toKey}
+		AND WC_SYSTEM = #{wcSystem}
+		ORDER BY TO_KEY, TOCO_ID
+	</select>
+	
+	<!-- Insert All --><!-- 2023 01 13 ADD -->
+	<insert id="insertAllDaoKTA" parameterType="com.expis.ietm.dto.XContWCDto">
+		<!-- insertAllDaoKTA -->
+		INSERT INTO tm_wc_system_link
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			to_key,
+			toco_id,
+			<if test="name != null">wc_name,</if>
+			<if test="steptime != null">wc_steptime,</if>
+			<if test="steparea != null">wc_steparea,</if>
+			<if test="system != null">wc_system,</if>
+			<if test="subsystem != null">wc_subsystem,</if>
+			<if test="content != null">wc_content,</if>
+			create_date
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			#{toKey},
+			#{tocoId},
+			<if test="name != null">#{name},</if>
+			<if test="steptime != null">#{steptime},</if>
+			<if test="steparea != null">#{steparea},</if>
+			<if test="system != null">#{system},</if>
+			<if test="subsystem != null">#{subsystem},</if>
+			<if test="content != null">#{content},</if>
+			SYSDATE
+		</trim>
+	</insert>
+	
+	<!-- Delete 2023 01 13 Park.J.S. ADD -->
+	<delete id="deleteDaoKTA" parameterType="com.expis.ietm.dto.XContDto">
+		DELETE FROM tm_wc_system_link
+		WHERE to_key = #{toKey}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,58 @@
+<div th:fragment="ietmHome" class="row p-4 main_board" id="ietmHome">
+  <div class="col">
+    <div class="row mt-3">
+      <div class="col">
+        <i class="fa-solid fa-angles-right"></i>
+        <span th:text="'버전 : ' + ${session.VERSION}"></span>
+        <hr>
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div class="col">
+        <i class="fa-solid fa-angles-right"></i>
+        <span>최종 로그인 시간</span>
+        <hr>
+        <p th:text="${connDate}"></p>
+      </div>
+      <div class="col">
+        <i class="fa-solid fa-angles-right"></i>
+        <span>최종 로그아웃 시간</span>
+        <hr>
+        <p th:text="${disConnDate}"></p>
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div class="col">
+        <i class="fa-solid fa-angles-right"></i>
+        <span>최근 사용 교범</span>
+        <hr>
+        <ul>
+          <li th:if="${#lists.isEmpty(mainToList)}">
+            <a>최종 사용 교범이 없습니다.</a>
+          </li>
+          <li th:each="mainToLists : ${mainToList}">
+            <a th:text="${mainToLists.toKey}" href="javascript:void(0);" th:onclick="selectTo([[${mainToLists.toKey}]]); viewCover([[${mainToLists.toKey}]]);"></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div class="col">
+        <i class="fa-solid fa-angles-right"></i>
+        <span>최근 사용 목차</span>
+        <hr>
+        <ul>
+          <li th:if="${#lists.isEmpty(mainToCoList)}">
+            <a>최종 사용 목차가 없습니다.</a>
+          </li>
+          <li th:each="mainToCoLists : ${mainToCoList}">
+            <a th:text="${mainToCoLists.tocoName}" href="javascript:void(0);" th:onclick="selectTo([[${mainToCoLists.toKey}]]); tocoContView([[${mainToCoLists.tocoId}]]);"></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+<!--    <img src="/img/community/kf21.png" alt="비행기 이미지" class="airplane-img">-->
+  </div>
+</div>

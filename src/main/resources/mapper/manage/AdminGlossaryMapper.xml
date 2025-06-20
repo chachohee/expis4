@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.manage.dao.AdminGlossaryMapper">
+    <select id="selectGlossaryList"	parameterType="com.expis.manage.dto.AdminGlossaryDto" resultType="com.expis.manage.dto.AdminGlossaryDto">
+        select 	rNum
+        ,turnNum
+        ,glsSeq
+        ,glsAbbr
+        ,glsMark
+        ,glsDesc
+        ,statusKind
+        from (
+        select	 row_number() over(order by gls_seq desc) as rNum
+        ,row_number() over(order by gls_seq asc ) as turnNum
+        ,gls_seq as glsSeq
+        ,case when gls_abbr is null then '-'
+        else gls_abbr end glsAbbr
+        ,case when gls_mark is null then '-'
+        when gls_mark like 'null' then '-'
+        else gls_mark end glsMark
+        ,case when gls_desc is null then '-'
+        else gls_desc end glsDesc
+        ,status_kind as statusKind
+        from 	tm_glossary
+        where 	status_kind != '40'
+        <if test="searchCate == 'abbr'">
+            and UPPER(gls_abbr) like '%' || UPPER(#{searchValue}) || '%'
+        </if>
+        <if test="searchCate == 'desc'">
+            and UPPER(gls_desc) like '%' || UPPER(#{searchValue}) || '%'
+        </if>
+
+        )
+        <if test="startRow != 0 and endRow != 0">
+            where rNum between #{startRow} and #{endRow}
+        </if>
+    </select>
+
+    <select id="selectGlossaryTotalCount" parameterType="com.expis.manage.dto.AdminGlossaryDto" resultType="int">
+        select 	count(gls_seq) as glossaryTotalCount
+        from 	tm_glossary
+        where 	status_kind != '40'
+        <if test="searchCate == 'abbr'">
+            and UPPER(gls_abbr) like '%' || UPPER(#{searchValue}) || '%'
+        </if>
+        <if test="searchCate == 'desc'">
+            and UPPER(gls_desc) like '%' || UPPER(#{searchValue}) || '%'
+        </if>
+    </select>
+
+    <select id="selectDetailGlossary" parameterType="int" resultType="com.expis.manage.dto.AdminGlossaryDto">
+        select 	gls_seq as glsSeq
+        ,case when gls_abbr is null then ''
+        else gls_abbr end glsAbbr
+        ,case when gls_mark is null then '-'
+        when gls_mark like 'null' then '-'
+        else gls_mark end glsMark
+        ,gls_desc as glsDesc
+        from 	tm_glossary
+        where 	gls_seq = #{glsSeq}
+    </select>
+
+    <insert id="allInsertGlossary" parameterType="com.expis.manage.dto.AdminGlossaryDto">
+        <selectKey keyProperty="glsSeq" resultType="int" order="BEFORE">
+            select 	nvl(max(gls_seq), 0) + 1 as glsSeq
+            from 	tm_glossary
+        </selectKey>
+        insert all
+        <foreach collection="list" item="param" separator=" ">
+            into tm_glossary
+            (
+            gls_seq
+            ,gls_abbr
+            ,gls_mark
+            ,gls_desc
+            ,status_kind
+            ,create_user_id
+            ,create_date
+            ,modify_user_id
+            ,modify_date
+            ) values (
+            (${glsSeq} + ${param.glsSeq})
+            ,#{param.glsAbbr}
+            ,#{param.glsMark}
+            ,#{param.glsDesc}
+            ,'10'
+            ,#{param.createUserId}
+            ,sysdate
+            ,#{param.createUserId}
+            ,sysdate
+            )
+        </foreach>
+        select * from dual
+    </insert>
+
+    <insert id="insertGlossary" parameterType="com.expis.manage.dto.AdminGlossaryDto">
+        <selectKey keyProperty="glsSeq" resultType="int" order="BEFORE">
+            select 	nvl(max(gls_seq), 0) + 1 as glsSeq
+            from 	tm_glossary
+        </selectKey>
+
+        insert into tm_glossary (
+        gls_seq
+        <if test="glsAbbr != null">
+            ,gls_abbr
+        </if>
+        <if test="glsMark != null">
+            ,gls_mark
+        </if>
+        <if test="glsDesc != null">
+            ,gls_desc
+        </if>
+        ,status_kind
+        ,create_user_id
+        ,create_date
+        ,modify_user_id
+        ,modify_date
+
+        ) values (
+        #{glsSeq}
+        <if test="glsAbbr != null">
+            ,#{glsAbbr}
+        </if>
+        <if test="glsMark != null">
+            ,#{glsMark}
+        </if>
+        <if test="glsDesc != null">
+            ,#{glsDesc}
+        </if>
+        ,'10'
+        ,#{createUserId}
+        ,sysdate
+        ,#{createUserId}
+        ,sysdate
+        )
+
+    </insert>
+
+    <update id="modifyGlossary" parameterType="com.expis.manage.dto.AdminGlossaryDto">
+        update 	tm_glossary
+        set		gls_abbr = #{glsAbbr}
+        ,gls_mark = #{glsMark}
+        ,gls_desc = #{glsDesc}
+        ,modify_user_id = #{modifyUserId}
+        ,modify_date = sysdate
+        where	gls_seq = #{glsSeq}
+    </update>
+
+    <!-- expis3에서부터 주석처리된 구문임 -->
+    <!-- 2021.12.29 edit ejkim (mdb 쿼리에 맞게 수정)
+    <update id="deleteGlossary" parameterType="AdminGlossaryDTO">
+        update 	tm_glossary
+        set		status_kind = '40'
+                ,modify_user_id = #{modifyUserId}
+                ,modify_date = sysdate
+        where	gls_seq = #{glsSeq}
+    </update>-->
+
+    <update id="deleteGlossary" parameterType="com.expis.manage.dto.AdminGlossaryDto">
+        delete
+        from 	tm_glossary
+        where	gls_seq = #{glsSeq}
+    </update>
+
+    <!-- expis3에서부터 주석처리된 구문임 -->
+    <!-- 2021.12.29 edit ejkim (mdb 쿼리에 맞게 수정)
+    <update id="deleteAllGlossary" parameterType="AdminGlossaryDTO">
+        update 	tm_glossary
+        set		status_kind = '40'
+                ,modify_user_id = #{createUserId}
+                ,modify_date = sysdate
+        where	status_kind = '10'
+    </update> -->
+
+    <update id="deleteAllGlossary" parameterType="com.expis.manage.dto.AdminGlossaryDto">
+        delete
+        from 	tm_glossary
+    </update>
+
+    <!-- LOG 쿼리 -->
+    <select id="logTotCount" parameterType="com.expis.manage.dto.AdminLogDto" resultType="int">
+        select	count(log_seq)
+        from	ad_log_info
+        where	status_kind = '10'
+        <if test="startDate != 'none'">
+            and to_char(create_date, 'YYYY-MM-DD') between #{startDate} and #{endDate}
+        </if>
+    </select>
+
+    <select id="logSelect" parameterType="com.expis.manage.dto.AdminLogDto" resultType="com.expis.manage.dto.AdminLogDto">
+        select	rNum
+        ,tNum
+        ,logSeq
+        ,codeType
+        ,codeName
+        ,codeInfo
+        ,createUserId
+        ,createDate
+        from
+        (
+        select	 row_number() over(order by log_seq desc) as rNum
+        ,row_number() over(order by log_seq asc) tNum
+        ,lg.log_seq			as	logSeq
+        ,lci.code_type		as	codeType
+        ,lci.code_name		as	codeName
+        ,lci.code_info		as	codeInfo
+        ,lg.create_user_id	as	createUserId
+        ,to_char(lg.create_date, 'YYYY-MM-DD hh24:mi')		as	createDate
+
+        from	ad_log_info lg
+        left join ad_log_code lci
+        on lg.code_type = lci.code_type
+        where lg.status_kind = '10'
+        <if test="startDate != 'none'">
+            and to_char(lg.create_date, 'YYYY-MM-DD') between #{startDate} and #{endDate}
+        </if>
+        )
+        where	tNum between #{startRow} and #{endRow}
+        order by tNum
+    </select>
+
+    <!-- expis3에서부터 주석처리된 구문임 -->
+    <!-- <insert id="insertLog" parameterType="AdminLogDTO">
+        <selectKey keyProperty="logSeq" resultType="int" order="BEFORE">
+        select 	nvl(max(log_seq), 0) + 1 as logSeq
+            from 	ad_log_info
+        </selectKey>
+
+        insert	into ad_log_info
+        (
+            log_seq
+            ,code_type
+            ,create_user_id
+            ,create_date
+            ,status_kind
+        )
+        values
+        (
+            #{logSeq}
+            ,#{codeType}
+            ,#{createUserId}
+            ,sysdate
+            ,'10'
+        )
+    </insert> -->
+    <insert id="insertLog" parameterType="com.expis.manage.dto.AdminLogDto">
+        <selectKey keyProperty="logSeq" resultType="int" order="BEFORE">
+            select	nvl(max(log_seq),0)+1 as logSeq from ad_log_info
+        </selectKey>
+
+        insert	into ad_log_info
+        (
+        log_seq
+        ,code_type
+        ,create_user_id
+        ,create_date
+        ,status_kind
+        )
+        values
+        (
+        #{logSeq}
+        ,#{codeType}
+        ,#{createUserId}
+        ,sysdate
+        ,'10'
+        )
+    </insert>
+
+    <select id="logCodeTotCount" parameterType="com.expis.manage.dto.AdminLogDto" resultType="int">
+        select	count(code_seq)
+        from	ad_log_code
+        where	status_kind = '10'
+        <if test="startDate != 'none'">
+            and to_char(create_date, 'YYYY-MM-DD') between #{startDate} and #{endDate}
+        </if>
+    </select>
+
+    <select id="logCodeSelect" parameterType="com.expis.manage.dto.AdminLogDto" resultType="com.expis.manage.dto.AdminLogDto">
+        select	rNum
+        ,tNum
+        ,codeType
+        ,codeName
+        ,codeInfo
+        ,createUserId
+        ,createDate
+        from
+        (
+        select	 row_number() over(order by code_seq desc) as rNum
+        ,row_number() over(order by code_seq asc) tNum
+        ,code_type		as	codeType
+        ,code_name		as	codeName
+        ,code_info		as	codeInfo
+        ,create_user_id	as	createUserId
+        ,to_char(create_date, 'YYYY-MM-DD hh24:mi')		as	createDate
+        from	ad_log_code
+        where status_kind = '10'
+        <if test="startDate != 'none'">
+            and to_char(create_date, 'YYYY-MM-DD') between #{startDate} and #{endDate}
+        </if>
+        )
+        where	tNum between #{startRow} and #{endRow}
+
+    </select>
+
+    <update id="deleteLog" parameterType="int">
+        update	ad_log_info
+        set		status_kind = '40'
+        where	log_seq = #{logSeq}
+    </update>
+
+</mapper>

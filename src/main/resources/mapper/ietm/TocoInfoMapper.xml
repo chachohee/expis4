@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.ietm.dao.TocoInfoMapper">
+
+	<!-- ResultMap -->
+	<resultMap id="tocoResultMap" type="com.expis.ietm.dto.TocoInfoDto">
+		<id		property="toKey"						column="to_key"						javaType="string" />
+		<result	property="tocoId"					column="toco_id"						javaType="string" />
+		<result	property="pTocoId"					column="p_toco_id"					javaType="string" />
+		<result	property="tocoOrd"					column="toco_ord"					javaType="long" />
+		<result	property="tocoName"				column="toco_name"				javaType="string" />
+		<result	property="tocoType"				column="toco_type"				javaType="string" />
+		<result	property="tocoVehicleType"	column="toco_vehicle_type"	javaType="string" />
+		<result	property="tocoRefId"				column="toco_ref_id"				javaType="string" />
+		<result	property="tocoSecurityCode"	column="toco_security_code"	javaType="string" />
+		<result	property="tocoStatusCode"	column="toco_status_code"	javaType="string" />
+		<result	property="tocoSssnNo"			column="toco_sssn_no"			javaType="string" />
+		<result	property="tocoDummy"			column="toco_dummy"			javaType="string" />
+		<result	property="tocoVerId"				column="toco_ver_id"				javaType="string" />
+		<result	property="tocoChgNo"			column="toco_chg_no"			javaType="string" />
+		<result	property="tocoRevNo"				column="toco_rev_no"			javaType="string" />
+		<result	property="statusKind"				column="status_kind"				javaType="string" />
+		<result	property="createUserId"			column="create_user_id"		javaType="string" />
+		<result	property="createDate"			column="create_date"				javaType="date" />
+		<result	property="uuid"			column="uuid"				javaType="string" />
+		<result	property="contentsSortName"			column="contents_sort_name"				javaType="string" />	
+	</resultMap>
+	
+	
+	<!-- ResultCount -->
+	<resultMap id="tocoResultCount" type="int">
+		<result property="cnt" column="cnt" />
+	</resultMap>
+	
+	
+	<!-- Column -->
+	<sql id="tocoColumn">
+		  tci.to_key						AS to_key
+		, tci.toco_id						AS toco_id
+		, tci.p_toco_id					AS p_toco_id
+		, tci.toco_ord					AS toco_ord
+		, tci.toco_name				AS toco_name
+		, tci.toco_type					AS toco_type
+		, tci.toco_vehicle_type		AS toco_vehicle_type
+		, tci.toco_ref_id				AS toco_ref_id
+		, tci.toco_security_code	AS toco_security_code
+		, tci.toco_status_code		AS toco_status_code
+		, tci.toco_sssn_no			AS toco_sssn_no
+		, tci.toco_dummy				AS toco_dummy
+		, tci.toco_ver_id				AS toco_ver_id
+		, NVL(tci.toco_chg_no, 0)	AS toco_chg_no
+		, tci.toco_rev_no				AS toco_rev_no
+		, tci.status_kind				AS status_kind
+		, tci.create_user_id			AS create_user_id
+		, tci.create_date				AS create_date
+	</sql>
+	
+	
+	<!--  Select Count -->
+	<select id="selectCountVersionDao" resultMap="tocoResultCount">
+		SELECT
+			COUNT(*) AS cnt
+		FROM tm_toco_info tci
+		WHERE 1=1
+			<choose>
+				<when test="statusKind != null">
+					<if test="statusKind != ''">
+					and	status_kind = #{statusKind}
+					</if>
+					<if test="statusKind == ''">
+					and	status_kind = '10'
+					</if>
+				</when>
+				<otherwise>
+					and status_kind = '10'
+				</otherwise>
+			</choose>
+		<if test="toKey != null">
+			AND to_key = #{toKey}
+		</if>
+		<choose>
+			<when test="tocoVerId != null">
+				<if test="tocoVerId == 'org'">
+					AND toco_ver_id is null
+				</if>
+				<if test="tocoVerId != 'org'">
+					AND toco_ver_id = #{tocoVerId}
+				</if>
+			</when>
+			<otherwise>
+				<if test="param == 'total'">
+					AND toco_ver_id is not null
+				</if>
+			</otherwise>
+		</choose>
+		
+	</select>
+	
+	
+	<!--  Select List - 버전 목록(유효목록 대분류) -->
+	<select id="selectListVersionDao" resultMap="tocoResultMap">
+		SELECT
+		<include refid="tocoColumn" />
+		FROM
+			(
+			SELECT rownum rn,
+			<include refid="tocoColumn" />
+			FROM
+				(
+				
+				SELECT 
+				<include refid="tocoColumn" />
+				FROM tm_toco_info tci
+				
+				<where>
+					1 = 1
+					<!-- 해당 조건문 이유 몰라서 주석 처리 WC 교범이 조회가 되지 않음 toco_type not in('09', '10', '11', '12')  -->
+					<choose>
+						<when test="statusKind != null">
+							<if test="statusKind != ''">
+							and	status_kind = #{statusKind}
+							</if>
+							<if test="statusKind == ''">
+							and	status_kind = '10'
+							</if>
+						</when>
+						<otherwise>
+							AND status_kind = '10'
+						</otherwise>
+					</choose>
+				</where>
+				<if test="toKey != null">
+					AND to_key = #{toKey}
+				</if>
+				<choose>
+					<when test="tocoVerId != null">
+						<if test="tocoVerId == 'org'">
+							AND toco_ver_id is null
+						</if>
+						<if test="tocoVerId != 'org'">
+							AND toco_ver_id = #{tocoVerId}
+						</if>
+					</when>
+					<otherwise>
+						<if test="param == 'total'">
+							AND toco_ver_id is not null 
+						</if>
+					</otherwise>
+				</choose>
+				<!-- 버전 정보에서 테이블과 이미지 리스트 제거 -->
+				and p_toco_id != 'TableToco'
+				and p_toco_id != 'GrphToco'
+				and toco_id != 'TableToco'
+				and toco_id != 'GrphToco'
+				<!-- ORDER BY to_number(toco_ord) ASC, to_number(toco_chg_no) ASC -->
+				ORDER BY to_number(toco_ord) ASC, LENGTH(toco_chg_no) ASC, toco_chg_no ASC
+				) tci
+			) tci
+		
+	</select>
+	
+	
+	<!--  Select List - 그림목차/표목차 목록 - 미사용 -->
+	<select id="selectListTocoTypeDao" resultMap="tocoResultMap">
+		SELECT
+		<include refid="tocoColumn" />
+		FROM tm_toco_info tci
+	   WHERE 1=1
+			<choose>
+				<when test="statusKind != null">
+					<if test="statusKind != ''">
+					and	status_kind = #{statusKind}
+					</if>
+					<if test="statusKind == ''">
+					and	status_kind = '10'
+					</if>
+				</when>
+				<otherwise>
+					and status_kind = '10'
+				</otherwise>
+			</choose>
+		<if test="toKey != null">
+			AND to_key = #{toKey}
+		</if>
+		<if test="tocoType != null">
+			AND toco_type = #{tocoType}
+		</if>
+		
+		ORDER BY to_key ASC, toco_ord ASC, toco_name ASC
+		
+	</select>
+	
+	
+	<select id="selectDetailDao" resultMap="tocoResultMap">
+		SELECT
+		<include refid="tocoColumn" />
+		FROM tm_toco_info tci
+		
+		<trim prefix="where" prefixOverrides="and | or">
+			<if test="toKey != null">and to_key = #{toKey}</if>
+			<if test="tocoId != null">and toco_id = #{tocoId}</if>
+			and (toco_dummy is null or toco_dummy = '')
+		</trim>
+		and rownum &lt;= 1
+	</select>
+	
+	<!--  Select One - toco_name // 2017-02-21 check by JS -->
+	<!-- MySQL to AccessDB // 2017-10-19 ahj -->
+	<select id="selectTocoNameDao" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT DISTINCT(toco_name) toco_name
+		FROM tm_toco_info tci
+		
+		<trim prefix="where" prefixOverrides="and | or">
+			<if test="toKey != null">and to_key = #{toKey}</if>
+			<if test="tocoId != null">and toco_id = #{tocoId}</if>
+		</trim>
+	</select>
+	
+	
+	<select id="selectParentTocoDao" parameterType="java.lang.String" resultMap="tocoResultMap">
+		SELECT toco_id, toco_name, NVL(toco_sssn_no, '-') as toco_sssn_no
+		FROM tm_toco_info
+		WHERE toco_id in (
+		    SELECT p_toco_id FROM tm_toco_info
+		    <trim prefix="where" prefixOverrides="and | or">
+				<if test="toKey != null">AND to_key = #{toKey}</if>
+				<if test="tocoId != null">AND toco_id = #{tocoId}</if>
+			</trim>
+		)
+		<if test="toKey != null">AND to_key = #{toKey}</if>
+		
+	</select>	
+	
+	
+	<select id="selectOneDao" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT
+			<if test="colName == 'toco_type'">NVL(toco_type, '')</if>
+			<if test="colName == 'toco_sssn_no'">NVL(toco_sssn_no, '-')</if>
+			AS rt_value
+		FROM tm_toco_info tci
+		<trim prefix="where" prefixOverrides="and | or">
+			<if test="toKey != null">AND to_key = #{toKey}</if>
+			<if test="tocoId != null">AND toco_id = #{tocoId}</if>
+		</trim>
+		
+	</select>
+	
+
+	<select id="selectTocoIdFromIpbcodeDao" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT toco_id, toco_name 
+		FROM tm_toco_info
+		WHERE toco_id in (
+		    SELECT toco_id FROM tm_sc_ipb
+		    <trim prefix="where" prefixOverrides="and | or">
+				<if test="toKey != null">AND to_key = #{toKey}</if>
+				<if test="ipbCode != null">AND ipb_code = #{ipbCode}</if>
+				AND rownum = 1
+			</trim>
+		)
+		<if test="toKey != null">AND to_key = #{toKey}</if>
+	</select>
+	
+	
+	<!-- Insert -->
+	<insert id="insertDao" parameterType="com.expis.ietm.dto.TocoInfoDto">
+		INSERT INTO tm_toco_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			to_key,
+			toco_id,
+			p_toco_id,
+			toco_ord,
+			toco_name,
+			<if test="tocoType != null">toco_type,</if>
+			<if test="tocoVehicleType != null">toco_vehicle_type,</if>
+			<if test="tocoRefId != null">toco_ref_id,</if>
+			<if test="tocoSecurityCode != null">toco_security_code,</if>
+			<if test="tocoStatusCode != null">toco_status_code,</if>
+			<if test="tocoSssnNo != null">toco_sssn_no,</if>
+			<if test="tocoDummy != null">toco_dummy,</if>
+			<if test="tocoVerId != null">toco_ver_id,</if>
+			<if test="tocoChgNo != null">toco_chg_no,</if>
+			<if test="tocoRevNo != null">toco_rev_no,</if>
+			<if test="statusKind != null">status_kind,</if>
+			<if test="createUserId != null">create_user_id,</if>
+			create_date
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			#{toKey},
+			#{tocoId},
+			#{pTocoId},
+			#{tocoOrd},
+			#{tocoName},
+			<if test="tocoType != null">#{tocoType},</if>
+			<if test="tocoVehicleType != null">#{tocoVehicleType},</if>
+			<if test="tocoRefId != null">#{tocoRefId},</if>
+			<if test="tocoSecurityCode != null">#{tocoSecurityCode},</if>
+			<if test="tocoStatusCode != null">#{tocoStatusCode},</if>
+			<if test="tocoSssnNo != null">#{tocoSssnNo},</if>
+			<if test="tocoDummy != null">#{tocoDummy},</if>
+			<if test="tocoVerId != null">#{tocoVerId},</if>
+			<if test="tocoChgNo != null">#{tocoChgNo},</if>
+			<if test="tocoRevNo != null">#{tocoRevNo},</if>
+			<if test="statusKind != null">#{statusKind},</if>
+			<if test="createUserId != null">#{createUserId},</if>
+			SYSDATE
+		</trim>
+	</insert>
+	
+	
+	<insert id="insertAllDao" parameterType="com.expis.ietm.dto.TocoInfoDto">
+		<foreach index="index" item="item" collection="list" open="INSERT ALL " separator=" " close="SELECT * FROM DUAL">
+			INTO tm_toco_info
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				to_key,
+				toco_id,
+				p_toco_id,
+				toco_ord,
+				toco_name,
+				<if test="item.tocoType != null">toco_type,</if>
+				<if test="item.tocoVehicleType != null">toco_vehicle_type,</if>
+				<if test="item.tocoRefId != null">toco_ref_id,</if>
+				<if test="item.tocoSecurityCode != null">toco_security_code,</if>
+				<if test="item.tocoStatusCode != null">toco_status_code,</if>
+				<if test="item.tocoSssnNo != null">toco_sssn_no,</if>
+				<if test="item.tocoDummy != null">toco_dummy,</if>
+				<if test="item.tocoVerId != null">toco_ver_id,</if>
+				<if test="item.tocoChgNo != null">toco_chg_no,</if>
+				<if test="item.tocoRevNo != null">toco_rev_no,</if>
+				<if test="item.statusKind != null">status_kind,</if>
+				<if test="item.createUserId != null">create_user_id,</if>
+				create_date
+			</trim>
+			VALUES
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				#{item.toKey},
+				#{item.tocoId},
+				#{item.pTocoId},
+				#{item.tocoOrd},
+				#{item.tocoName},
+				<if test="item.tocoType != null">#{item.tocoType},</if>
+				<if test="item.tocoVehicleType != null">#{item.tocoVehicleType},</if>
+				<if test="item.tocoRefId != null">#{item.tocoRefId},</if>
+				<if test="item.tocoSecurityCode != null">#{item.tocoSecurityCode},</if>
+				<if test="item.tocoStatusCode != null">#{item.tocoStatusCode},</if>
+				<if test="item.tocoSssnNo != null">#{item.tocoSssnNo},</if>
+				<if test="item.tocoDummy != null">#{item.tocoDummy},</if>
+				<if test="item.tocoVerId != null">#{item.tocoVerId},</if>
+				<if test="item.tocoChgNo != null">#{item.tocoChgNo},</if>
+				<if test="item.tocoRevNo != null">#{item.tocoRevNo},</if>
+				<if test="item.statusKind != null">#{item.statusKind},</if>
+				<if test="item.createUserId != null">#{item.createUserId},</if>
+				SYSDATE
+			</trim>
+		</foreach>
+	</insert>
+	
+	<insert id="insertAllDaoMDB" parameterType="com.expis.ietm.dto.TocoInfoDto">
+		insert into	tm_toco_info
+		(
+			to_key,
+			toco_id,
+			p_toco_id,
+			toco_ord,
+			toco_name,
+			toco_type,
+			toco_vehicle_type,
+			toco_ref_id,
+			toco_security_code,
+			toco_status_code,
+			toco_sssn_no,
+			toco_dummy,
+			toco_ver_id,
+			toco_chg_no,
+			toco_rev_no,
+			status_kind,
+			create_user_id,
+			create_date
+		)
+		values
+		(
+			#{toKey},
+			#{tocoId},
+			#{pTocoId},
+			${tocoOrd},
+			#{tocoName},
+			#{tocoType},
+			#{tocoVehicleType},
+			#{tocoRefId},
+			#{tocoSecurityCode},
+			#{tocoStatusCode},
+			#{tocoSssnNo},
+			#{tocoDummy},
+			#{tocoVerId},
+			#{tocoChgNo},
+			#{tocoRevNo},
+			#{statusKind},
+			#{createUserId},
+			sysdate
+		)
+	</insert>
+	
+	<!-- Update -->
+	<update id="updateDao" parameterType="com.expis.ietm.dto.TocoInfoDto">
+		UPDATE tm_toco_info
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="tocoName != null">toco_name = #{tocoName},</if>
+			<if test="tocoType != null">toco_type = #{tocoType},</if>
+			<if test="tocoVehicleType != null">toco_vehicle_type = #{tocoVehicleType},</if>
+			<if test="tocoRefId != null">toco_ref_id = #{tocoRefId},</if>
+			<if test="tocoSecurityCode != null">toco_security_code = #{tocoSecurityCode},</if>
+			<if test="tocoStatusCode != null">toco_status_code = #{tocoStatusCode},</if>
+			<if test="tocoSssnNo != null">toco_sssn_no = #{tocoSssnNo},</if>
+			<if test="tocoDummy != null">toco_dummy = #{tocoDummy},</if>
+			<if test="tocoVerId != null">toco_ver_id = #{tocoVerId},</if>
+			<if test="tocoChgNo != null">toco_chg_no = #{tocoChgNo},</if>
+			<if test="tocoRevNo != null">toco_rev_no = #{tocoRevNo},</if>
+			<if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+			modify_date = SYSDATE
+		</trim>
+		WHERE to_key = #{toKey} AND toco_id = #{tocoId}
+	</update>
+
+	
+	<!-- Update Setting -->
+	<update id="updateVersionDao" parameterType="com.expis.ietm.dto.TocoInfoDto">
+		UPDATE tm_toco_info
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="tocoVerId != null">toco_ver_id = #{tocoVerId},</if>
+			<if test="tocoChgNo != null">toco_chg_no = #{tocoChgNo},</if>
+			<if test="tocoRevNo != null">toco_rev_no = #{tocoRevNo},</if>
+			<if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+			modify_date = SYSDATE
+		</trim>
+		WHERE to_key = #{toKey} AND toco_id = #{tocoId}
+	</update>
+	
+	
+	<!-- Delete --><!-- 사용 20160909 -->
+	<delete id="deleteDao" parameterType="com.expis.ietm.dto.TocoInfoDto">
+		DELETE FROM tm_toco_info
+		WHERE to_key = #{toKey}
+	</delete>
+
+
+	<!-- Delete All --><!-- 사용 -->
+	<delete id="deleteAllDao">
+		DELETE FROM tm_toco_info
+	</delete>
+	
+	<select id="selectTocoId" resultType="String">
+		select	toco_id
+		from	tm_toco_info
+		where	to_key = #{toKey}
+		and		toco_ord = 1
+	</select>
+	
+	<select id="selectTocoList" parameterType="com.expis.ietm.dto.TocoInfoDto" resultType="com.expis.ietm.dto.TocoInfoDto">
+		select	to_key		as	tokey
+				,case when p_toco_id = 'TableToco' then (SELECT toco_id FROM tm_table_xcont WHERE tbl_id = tti.toco_id GROUP BY toco_id)
+			          ELSE toco_id END AS tocoId
+				,p_toco_id	as	pTocoId
+				,toco_name	as	tocoName
+				,toco_status_code	as	tocoStatusCode
+				,case	when toco_type = '16' THEN 'IPB'
+						when toco_type = '17' THEN 'IPB'
+						when toco_type = '18' THEN 'IPB'
+					else 'TOCO'
+					end as tocoType
+				,case when toco_vehicle_type = 'NONE' OR toco_vehicle_type = 'SYSTEM' OR toco_vehicle_type = '' OR toco_vehicle_type IS NULL THEN '1'
+					when INSTR(toco_vehicle_type,#{tocoVehicleType}) &gt; 0 THEN '1'
+					else '0'
+					end as tocoVehicleType
+		
+		from tm_toco_info tti
+		where	to_key = #{toKey}
+		and		(p_toco_id	= #{tocoId}	or	toco_id = #{tocoId})
+		order by toco_ord, toco_chg_no desc
+	</select>
+	
+	<!-- Select (TOCO_VEHICLE_TYPE 없는 경우 업데이트 용) -->
+	<select id="selectUpdateToList" resultMap="tocoResultMap">
+		SELECT 
+			to_key
+			,toco_id
+			,p_toco_id
+			,(
+				SELECT TOCO_VEHICLE_TYPE 
+				FROM tm_toco_info
+				WHERE TOCO_ID = tti.P_TOCO_ID AND TOCO_VEHICLE_TYPE IS NOT NULL  AND to_key = #{toKey} group by TOCO_VEHICLE_TYPE
+				) AS toco_vehicle_type
+		  FROM tm_toco_info tti
+		 WHERE to_key = #{toKey}
+		   AND P_TOCO_ID IN (
+				SELECT
+					TOCO_ID
+				  FROM	tm_toco_info
+				 WHERE	to_key = #{toKey}
+				   AND TOCO_VEHICLE_TYPE IS NOT null
+			)
+		   AND TOCO_VEHICLE_TYPE IS NULL
+	</select>
+	
+	<!-- Update (TOCO_VEHICLE_TYPE 없는 경우 업데이트 용) -->
+	<update id="updateVehicleType" parameterType="com.expis.ietm.dto.TocoInfoDto">
+		UPDATE tm_toco_info
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="tocoVehicleType	!= null">toco_vehicle_type = #{tocoVehicleType},</if>
+			<if test="modifyUserId		!= null">modify_user_id = #{modifyUserId},</if>
+			modify_date = SYSDATE
+		</trim>
+		WHERE to_key = #{toKey} AND toco_id = #{tocoId}
+	</update>
+	
+	<!-- SELECT (getToTreeStrUpdate(목차정렬)에서 사용 위해 1차 처리하여 조회) -->
+	<!-- 2023.05.10 jysi EDIT : 동영상목차와 동영상목차리스트 정렬 추가, MARIA와 ORACLE도 자바단에서 정렬 -->
+	<select id="selectTocoDto" resultMap="tocoResultMap">
+		SELECT TO_KEY  
+			, UUID
+			, TOCO_ID
+			, P_TOCO_ID
+			, TOCO_NAME
+			, CASE WHEN TOCO_NAME LIKE '그림 %' AND SUBSTR(TOCO_NAME, INSTR(TOCO_NAME, ' ',  1, 2)-1, 1) BETWEEN '0' AND '9' 
+				THEN REPLACE(SUBSTR(TOCO_NAME, 0, INSTR(TOCO_NAME, ' ',  1, 2)-1 ), ' ', '') || '. ' || REPLACE(SUBSTR(TOCO_NAME, INSTR(TOCO_NAME, ' ',  1, 2), LENGTH(TOCO_NAME)), ' ', '')
+				WHEN TOCO_NAME LIKE '표 %' AND SUBSTR(TOCO_NAME, INSTR(TOCO_NAME, ' ',  1, 2)-1, 1) BETWEEN '0' AND '9'
+				THEN REPLACE(SUBSTR(TOCO_NAME, 0, INSTR(TOCO_NAME, ' ',  1, 2)-1 ), ' ', '') || '. ' || REPLACE(SUBSTR(TOCO_NAME, INSTR(TOCO_NAME, ' ',  1, 2), LENGTH(TOCO_NAME)), ' ', '')                                       
+				ELSE REPLACE(SUBSTR(TOCO_NAME, 0, INSTR(TOCO_NAME, '.', -1)), ' ', '') || ' ' || REPLACE(SUBSTR(TOCO_NAME, INSTR(TOCO_NAME, '.', -1)+1, LENGTH(TOCO_NAME)), ' ', '') 
+				END AS CONTENTS_SORT_NAME
+			FROM (
+				SELECT TO_KEY, TOCO_ID AS UUID, TOCO_ID AS TOCO_ID, '' AS P_TOCO_ID, TOCO_NAME FROM TM_TOCO_INFO WHERE TO_KEY = #{toKey}  AND TOCO_ID = 'GrphToco' 
+				UNION ALL
+				SELECT tgx.TO_KEY, tgx.TOCO_ID AS UUID, GRPH_ID AS TOCO_ID, 'GrphToco' AS P_TOCO_ID, GRPH_CAPTION AS TOCO_NAME FROM TM_GRPH_XCONT tgx JOIN TM_TOCO_INFO tti ON tgx.GRPH_ID = tti.TOCO_ID WHERE tgx.TO_KEY = #{toKey} AND XTH = 1 AND GRPH_CAPTION IS NOT NULL AND tti.P_TOCO_ID = 'GrphToco' 
+				UNION ALL
+				SELECT TO_KEY, TOCO_ID AS UUID, TOCO_ID AS TOCO_ID, '' AS P_TOCO_ID, TOCO_NAME FROM TM_TOCO_INFO WHERE TO_KEY = #{toKey}  AND TOCO_ID = 'VideoToco' 
+				UNION ALL
+				SELECT tgx.TO_KEY, tgx.TOCO_ID AS UUID, GRPH_ID AS TOCO_ID, 'VideoToco' AS P_TOCO_ID, GRPH_CAPTION AS TOCO_NAME FROM TM_GRPH_XCONT tgx JOIN TM_TOCO_INFO tti ON tgx.GRPH_ID = tti.TOCO_ID WHERE tgx.TO_KEY = #{toKey} AND XTH = 1 AND GRPH_CAPTION IS NOT NULL AND tti.P_TOCO_ID = 'VideoToco' 
+				UNION ALL
+				SELECT TO_KEY, TOCO_ID AS UUID, TOCO_ID AS TOCO_ID, '' AS P_TOCO_ID, TOCO_NAME FROM TM_TOCO_INFO WHERE TO_KEY = #{toKey}  AND TOCO_ID = 'TableToco' 
+				UNION ALL
+				SELECT TO_KEY, TOCO_ID AS UUID, TBL_ID  AS TOCO_ID, 'TableToco' AS P_TOCO_ID, TBL_CAPTION  AS TOCO_NAME FROM TM_TABLE_XCONT WHERE TO_KEY = #{toKey}  AND XTH = 1 AND TBL_CAPTION  IS NOT NULL
+			)
+	</select>
+	
+</mapper>

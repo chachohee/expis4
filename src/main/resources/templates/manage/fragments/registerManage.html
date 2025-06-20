@@ -1,0 +1,102 @@
+<div th:fragment="registerManage" xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+    <div data-role="messages" style="display:none;">
+        <input type="hidden" name="msg-invalid-upload" th:value="#{admin.toMng.invalidUpload}" />
+        <input type="hidden" name="msg-systree-register" th:value="#{admin.toMng.systreeRegister}" />
+        <input type="hidden" name="msg-invalid-filepath" th:value="#{admin.toMng.invalidFilepath}" />
+        <input type="hidden" name="msg-insert-to" th:value="#{admin.toMng.insert.to}" />
+        <input type="hidden" name="msg-complete-to" th:value="#{admin.toMng.complete.to}" />
+    </div>
+
+    <div th:if="${secondId == 'systree'}" >
+        <!-- SysTree 파일등록 -->
+        <div class="d-flex flex-column flex-shrink-0 p-3">
+            <h5 th:text="#{admin.toMng.titleSystree}">SysTree.xml 업로드</h5>
+            <hr>
+            <div class="row">
+                <div class="input-group mb-3">
+                    <span class="input-group-text col-md-4 col-lg-3 col-xl-2" th:text="#{admin.toMng.savedSystree}">저장된 SysTree.xml</span>
+                    <div class="form-control">
+                        <span th:text="#{admin.toMng.systreeXml}">[SysTree.xml]</span>
+                        <span style="color:blue;" th:if="${sysCount != 0}" th:text="#{admin.toMng.fileRegistered}">파일이 등록되어 있습니다.</span>
+                        <span style="color:gray;" th:if="${sysCount == 0}" th:text="#{admin.toMng.fileMissing}">파일이 등록하시기 바랍니다.</span>
+<!--                        <span style="color:pupple;" th:text="${sysCount}">등록건수</span>-->
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-group mb-3">
+                    <span class="input-group-text col-md-4 col-lg-3 col-xl-2" th:text="#{admin.toMng.registerFile}">Upload</span>
+                    <div class="col-md-8 col-lg-9 col-xl-10">
+                        <input type="file" class="form-control" id="sys_file_upload" />
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="d-flex justify-content-center align-item-center">
+                    <button type="button" id="btn-upload" class="btn btn-primary" th:text="#{admin.toMng.upload}">파일업로드</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${secondId == 'register'}" >
+        <!-- 저작 TO 등록 -->
+        <div class="d-flex flex-column flex-shrink-0 p-3">
+            <h5 th:text="#{admin.toMng.title-register}">원본 교범 경로 지정</h5>
+            <hr>
+            <div class="row">
+                <div class="input-group mb-3">
+                    <span class="input-group-text col-md-4 col-lg-3 col-xl-2" th:text="#{admin.toMng.savedSystree}">저장된 SysTree.xml</span>
+                    <label class="form-control" th:text="#{admin.toMng.systreeXml}">[SysTree.xml]</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-group mb-3">
+                    <span class="input-group-text col-md-4 col-lg-3 col-xl-2" th:text="#{admin.toMng.directory}">디렉토리 지정</span>
+                    <input class="form-control" type="text" id="to_dir_path" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-1 col-lg-2 col-xl-2"></div>
+                <div class="col-md-10 col-lg-8 col-xl-8 d-flex justify-content-between align-items-center">
+                    <button class="btn btn-primary" id="btn-single" th:text="#{admin.toMng.register.to(${ietmType})}">T.O등록</button>
+                    <button class="btn btn-primary" id="btn-project" th:text="#{admin.toMng.project.to(${ietmType})}">Project T.O등록</button>
+                    <button class="btn btn-primary" id="btn-package" th:text="#{admin.toMng.package.to(${ietmType})}">Package T.O등록</button>
+                </div>
+                <div class="col-md-1 col-lg-2 col-xl-2"></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="input-group mb-3">
+                    <label class="input-group-text col-md-4 col-lg-3 col-xl-2" th:text="#{admin.toMng.toname}">교범명 지정</label>
+                    <input class="form-control" type="text"  />
+                </div>
+            </div>
+            <div class="row">
+                <div class="d-flex justify-content-center align-items-center">
+                    <button class="btn btn-secondary" id="btn-delete-to" th:text="#{admin.toMng.delete.to(${ietmType})}" >T.O삭제</button>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-md-6 col-lg-6 col-xl-6">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <button class="btn btn-secondary" id="btn-delete-all" th:text="#{admin.toMng.deleteAll}">전체 프로젝트 삭제</button>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="checkIncludeFile" required />
+                            <label class="form-check-label" for="checkIncludeFile" th:text="#{admin.toMng.deleteResource}">파일처리 (icon, image, ipbimage 삭제) 포함</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-6 col-xl-6">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <button class="btn btn-secondary" id="btn-delete-related" th:text="#{admin.toMng.deleteRelated}">전체 계통 삭제</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

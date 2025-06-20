@@ -1,0 +1,258 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.expis.ietm.dao.SearchWucMapper">
+
+	<!-- ResultMap -->
+	<resultMap id="searchResultMap" type="searchDto">
+		<id		property="toKey"					column="to_key"					javaType="string" />
+		<result	property="tocoId"				column="toco_id"					javaType="string" />
+		<result	property="wucCode"			column="wuc_code"			javaType="string" />
+		<result	property="wucName"			column="wuc_name"			javaType="string" />
+		<result	property="createUserId"		column="create_user_id"	javaType="string" />
+		<result	property="createDate"		column="create_date"			javaType="date" />
+	</resultMap>
+	
+	
+	<!-- ResultCount -->
+	<resultMap id="searchResultCount" type="int">
+		<result property="cnt" column="cnt" />
+	</resultMap>
+	
+	
+	<!-- Column -->
+	<sql id="searchColumn">
+		  tsw.to_key				AS to_key
+		, tsw.toco_id				AS toco_id
+		, tsw.wuc_code				AS wuc_code
+		, tsw.wuc_name				AS wuc_name
+		, tsw.create_user_id		AS create_user_id
+		, tsw.create_date			AS create_date
+	</sql>
+	
+	<select id="selectWucDao" parameterType="SearchDto" resultType="SearchDto">
+		select	to_key	as	toKey
+				,toco_id	as	tocoId
+				,nvl(cont, #{searchArray.[0]})	as	cont
+				,#{arrConstResult.[8]}	as	resultKind
+				,case when instr(lower(wuc_code), lower(#{searchArray.[0]})) 
+						<if test="chkVal != 'none'">
+							<if test="chkVal == 'or'">
+								|| instr(lower(wuc_code), lower(#{searchArray.[1]}))
+							</if>
+						</if>
+					is null then
+						'0'
+					when instr(lower(wuc_code), lower(#{searchArray.[0]})) 
+						<if test="chkVal != 'none'">
+							<if test="chkVal == 'or'">
+								|| instr(lower(wuc_code), lower(#{searchArray.[1]}))
+							</if>
+						</if>
+						= 0 then
+						'0'
+					else
+					 	'wuc_code'
+					end as hasFirst
+					
+				,case when instr(lower(wuc_name), lower(#{searchArray.[0]})) 
+						<if test="chkVal != 'none'">
+							<if test="chkVal == 'or'">
+								|| instr(lower(wuc_name), lower(#{searchArray.[1]}))
+							</if>
+						</if>
+						is null then
+						'0'
+					when instr(lower(wuc_name), lower(#{searchArray.[0]})) 
+						<if test="chkVal != 'none'">
+							<if test="chkVal == 'or'">
+								|| instr(lower(wuc_name), lower(#{searchArray.[1]}))
+							</if>
+						</if>
+						= 0 then
+						'0'
+					else
+					 	'wuc_name'
+					end as hasSecond
+					
+		from	tm_sc_wuc
+		where 1=1
+			<if test="toKey != ''">and to_key = #{toKey}</if>
+			<choose>
+				<when test="chkVal != 'none'">
+					and ((lower(replace(wuc_code, ' ', '')) like '%' || lower(replace(#{searchArray.[0]}, ' ', '')) || '%')
+						${chkVal}
+						(lower(replace(wuc_code, ' ', '')) like '%' || lower(replace(#{searchArray.[1]}, ' ', '')) || '%'))
+					or
+						((lower(replace(wuc_name, ' ', '')) like '%' || lower(replace(#{searchArray.[0]}, ' ', '')) || '%')
+						${chkVal}
+						(lower(replace(wuc_name, ' ', '')) like '%' || lower(replace(#{searchArray.[1]}, ' ', '')) || '%'))
+					
+				</when>
+				<otherwise>
+					and lower(replace(wuc_code, ' ', '')) like '%' || lower(replace(#{searchArray.[0]}, ' ', '')) || '%'
+					or lower(replace(wuc_name, ' ', '')) like '%' || lower(replace(#{searchArray.[1]}, ' ', '')) || '%'
+				</otherwise>
+			</choose>
+		ORDER BY toKey ASC
+	</select>
+	
+	<!--  Select List -->
+	<select id="selectListDao" resultMap="searchResultMap">
+		SELECT
+		<include refid="searchColumn" />
+		FROM tm_sc_wuc tsw
+
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+			</trim>
+		</where>
+
+		ORDER BY to_key ASC, toco_id ASC, wuc_code ASC
+	</select>
+	
+	
+	<!--  Select One -->
+	<select id="selectDetailDao" resultMap="searchResultMap">
+		SELECT
+		<include refid="searchColumn" />
+		FROM tm_sc_wuc tsw
+		WHERE to_key = #{toKey}
+
+		<trim prefix="AND">
+			<if test="tocoId != null">toco_id = #{tocoId}</if>
+			<if test="wucCode != null">wuc_code = #{wucCode}</if>
+		</trim>
+
+	</select>
+	
+	
+	<!--  Select Count -->
+	<select id="selectCountDao" resultMap="searchResultCount">
+		SELECT
+			COUNT(*) AS cnt
+		FROM tm_sc_wuc tsw
+		
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+			</trim>
+		</where>
+		
+	</select>
+	
+	
+	<!-- Insert -->
+	<insert id="insertDao" parameterType="com.expis.ietm.dto.SearchDto">
+		INSERT INTO tm_sc_wuc
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			to_key,
+			toco_id,
+			<if test="wucCode != null">wuc_code,</if>
+			<if test="wucName != null">wuc_name,</if>
+			<if test="createUserId != null">create_user_id,</if>
+			<if test="cont != null">cont,</if>
+			create_date
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			#{toKey},
+			#{tocoId},
+			<if test="wucCode != null">#{wucCode},</if>
+			<if test="wucName != null">#{wucName},</if>
+			<if test="createUserId != null">#{createUserId},</if>
+			<if test="cont != null">#{cont},</if>
+			SYSDATE
+		</trim>
+	</insert>
+	
+	
+	<!-- Insert All --><!-- 사용 20160923 -->
+	<insert id="insertAllDao" parameterType="com.expis.ietm.dto.SearchDto">
+		<foreach index="index" item="item" collection="list" open="INSERT ALL " separator=" " close="SELECT * FROM DUAL">
+			INTO tm_sc_wuc
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				to_key,
+				toco_id,
+				<if test="item.wucCode != null">wuc_code,</if>
+				<if test="item.wucName != null">wuc_name,</if>
+				<if test="item.createUserId != null">create_user_id,</if>
+				<if test="item.cont != null">cont,</if>
+				create_date
+			</trim>
+			VALUES
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				#{item.toKey},
+				#{item.tocoId},
+				<if test="item.wucCode != null">#{item.wucCode},</if>
+				<if test="item.wucName != null">#{item.wucName},</if>
+				<if test="item.createUserId != null">#{item.createUserId},</if>
+				<if test="item.cont != null">#{item.cont},</if>
+				SYSDATE
+			</trim>
+		</foreach>
+	</insert>
+	
+	<insert id="insertAllDaoMDB" parameterType="com.expis.ietm.dto.SearchDto">
+		insert into	tm_sc_wuc
+		(
+			to_key,
+			toco_id,
+			wuc_code,
+			wuc_name,
+			create_user_id,
+			create_date
+		)
+		values
+		(
+			#{toKey},
+			#{tocoId},
+			#{wucCode},
+			#{wucName},
+			#{createUserId},
+			SYSDATE
+		)
+		
+	</insert>
+	
+	
+	<!-- Update -->
+	<update id="updateDao" parameterType="com.expis.ietm.dto.SearchDto">
+		UPDATE tm_sc_wuc
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="wucCode != null">wuc_code = #{wucCode},</if>
+			<if test="wucName != null">wuc_name = #{wucName},</if>
+			<if test="cont != null">cont = #{cont},</if>
+			<if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+			modify_date = SYSDATE
+		</trim>
+
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+				<if test="wucCode != null">wuc_code = #{wucCode}</if>
+			</trim>
+		</where>
+
+	</update>
+
+	
+	<!-- Delete --><!-- 사용 20160924 -->
+	<delete id="deleteDao" parameterType="com.expis.ietm.dto.SearchDto">
+		DELETE FROM tm_sc_wuc
+		WHERE to_key = #{toKey}
+		<trim prefix="AND">
+			<if test="tocoId != null">toco_id = #{tocoId}</if>
+			<if test="wucCode != null">wuc_code = #{wucCode}</if>
+		</trim>
+	</delete>
+	
+	
+	<!-- Delete --><!-- 사용 20160924 -->
+	<delete id="deleteAllDao">
+		DELETE FROM tm_sc_wuc
+	</delete>
+
+</mapper>

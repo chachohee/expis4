@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eXPIS-IV</title>
+    <link href="/component/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/component/jquery/jquery-ui.min.css" rel="stylesheet">
+    <link href="/component/fontawesome/css/all.min.css" rel="stylesheet">
+    <link href="/css/manage/manage.css" rel="stylesheet">
+    <link th:if="${firstId == 'areaStatistics' or firstId == 'areaLog'}" th:href="@{/css/manage/statisticsManage.css}" rel="stylesheet">
+    <script th:src="@{/component/jquery/jquery-3.7.1.min.js}" type="text/javascript"></script>
+    <script th:src="@{/component/jquery/jquery-ui.min.js}" type="text/javascript"></script>
+    <script th:src="@{/component/bootstrap/js/bootstrap.bundle.min.js}" type="text/javascript"></script>
+    <script th:src="@{/component/echarts/echarts.min.js}" type="text/javascript"></script>
+    <script th:src="@{/js/common/messages.js}" type="text/javascript"></script>
+    <script th:src="@{/js/manage/manage.js}" type="text/javascript"></script>
+    <script th:if="${firstId == 'areaRegister'}" th:src="@{/js/manage/register.js}" type="text/javascript"></script>
+    <script th:if="${firstId == 'areaBoard'}" th:src="@{/js/manage/board.js}" type="text/javascript"></script>
+    <script th:if="${firstId == 'areaStatistics' and secondId == 'user'}" th:src="@{/js/manage/user_stat.js}" type="text/javascript"></script>
+    <script th:if="${firstId == 'areaStatistics' and secondId == 'ietm'}" th:src="@{/js/manage/to_stat.js}" type="text/javascript"></script>
+    <script th:if="${firstId == 'areaLog'}" th:src="@{/js/manage/log.js}" type="text/javascript"></script>
+</head>
+<body>
+<div style="display:none;">
+    <input type="hidden" name="bizCode" th:value="${BIZ_CODE}" />
+    <input type="hidden" name="firstId" th:value="${firstId}" />
+    <input type="hidden" name="secondId" th:value="${secondId}" />
+</div>
+<div class="container-fluid" style="height:100vh;">
+    <div class="row h-100">
+        <div class="col-md-4 col-lg-3 col-xl-2 h-100">
+            <div th:replace="~{manage/fragments/sidebar :: sidebar}"></div>
+        </div>
+        <main class="col-md-8 col-lg-9 col-xl-10">
+            <div class="p-2">
+                <div class="d-flex flex-column flex-shrink-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="lead fw-bold">
+                            <i class="fa fa-angles-right fa-lg"></i>
+                            <label id="headerLabel" th:text="#{admin.accountMng}">계정관리.</label>
+                        </div>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb" id="headerBreadcrumb">
+                                <li class="breadcrumb-item"> <i class="fa fa-house"></i> </li>
+                                <li class="breadcrumb-item"> <a href="#"><label th:text="#{admin.accountMng}">계정관리.</label></a> </li>
+                                <li class="breadcrumb-item active" aria-current="page"> <a href="#"><label th:text="#{admin.accountMng.account}">승인관리</label></a> </li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                <hr class="top">
+
+                <!-- 계정 관리 -->
+                <div th:if="${firstId == 'areaAccount'}" >
+                    <div th:replace="~{manage/fragments/approvalManage :: approvalManage}"></div>
+                </div>
+                <!-- 게시판 관리 -->
+                <div th:if="${firstId == 'areaBoard'}" >
+                    <div th:replace="~{manage/fragments/boardManage :: boardManage}"></div>
+                </div>
+                <!-- T.O 관리 -->
+                <div th:if="${firstId == 'areaRegister'}" >
+                    <div th:replace="~{manage/fragments/registerManage :: registerManage}"></div>
+                </div>
+                <!-- 통계 관리 -->
+                <div th:if="${firstId == 'areaStatistics'}" >
+                    <div th:replace="~{manage/fragments/userStatisticsManage :: userStatisticsManage}"></div>
+                    <div th:replace="~{manage/fragments/toStatisticsManage :: toStatisticsManage}"></div>
+                </div>
+                <!-- 로그 관리 -->
+                <div th:if="${firstId == 'areaLog'}" >
+                    <div th:replace="~{manage/fragments/logInfoManage :: logInfoManage}"></div>
+                    <div th:replace="~{manage/fragments/logCodeManage :: logCodeManage}"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

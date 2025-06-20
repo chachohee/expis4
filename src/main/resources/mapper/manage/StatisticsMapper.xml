@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.manage.dao.StatisticsMapper">
+
+    <select id="selectToConnTotalCount" parameterType="StatisticsDto" resultType="int">
+        select count(ucth.user_id)
+        from ur_conn_to_history ucth
+        inner join ur_user_profile uup
+        on ucth.user_id = uup.user_id
+        inner join tm_toco_info tti
+        on ucth.toco_id = tti.toco_id
+        where ucth.status_kind = '10'
+        <choose>
+            <when test="searchType =='id'">
+                and ucth.user_id like '%' || #{searchValue} || '%'
+            </when>
+            <when test="searchType =='name'">
+                and uup.user_name like '%' || #{searchValue} || '%'
+            </when>
+            <when test="searchType =='to'">
+                and ucth.to_key like '%' || #{searchValue} || '%'
+            </when>
+            <when test="searchType =='toco'">
+                and tti.toco_name like '%' || #{searchValue} || '%'
+            </when>
+        </choose>
+    </select>
+
+    <select id="selectDetailToConnList" parameterType="StatisticsDto" resultType="StatisticsDto">
+        select tNum
+        ,rNum
+        ,userId
+        ,userName
+        ,toKey
+        ,tocoName
+        ,connDate
+        from(
+        select row_number() over(order by conn_date asc) as tNum
+        ,row_number() over(order by conn_date desc) as rNum
+        ,ucth.user_id as userId
+        ,user_name as userName
+        ,ucth.to_key as toKey
+        ,tti.toco_name as tocoName
+        ,to_char(ucth.conn_date, 'yyyy-mm-dd') as connDate
+        from ur_conn_to_history ucth
+        inner join ur_user_profile uup
+        on ucth.user_id = uup.user_id
+        inner join tm_toco_info tti
+        on ucth.to_key = tti.to_key and ucth.toco_id = tti.toco_id
+        where ucth.status_kind = '10'
+        <choose>
+            <when test="searchType =='id'">
+                and ucth.user_id like '%' || #{searchValue} || '%'
+            </when>
+            <when test="searchType =='name'">
+                and uup.user_name like '%' || #{searchValue} || '%'
+            </when>
+            <when test="searchType =='to'">
+                and ucth.to_key like '%' || #{searchValue} || '%'
+            </when>
+            <when test="searchType =='toco'">
+                and tti.toco_name like '%' || #{searchValue} || '%'
+            </when>
+        </choose>
+        order by conn_date desc
+        )
+        where rNum between #{startRow} and #{endRow}
+        order by rNum asc
+    </select>
+    <!-- 확인중 -->
+    <select id="selectToConnPie" parameterType="StatisticsDto" resultType="StatisticsDto">
+        select row_number() over(order by connCount desc) as tNum
+        ,toName
+        ,connCount
+        from (
+        select toi.to_name as toName
+        ,count(ucth.to_key) as connCount
+        from ur_conn_to_history ucth
+        left join tm_to_info toi
+        on ucth.to_key = toi.to_key
+        where ucth.status_kind = '10'
+        and toi.to_name is not null
+        <if test="date != 'none'">
+            <choose>
+                <when test="type =='year'">
+                    and to_char(ucth.conn_date, 'yyyy') = #{date}
+                </when>
+                <when test="type =='month'">
+                    and to_char(ucth.conn_date, 'yyyy-mm') = #{date}
+                </when>
+                <when test="type =='day'">
+                    and to_char(ucth.conn_date, 'yyyy-mm-dd') = #{date}
+                </when>
+            </choose>
+        </if>
+        group by ucth.to_key, toi.to_name
+        order by connCount desc
+        )
+        where rownum <![CDATA[<=]]> 5
+    </select>
+    <!-- 확인중 -->
+    <select id="selectTocoConnPie" parameterType="StatisticsDto" resultType="StatisticsDto">
+        select connCount
+        ,toKey
+        ,tocoName
+        from
+        (
+        select distinct count(ucth.toco_id) as connCount
+        ,ucth.to_key as toKey
+        ,toco.toco_name as tocoName
+        from ur_conn_to_history ucth
+        left join tm_toco_info toco
+        on ucth.toco_id = toco.toco_id
+        where ucth.to_key != toco.toco_name
+        and ucth.status_kind = '10'
+        <if test="date != 'none'">
+            <choose>
+                <when test="type =='year'">
+                    and to_char(ucth.conn_date, 'yyyy') = #{date}
+                </when>
+                <when test="type =='month'">
+                    and to_char(ucth.conn_date, 'yyyy-mm') = #{date}
+                </when>
+                <when test="type =='day'">
+                    and to_char(ucth.conn_date, 'yyyy-mm-dd') = #{date}
+                </when>
+            </choose>
+        </if>
+        group by ucth.toco_id ,ucth.to_key ,toco.toco_name
+        order by connCount desc
+        )
+        where rownum <![CDATA[<=]]> 5
+    </select>
+
+    <select id="toCreateDate" resultType="StatisticsDto">
+        select distinct substr(to_char(conn_date, 'YYYYMMDDHH24miss'), 1, 4) as connDate
+        from ur_conn_to_history
+        order by connDate asc
+    </select>
+
+    <select id="selectUserStatusList" resultType="StatisticsDto">
+        select distinct substr(to_char(conn_date, 'YYYYMMDDHH24miss'), 1, 4) as year
+	            ,count(conn_date) over(partition by substr(to_char(conn_date, 'YYYYMMDDHH24miss'),1,4))	as userCount
+        from ur_conn_user_history
+        order by year
+    </select>
+
+    <select id="selectUserIdCount" resultType="int" parameterType="StatisticsDto">
+        select count(distinct uuh.user_id)
+        from ur_conn_user_history uuh
+        left join ur_user_profile uup
+        on uuh.user_id = uup.user_id
+        <where>
+            <choose>
+                <when test="type =='year'">
+                    to_char(uuh.conn_date, 'yyyy') = #{date}
+                </when>
+                <when test="type =='month'">
+                    to_char(uuh.conn_date, 'yyyy-mm')= #{date}
+                </when>
+                <when test="type =='day'">
+                    to_char(uuh.conn_date, 'yyyy-mm-dd') = #{date}
+                </when>
+            </choose>
+        </where>
+    </select>
+
+    <select id="selectUserList" resultType="StatisticsDto" parameterType="StatisticsDto">
+        select rNum
+        ,userId
+        ,userName
+        ,userCount
+        from
+        (
+        select rownum as rNum
+        ,userId
+        ,userName
+        ,userCount
+        from
+        (
+        select distinct uuh.user_id as userId
+        ,user_name as userName
+        ,count(uuh.user_id) over(partition by uuh.user_id) as userCount
+        from ur_conn_user_history uuh
+        left join ur_user_profile uup
+        on uuh.user_id = uup.user_id
+        <where>
+            <choose>
+                <when test="type =='year'">
+                    to_char(uuh.conn_date, 'yyyy') = #{date}
+                </when>
+                <when test="type =='month'">
+                    to_char(uuh.conn_date, 'yyyy-mm') = #{date}
+                </when>
+                <when test="type =='day'">
+                    to_char(uuh.conn_date, 'yyyy-mm-dd') = #{date}
+                </when>
+            </choose>
+        </where>
+        order by userCount desc
+        )
+        )
+        where rNum &lt;= 5
+    </select>
+
+
+    <select id="selectYearUserStatusList" resultType="StatisticsDto" parameterType="StatisticsDto">
+        select tempMonth as month
+              	,nvl(userCount ,0)	as userCount
+        from
+            (
+            select lpad(level, 2, 0) tempMonth
+            from dual
+            connect by level &lt;= 12
+            ) tempMonth
+            left join
+            (
+            select distinct substr(to_char(conn_date, 'YYYYMMDDHH24miss'), 5, 2) as month
+                , count (conn_date) over(partition by substr(to_char(conn_date, 'YYYYMMDDHH24miss'), 5, 2)) as userCount
+            from ur_conn_user_history
+            where substr(to_char(conn_date, 'YYYYMMDDHH24miss'), 1, 4) = #{year}
+            order by month
+            ) temp
+        on tempMonth.tempMonth = temp.month
+        order by month
+    </select>
+
+    <select id="selectMonthUserStatusList" resultType="StatisticsDto" parameterType="StatisticsDto">
+        select tempDay as day
+              	,nvl(userCount ,0)	as userCount
+        from
+            (
+            select lpad(level, 2, 0) tempDay
+            from dual
+            connect by level &lt;= (SUBSTR(TO_CHAR(LAST_DAY(TO_DATE(#{yearMonth}, 'YYYY-MM')), 'YYYYMMDD'), 7, 2) )
+            ) tempDay
+            left join
+            (
+            select distinct substr(to_char(conn_date, 'YYYYMMDDHH24miss'), 7, 2) as day
+                , count (conn_date) over(partition by substr(to_char(conn_date, 'YYYYMMDDHH24miss'), 7, 2)) as userCount
+            from ur_conn_user_history
+            where to_char(conn_date, 'YYYY-MM') = #{yearMonth}
+            ) temp
+        on tempDay.tempDay = temp.day
+        order by day
+    </select>
+
+    <!--
+        2025.05.15 - osm
+        누락데이터, 정합성 개선
+     -->
+    <select id="selectUserDayContactStatus" resultType="StatisticsDto" parameterType="StatisticsDto">
+        SELECT
+            submenu.hourVal AS timeVal,
+            NVL(thmenu.userCount, 0) AS userCount
+        FROM (
+            SELECT LPAD(LEVEL - 1, 2, '0') AS hourVal
+            FROM dual
+            CONNECT BY LEVEL &lt;= 24
+        ) submenu
+        LEFT JOIN (
+            SELECT
+                SUBSTR(TO_CHAR(conn_date, 'yyyymmddhh24miss'), 9, 2) AS hour,
+                COUNT(user_id) AS userCount
+            FROM ur_conn_user_history
+            WHERE TO_CHAR(conn_date, 'yyyy-mm-dd') = #{date}
+            GROUP BY SUBSTR(TO_CHAR(conn_date, 'yyyymmddhh24miss'), 9, 2)
+        ) thmenu
+        ON submenu.hourVal = thmenu.hour
+        ORDER BY submenu.hourVal
+    </select>
+
+    <select id="selectUserIdDetailCount" resultType="int" parameterType="StatisticsDto">
+        select count(uuh.user_id)
+        from ur_conn_user_history uuh
+        left join ur_user_profile uup
+        on uuh.user_id = uup.user_id
+        <where>
+            uuh.status_kind &lt;&gt; '40'
+            <if test="searchType == 'id' and searchValue != null and searchValue != '' and searchValue != 'none'">
+                and uuh.user_id like '%' || #{searchValue} || '%'
+            </if>
+            <if test="searchType == 'name' and searchValue != null and searchValue != '' and searchValue != 'none'">
+                and uup.user_name like '%' || #{searchValue} || '%'
+            </if>
+        </where>
+    </select>
+
+
+    <select id="selectUserDetailList" resultType="StatisticsDto" parameterType="StatisticsDto">
+        select rNum
+        ,tNum
+        ,connSeq
+        ,userId
+        ,userName
+        ,connIp
+        ,connDate
+        ,disconnDate
+        ,statusKind
+        from
+        (
+        select row_number() over(order by conn_date desc) as rNum
+        ,row_number() over(order by conn_date asc) as tNum
+        ,conn_seq as connSeq
+        ,ucuh.user_id as userId
+        ,uup.user_name as userName
+        ,conn_ip as connIp
+        ,to_char(conn_date, 'YYYY-MM-DD hh24:mi:ss') as connDate
+        ,case when ucuh.disconn_date is null then '-'
+        else to_char(ucuh.disconn_date, 'YYYY-MM-DD hh24:mi:ss')
+        end as disconnDate
+        ,ucuh.status_kind as statusKind
+        from ur_conn_user_history ucuh
+        left join ur_user_profile uup
+        on ucuh.user_id = uup.user_id
+        <where>
+            ucuh.status_kind &lt;&gt; '40'
+            <if test="searchType == 'id' and searchValue != null and searchValue != '' and searchValue != 'none'">
+                and ucuh.user_id like '%' || #{searchValue} || '%'
+            </if>
+            <if test="searchType == 'name' and searchValue != null and searchValue != '' and searchValue != 'none'">
+                and uup.user_name like '%' || #{searchValue} || '%'
+            </if>
+        </where>
+        order by conn_date desc
+        )
+        where rNum between #{startRow} and #{endRow}
+    </select>
+
+    <!-- User Statistics -->
+
+    <select id="selectUserCount" parameterType="StatisticsDto" resultType="int">
+        select count(conn_seq)
+        from ur_conn_user_history ucuh
+        left join ur_user_profile uup
+        on ucuh.user_id = uup.user_id
+        <where>
+            <if test="searchCate == 'userId' and  searchValue != ''">
+                uup.user_id like '%' || #{searchValue} || '%'
+            </if>
+            <if test="searchCate == 'userName' and  searchValue != ''">
+                uup.user_name like '%' || #{searchValue} || '%'
+            </if>
+            <if test="searchCate == 'connDate' and  searchValue != ''">
+                to_char(conn_date, 'yyyy-mm-dd') = #{searchValue}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectUserStatList" parameterType="StatisticsDto" resultType="StatisticsDto">
+        select rNum
+        ,tNum
+        ,connSeq
+        ,userId
+        ,userName
+        ,connIp
+        ,connDate
+        ,disconnDate
+        ,statusKind
+        from (
+        select row_number() over(order by conn_date desc) as tNum
+        ,row_number() over(order by conn_date asc) as rNum
+        ,conn_seq as connSeq
+        ,ucuh.user_id as userId
+        ,uup.user_name as userName
+        ,conn_ip as connIp
+        ,to_char(conn_date, 'YYYY-MM-DD hh24:mi:ss') as connDate
+        ,case when ucuh.disconn_date is null then '-'
+        else to_char(ucuh.disconn_date, 'YYYY-MM-DD hh24:mi:ss') end disconnDate
+        ,ucuh.status_kind as statusKind
+        from ur_conn_user_history ucuh
+        left join ur_user_profile uup
+        on ucuh.user_id = uup.user_id
+        <where>
+            <if test="searchCate == 'userId' and searchValue != 'none'">
+                uup.user_id like '%' || #{searchValue} || '%'
+            </if>
+            <if test="searchCate == 'userName' and searchValue != 'none'">
+                uup.user_name like '%' || #{searchValue} || '%'
+            </if>
+            <if test="searchCate == 'connDate' and searchValue != ''">
+                to_char(conn_date, 'yyyy-mm-dd') = #{searchValue}
+            </if>
+        </where>
+        order by tNum
+        )
+        where tNum between #{startRow} and #{endRow}
+    </select>
+
+</mapper>

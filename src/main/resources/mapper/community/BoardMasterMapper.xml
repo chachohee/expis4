@@ -1,0 +1,226 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MyBatis 3 Mapper//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.expis.community.dao.BoardMasterMapper">
+    <!-- ResultMap -->
+    <resultMap id="boardMasterDTO" type="BoardMasterDTO">
+        <result column="board_m_seq" property="boardMSeq" javaType="int"/>
+        <result column="board_name" property="boardName" javaType="String"/>
+        <result column="board_type" property="boardType" javaType="String"/>
+        <result column="board_file_yn" property="boardFileYn" javaType="String"/>
+        <result column="board_write_yn" property="boardWriteYn" javaType="String"/>
+        <result column="board_reply_yn" property="boardReplyYn" javaType="String"/>
+        <result column="board_comment_yn" property="boardCommentYn" javaType="String"/>
+        <result column="board_count_yn" property="boardCountYn" javaType="String"/>
+        <result column="board_notice_yn" property="boardNoticeYn" javaType="String"/>
+        <result column="notice_day" property="noticeDay" javaType="int"/>
+        <result column="status_kind" property="statusKind" javaType="String"/>
+        <result column="create_user_id" property="createUserId" javaType="String"/>
+        <result column="create_date" property="createDate" javaType="Date"/>
+        <result column="modify_user_id" property="modifyUserId" javaType="String"/>
+        <result column="modify_date" property="modifyDate" javaType="Date"/>
+        <result column="class_name" property="className" javaType="String"/>
+        <result column="board_order_num" property="boardOrderNum" javaType="int"/>
+    </resultMap>
+
+    <select id="boardMCount" resultType="int" parameterType="BoardMasterDTO">
+        select	count(board_m_seq)
+        from	cm_board_master
+        <if test="statusKind == '10'">
+            where status_kind = '10'
+        </if>
+    </select>
+
+    <!-- 마스터 테이블 조회 -->
+    <select id="selectBoardMasterList" parameterType="int" resultType="BoardMasterDTO">
+        select 	board_m_seq		as	boardMSeq
+             ,board_name		as	boardName
+             ,class_name		as	className
+             ,board_order_num
+        from 	cm_board_master
+        where 	status_kind = '10'
+        order by board_order_num
+    </select>
+
+    <select id="boardMOption" parameterType="BoardMasterDTO" resultType="BoardMasterDTO">
+        select 	row_number () over (order by board_m_seq desc)	as	rNum
+					,board_m_seq as boardMSeq
+             ,board_name as boardName
+             ,board_type as boardType
+             ,board_file_yn as boardFileYn
+             ,board_write_yn as boardWriteYn
+             ,board_reply_yn as boardReplyYn
+             ,board_comment_yn as boardCommentYn
+             ,board_count_yn as boardCountYn
+             ,board_notice_yn as boardNoticeYn
+             ,notice_day as noticeDay
+             ,class_name	as	className
+             ,board_order_num as	boardOrderNum
+             ,status_kind	as	statusKind
+        from 	cm_board_master
+        where	board_m_seq = #{boardMSeq}
+        order by board_m_seq desc
+    </select>
+
+    <select id="selectBoardMaster" parameterType="BoardMasterDTO" resultType="BoardMasterDTO">
+
+        select
+        row_number () over (order by board_order_num desc)	as	rNum
+        ,board_m_seq as boardMSeq
+        ,board_name as boardName
+        ,board_type as boardType
+        ,board_file_yn as boardFileYn
+        ,board_write_yn as boardWriteYn
+        ,board_reply_yn as boardReplyYn
+        ,board_comment_yn as boardCommentYn
+        ,board_count_yn as boardCountYn
+        ,board_notice_yn as boardNoticeYn
+        ,notice_day as noticeDay
+        ,class_name	as	className
+        ,board_order_num as	boardOrderNum
+        ,status_kind	as	statusKind
+        from 	cm_board_master
+        where	status_kind =  '10'
+        <if test="boardMSeq != 0">
+            and board_m_seq = #{boardMSeq}
+        </if>
+    </select>
+
+    <select id="selectAllBoardMaster" parameterType="BoardMasterDTO" resultType="BoardMasterDTO">
+        select	rNum	as	rNum
+        ,tNum  as tNum
+        ,boardMSeq
+        ,boardName
+        ,boardType
+        ,boardFileYn
+        ,boardWriteYn
+        ,boardReplyYn
+        ,boardCommentYn
+        ,boardCountYn
+        ,boardNoticeYn
+        ,noticeDay
+        ,className
+        ,boardOrderNum
+        ,createDate
+        ,statusKind
+        from
+        (
+        select
+        <if test="sortKind == 'asc'">
+            row_number() over (order by status_kind desc, create_date)	as	tNum
+        </if>
+        <if test="sortKind == 'desc'">
+            row_number() over (order by status_kind asc, create_date)	as	tNum
+        </if>
+        ,row_number() over (order by status_kind ${sortKind}, create_date desc)	as	rNum
+        ,board_m_seq as boardMSeq
+        ,board_name as boardName
+        ,board_type as boardType
+        ,board_file_yn as boardFileYn
+        ,board_write_yn as boardWriteYn
+        ,board_reply_yn as boardReplyYn
+        ,board_comment_yn as boardCommentYn
+        ,board_count_yn as boardCountYn
+        ,board_notice_yn as boardNoticeYn
+        ,notice_day as noticeDay
+        ,class_name	as	className
+        ,board_order_num as	boardOrderNum
+        ,create_date	as	createDate
+        ,status_kind	as	statusKind
+        from 	cm_board_master
+        )t1
+        where	rNum between #{startRow} and #{endRow}
+        order by rNum
+    </select>
+
+    <!-- 이하 C.U.D -->
+    <insert id="insertBoardMaster" parameterType="BoardMasterDTO">
+        <selectKey keyProperty="boardMSeq" resultType="int" order="BEFORE">
+            select nvl(max(board_m_seq), 0) + 1 as boardMSeq
+            from cm_board_master
+        </selectKey>
+        insert into cm_board_master	(
+        board_m_seq
+        ,board_name
+        ,board_type
+        ,board_file_yn
+        ,board_write_yn
+        ,board_reply_yn
+        ,board_comment_yn
+        ,board_order_num
+        ,class_name
+        ,status_kind
+        ,create_user_id
+        ,create_date
+        ,modify_user_id
+        ,modify_date
+        ) values (
+        #{boardMSeq}
+        ,#{boardName}
+        ,#{boardType}
+        ,#{boardFileYn}
+        ,#{boardWriteYn}
+        ,#{boardReplyYn}
+        ,#{boardCommentYn}
+        ,#{maxOrderNum}
+        <!-- 			,(select max(nvl(board_order_num,0)) + 1 from cm_board_master) -->
+        ,#{className}
+        ,'40'
+        ,#{createUserId}
+        ,sysdate
+        ,#{createUserId}
+        ,sysdate
+        )
+    </insert>
+
+    <select id="maxOrderNum" resultType="int">
+        select max(nvl(board_order_num, 0)) + 1 from cm_board_master
+    </select>
+
+    <update id="updateBoardMaster" parameterType="BoardMasterDTO">
+        update  cm_board_master
+        set		board_name = #{boardName}
+          ,board_type = #{boardType}
+          ,board_file_yn = #{boardFileYn}
+          ,board_write_yn = #{boardWriteYn}
+          ,board_reply_yn = #{boardReplyYn}
+          ,board_comment_yn = #{boardCommentYn}
+          ,board_order_num = #{boardOrderNum}
+          ,class_name = #{className}
+          ,modify_user_id = #{modifyUserId}
+          ,modify_date = sysdate
+        where board_m_seq = #{boardMSeq}
+    </update>
+
+    <update id="deleteBoardMaster" parameterType="BoardMasterDTO">
+        update  cm_board_master
+        set		status_kind = #{statusKind}
+          ,modify_date = sysdate
+        where board_m_seq = #{boardMSeq}
+    </update>
+
+    <update id="nUpdateBoardNum" parameterType="BoardMasterDTO">
+        update	cm_board_master
+        set		board_order_num = #{updateNum}
+        where	board_m_seq = #{mSeq}
+    </update>
+
+    <update id="updateBoardNum" parameterType="BoardMasterDTO">
+        update	cm_board_master
+        set		board_order_num = #{nNum}
+        where	board_m_seq = #{updateMSeq}
+    </update>
+
+    <select id="boardMasterSelect" parameterType="String" resultType="BoardMasterDTO">
+        select	board_m_seq	as	boardMSeq
+             ,board_name	as	boardName
+        from	cm_board_master
+        where	status_kind = #{statusKind}
+        order by board_order_num
+    </select>
+
+    <select id="boardNoticeCheck" parameterType="String" resultType="int">
+        select	board_m_seq	as	boardMSeq
+        from	cm_board_master
+        where	board_notice_check = #{boardNoticeCheck}
+    </select>
+
+</mapper>

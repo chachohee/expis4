@@ -1,0 +1,60 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <!-- 루트 템플릿: 시스템 항목을 포함한 UL 목록 -->
+    <xsl:template match="/">
+        <ul class="collapse show nav flex-column ps-3">
+            <xsl:apply-templates select="eXPISInfo/system" />
+        </ul>
+    </xsl:template>
+
+    <!-- system 항목을 처리하는 템플릿 -->
+    <xsl:template match="system">
+        <!-- 2025.04.22 - osm -->
+        <!-- TO목차 type에 따른 js 적용 상수 -->
+        <xsl:variable name="TOTYPE">
+            <xsl:choose>
+                <xsl:when test="contains(@type, 'Grph')">
+                    <xsl:value-of select="concat('popupData({grphId: &quot;', @id, '&quot;})')" />
+                </xsl:when>
+                <xsl:when test="contains(@type, 'Table')">
+                    <xsl:value-of select="concat('popupData({tblId: &quot;', @id, '&quot;})')" />
+                </xsl:when>
+                <xsl:when test="contains(@type, 'TO')">
+                    <xsl:value-of select="concat('viewCover(&quot;', @name, '&quot;)')" />
+                </xsl:when>
+            </xsl:choose>
+        </xsl:variable>
+
+        <li class="nav-item"
+            id="{@id}"
+            itemid="{@itemid}"
+            name="{@name}"
+            status="{@status}"
+            subname="{@subname}"
+            type="{@type}"
+            version="{@version}"
+            vehicletype="{@vehicletype}">
+
+            <!-- 버튼: 자식 항목이 있는 경우 'plus' 또는 'minus' 아이콘 표시 -->
+            <button type="button">
+                <xsl:choose>
+                    <xsl:when test="system"><i class="fa-solid fa-lg fa-folder-plus"></i></xsl:when>
+                    <xsl:otherwise><i class="fa-solid fa-lg fa-folder-minus"></i></xsl:otherwise>
+                </xsl:choose>
+            </button>
+
+            <!-- 항목 이름 링크 -->
+            <a href="#" class="nav-link" data-bs-toggle="collapse" onclick="{$TOTYPE}" xid="{@id}" revistion="{/eXPISInfo/version/@revision}">
+                <xsl:value-of select="@name" />
+            </a>
+            <!-- toKey, revision 조회용 데이터 - 화면출력 x -->
+            <span class="revision" data-name="{@name}" data-revision="{/eXPISInfo/version/@revision}"/>
+
+            <!-- 자식 system 요소가 있을 경우, 해당 항목을 하위 목록으로 출력 -->
+            <xsl:if test="system">
+                <ul class="collapse nav flex-column ps-3" id="col-{@id}">
+                    <xsl:apply-templates select="system" />
+                </ul>
+            </xsl:if>
+        </li>
+    </xsl:template>
+</xsl:stylesheet>

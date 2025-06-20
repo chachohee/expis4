@@ -1,0 +1,60 @@
+hr {
+    border: 0;
+    height: 0.0625rem;
+    background-color: #e0e0e0;
+}
+
+input:focus, button:focus {
+    outline: none;
+    box-shadow: none;
+    border-color: #ccc;
+}
+
+.content{
+    padding-left: 20px;
+}
+
+.search-bar form {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.625rem;
+}
+
+.search-bar input,
+.search-bar select {
+    max-width: 18.75rem;
+}
+
+.form-control:focus, .form-select:focus, .btn:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: #ccc !important;
+}
+
+.table th,
+.table td {
+    text-align: center;
+    border: 0.0625rem solid #dee2e6;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+
+@media (max-width: 48rem) { /* 768px → 48rem */
+    .content {
+        margin-left: 0;
+        padding: 1rem; /* 10px → 0.625rem */
+    }
+
+    .banner {
+        height: 12.5rem; /* 200px → 12.5rem */
+    }
+
+    .search-bar form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+

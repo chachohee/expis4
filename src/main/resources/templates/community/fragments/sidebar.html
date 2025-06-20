@@ -1,0 +1,71 @@
+<div th:fragment="sidebar">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <span th:if="${cmnt.userId != null}" th:text="${cmnt.userId} + 님"></span>
+            <span th:if="${cmnt.userId == null}"> &nbsp; </span>
+        </div>
+        <nav>
+            <ul class="nav justify-content-center">
+                <li class="nav-item">
+                    <a class="nav-link text-white" th:href="@{/EXPIS/{bizCode}/logout(bizCode=${BIZ_CODE})}">
+                        <i class="fa fa-power-off fa-lg"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto sidebar">
+        <span th:text="#{cmnt.menu.community}">community</span>
+        <li class="nav-item">
+            <a th:href="@{/EXPIS/{bizCode}/cmnt/cmntIntro.do(bizCode=${BIZ_CODE})}" class="nav-link text-white"
+               data-bs-target="#">
+                <i class="fa-solid fa-house"></i>
+                <span th:text="#{cmnt.home}">home</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/EXPIS/{bizCode}/cmnt/boardList.do(boardMSeq=${menuList.boardMSeq}, bizCode=${BIZ_CODE})}"
+               class="nav-link text-white" data-bs-target="#"
+               th:each="menuList : ${cmnt.boardMList}">
+                <i th:if="${menuList.className == 'Notice'}" i class="fa-solid fa-bell"></i>
+                <i th:if="${menuList.className == 'Board'}" i class="fa-solid fa-calendar-days"></i>
+                <i th:if="${menuList.className == 'Download'}" i class="fa-regular fa-download"></i>
+                <i th:if="${menuList.className == 'Custom'}" i class="fa-solid fa-paint-brush"></i>
+                <span th:text="${menuList.boardName}"></span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/EXPIS/{bizCode}/cmnt/relatedList.do(bizCode=${BIZ_CODE})}" class="nav-link text-white"
+               data-bs-target="#">
+                <i class="fa-solid fa-link"></i>
+                <span th:text="#{cmnt.related.site}">관련사이트</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/EXPIS/{bizCode}/cmnt/userAccount.do(bizCode=${BIZ_CODE})}" class="nav-link text-white"
+               data-bs-target="#">
+                <i class="fa-solid fa-link"></i>
+                <span th:text="#{cmnt.personal.info}">개인정보변경</span>
+            </a>
+        </li>
+        <hr>
+        <span th:text="#{cmnt.menu.technical}">Technical Order</span>
+        <li class="nav-item">
+            <a th:href="@{/EXPIS/{bizCode}/ietm/toMain.do(bizCode=${BIZ_CODE})}" class="nav-link text-white"
+               data-bs-target="#">
+                <i class="fa-solid fa-book"></i>
+                <span th:text="#{cmnt.ietm}">전자기술교범</span>
+            </a>
+        </li>
+        <hr>
+        <span th:text="#{cmnt.menu.manual}">Manual Admin</span>
+        <li class="nav-item">
+            <a th:href="@{/EXPIS/{bizCode}/manage/approvalManage.do(bizCode=${BIZ_CODE})}" class="nav-link text-white"
+               data-bs-target="#">
+                <i class="fa-solid fa-cog"></i>
+                <span th:text="#{cmnt.admin.menu}">운영관리</span>
+            </a>
+        </li>
+    </ul>
+</div>

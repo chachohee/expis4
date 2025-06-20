@@ -1,0 +1,309 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.expis.ietm.dao.SearchPartinfoMapper">
+
+	<!-- ResultMap -->
+	<resultMap id="searchResultMap" type="searchPartinfoDto">
+		<id		property="toKey"					column="to_key"					javaType="string" />
+		<result	property="tocoId"				column="toco_id"					javaType="string" />
+		<result	property="indexNo"				column="index_no"				javaType="string" />
+		<result	property="grphNo"				column="grph_no"				javaType="string" />
+		<result	property="ipbCode"				column="ipb_code"				javaType="string" />
+		<result	property="partNo"				column="part_no"				javaType="string" />
+		<result	property="partName"			column="part_name"			javaType="string" />
+		<result	property="nsn"					column="nsn"						javaType="string" />
+		<result	property="cage"					column="cage"						javaType="string" />
+		<result	property="rdn"					column="rdn"						javaType="string" />
+		<result	property="upa"					column="upa"						javaType="string" />
+		<result	property="smr"					column="smr"						javaType="string" />
+		<result	property="stdMngt"				column="std_mngt"				javaType="string" />
+		<result	property="createUserId"		column="create_user_id"	javaType="string" />
+		<result	property="createDate"		column="create_date"			javaType="date" />
+	</resultMap>
+	
+	
+	<!-- ResultCount -->
+	<resultMap id="searchResultCount" type="int">
+		<result property="cnt" column="cnt" />
+	</resultMap>
+	
+	
+	<!-- Column -->
+	<sql id="searchColumn">
+		  tsp.to_key					AS to_key
+		, tsp.toco_id					AS toco_id
+		, tsp.index_no				AS index_no
+		, tsp.grph_no				AS grph_no
+		, tsp.ipb_code				AS ipb_code
+		, tsp.part_no				AS part_no
+		, tsp.part_name			AS part_name
+		, tsp.nsn						AS nsn
+		, tsp.cage						AS cage
+		, tsp.rdn						AS rdn
+		, tsp.upa						AS upa
+		, tsp.smr						AS smr
+		, tsp.std_mngt				AS std_mngt
+		, tsp.create_user_id		AS create_user_id
+		, tsp.create_date			AS create_date
+	</sql>
+	
+	
+	<!--  Select List -->
+	<select id="selectListDao" resultMap="searchResultMap">
+		SELECT
+		<include refid="searchColumn" />
+		FROM tm_sc_partinfo tsp
+
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+				<if test="indexNo != null">index_no = #{indexNo}</if>
+				<if test="grphNo != null">grph_no = #{grphNo}</if>
+				<if test="ipbCode != null">ipb_code = #{ipbCode}</if>
+				<if test="partNo != null">part_no = #{partNo}</if>
+			</trim>
+		</where>
+
+		ORDER BY to_key ASC, toco_id ASC, index_no ASC, grph_no ASC, ipb_code ASC
+	</select>
+	
+	
+	<!--  Select One -->
+	<select id="selectDetailDao" resultMap="searchResultMap">
+		SELECT
+		<include refid="searchColumn" />
+		FROM tm_sc_partinfo tsp
+		WHERE to_key = #{toKey}
+
+		<trim prefix="AND">
+			<if test="tocoId != null">toco_id = #{tocoId}</if>
+			<if test="indexNo != null">index_no = #{indexNo}</if>
+			<if test="grphNo != null">grph_no = #{grphNo}</if>
+			<if test="ipbCode != null">ipb_code = #{ipbCode}</if>
+			<if test="partNo != null">part_no = #{partNo}</if>
+		</trim>
+
+	</select>
+	
+	
+	<!--  Select Count -->
+	<select id="selectCountDao" resultMap="searchResultCount">
+		SELECT
+			COUNT(*) AS cnt
+		FROM tm_sc_partinfo tsp
+		
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+				<if test="indexNo != null">index_no = #{indexNo}</if>
+				<if test="grphNo != null">grph_no = #{grphNo}</if>
+				<if test="ipbCode != null">ipb_code = #{ipbCode}</if>
+				<if test="partNo != null">part_no = #{partNo}</if>
+			</trim>
+		</where>
+		
+	</select>
+	
+	
+	<!-- Insert -->
+	<insert id="insertDao" parameterType="com.expis.ietm.dto.SearchPartinfoDto">
+		INSERT INTO tm_sc_partinfo
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			to_key,
+			toco_id,
+			<if test="indexNo != null">index_no,</if>
+			<if test="grphNo != null">grph_no,</if>
+			<if test="ipbCode != null">ipb_code,</if>
+			<if test="partNo != null">part_no,</if>
+			<if test="partName != null">part_name,</if>
+			<if test="nsn != null">nsn,</if>
+			<if test="cage != null">cage,</if>
+			<if test="rdn != null">rdn,</if>
+			<if test="upa != null">upa,</if>
+			<if test="smr != null">smr,</if>
+			<if test="stdMngt != null">std_mngt,</if>
+			<if test="wuc != null">wuc,</if>
+			<if test="createUserId != null">create_user_id,</if>
+			create_date
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			#{toKey},
+			#{tocoId},
+			<if test="indexNo != null">#{indexNo},</if>
+			<if test="grphNo != null">#{grphNo},</if>
+			<if test="ipbCode != null">#{ipbCode},</if>
+			<if test="partNo != null">#{partNo},</if>
+			<if test="partName != null">#{partName},</if>
+			<if test="nsn != null">#{nsn},</if>
+			<if test="cage != null">#{cage},</if>
+			<if test="rdn != null">#{rdn},</if>
+			<if test="upa != null">#{upa},</if>
+			<if test="smr != null">#{smr},</if>
+			<if test="stdMngt != null">#{stdMngt},</if>
+			<if test="wuc != null">#{wuc},</if>
+			<if test="createUserId != null">#{createUserId},</if>
+			SYSDATE
+		</trim>
+	</insert>
+	
+	
+	<!-- Insert All --><!-- 사용 20160924 -->
+	<insert id="insertAllDao" parameterType="com.expis.ietm.dto.SearchPartinfoDto">
+		<foreach index="index" item="item" collection="list" open="INSERT ALL " separator=" " close="SELECT * FROM DUAL">
+			INTO tm_sc_partinfo
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				to_key,
+				toco_id,
+				<if test="item.indexNo != null">index_no,</if>
+				<if test="item.grphNo != null">grph_no,</if>
+				<if test="item.ipbCode != null">ipb_code,</if>
+				<if test="item.partNo != null">part_no,</if>
+				<if test="item.partName != null">part_name,</if>
+				<if test="item.nsn != null">nsn,</if>
+				<if test="item.cage != null">cage,</if>
+				<if test="item.rdn != null">rdn,</if>
+				<if test="item.upa != null">upa,</if>
+				<if test="item.smr != null">smr,</if>
+				<if test="item.stdMngt != null">std_mngt,</if>
+				<if test="item.wuc != null">wuc,</if>
+				<if test="item.createUserId != null">create_user_id,</if>
+				create_date
+			</trim>
+			VALUES
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				#{item.toKey},
+				#{item.tocoId},
+				<if test="item.indexNo != null">#{item.indexNo},</if>
+				<if test="item.grphNo != null">#{item.grphNo},</if>
+				<if test="item.ipbCode != null">#{item.ipbCode},</if>
+				<if test="item.partNo != null">#{item.partNo},</if>
+				<if test="item.partName != null">#{item.partName},</if>
+				<if test="item.nsn != null">#{item.nsn},</if>
+				<if test="item.cage != null">#{item.cage},</if>
+				<if test="item.rdn != null">#{item.rdn},</if>
+				<if test="item.upa != null">#{item.upa},</if>
+				<if test="item.smr != null">#{item.smr},</if>
+				<if test="item.stdMngt != null">#{item.stdMngt},</if>
+				<if test="item.wuc != null">#{item.wuc},</if>
+				<if test="item.createUserId != null">#{item.createUserId},</if>
+				SYSDATE
+			</trim>
+		</foreach>
+	</insert>
+	
+	<insert id="insertAllDaoMDB" parameterType="com.expis.ietm.dto.SearchPartinfoDto">
+			insert into	tm_sc_partinfo
+			(
+				to_key,
+				toco_id,
+				index_no,
+				grph_no,
+				ipb_code,
+				part_no,
+				part_name,
+				nsn,
+				cage,
+				rdn,
+				upa,
+				smr,
+				std_mngt,
+				create_user_id,
+				create_date
+			)
+			values
+			(
+				#{toKey},
+				#{tocoId},
+				#{indexNo},
+				#{grphNo},
+				#{ipbCode},
+				#{partNo},
+				#{partName},
+				#{nsn},
+				#{cage},
+				#{rdn},
+				#{upa},
+				#{smr},
+				#{stdMngt},
+				#{createUserId},
+				SYSDATE
+			)
+	</insert>
+	
+	<!-- by ejkim 2021.06.07 update 전체 컬럼이 cont로 업데이트 되도록 되어 있어 오류로 추정, id를 updateDao_old로 변경 후  쿼리 신규추가 -->
+	<!-- Update -->
+	<update id="updateDao_old" parameterType="com.expis.ietm.dto.SearchPartinfoDto">
+		UPDATE tm_sc_partinfo
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="indexNo != null">cont = #{indexNo},</if>
+			<if test="grphNo != null">cont = #{grphNo},</if>
+			<if test="ipbCode != null">cont = #{ipbCode},</if>
+			<if test="partNo != null">cont = #{partNo},</if>
+			<if test="partName != null">cont = #{partName},</if>
+			<if test="nsn != null">cont = #{nsn},</if>
+			<if test="cage != null">cont = #{cage},</if>
+			<if test="rdn != null">cont = #{rdn},</if>
+			<if test="upa != null">cont = #{upa},</if>
+			<if test="smr != null">cont = #{smr},</if>
+			<if test="stdMngt != null">cont = #{stdMngt},</if>
+			<if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+			modify_date = SYSDATE
+		</trim>
+
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+			</trim>
+		</where>
+
+	</update>
+	
+	<!-- by ejkim 2021.06.07 신규 추가 -->
+	<!-- Update --> 
+	<update id="updateDao" parameterType="com.expis.ietm.dto.SearchPartinfoDto">
+		UPDATE tm_sc_partinfo
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="indexNo != null">index_no = #{indexNo},</if>
+			<if test="grphNo != null">grph_no = #{grphNo},</if>
+			<if test="ipbCode != null">ipb_code = #{ipbCode},</if>
+			<if test="partNo != null">part_no = #{partNo},</if>
+			<if test="partName != null">part_name = #{partName},</if>
+			<if test="nsn != null">nsn = #{nsn},</if>
+			<if test="cage != null">cage = #{cage},</if>
+			<if test="rdn != null">rdn = #{rdn},</if>
+			<if test="upa != null">upa = #{upa},</if>
+			<if test="smr != null">smr = #{smr},</if>
+			<if test="stdMngt != null">std_mngt = #{stdMngt},</if>
+			<if test="wuc != null">wuc = #{wuc},</if>
+			<if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+			modify_date = SYSDATE
+		</trim>
+
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+			</trim>
+		</where>
+
+	</update>
+	
+	<!-- Delete --><!-- 사용 20160924 -->
+	<delete id="deleteDao" parameterType="com.expis.ietm.dto.SearchPartinfoDto">
+		DELETE FROM tm_sc_partinfo
+		WHERE to_key = #{toKey}
+		<trim prefix="AND">
+			<if test="tocoId != null">toco_id = #{tocoId}</if>
+		</trim>
+	</delete>
+	
+	
+	<!-- Delete --><!-- 사용 20160924 -->
+	<delete id="deleteAllDao">
+		DELETE FROM tm_sc_partinfo
+	</delete>
+
+</mapper>

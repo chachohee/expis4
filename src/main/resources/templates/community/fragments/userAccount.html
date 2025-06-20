@@ -1,0 +1,96 @@
+<div th:fragment="userAccount">
+    <div th:if="${secondId == 'userAccount'}">
+        <div class="col-md-12 col-lg-12">
+            <div class="content">
+                <div class="row">
+                    <div class="banner">
+                        <img src="/img/community/bg_sub_title_06.jpg" alt="배너 이미지">
+                    </div>
+                    <div class="row-4">
+                        <h1 class="text-right1">개인정보변경</h1>
+                        <hr>
+                    </div>
+                </div>
+                <div class="row mb-8">
+                    <form class="row g-3">
+                        <!-- ID -->
+                        <div class="row align-items-center mb-2">
+                            <label for="userID" class="col-sm-2 col-form-label text-end">아이디(ID)</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="userID" th:value="${cmnt.userDetailInfo.userId}" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="row align-items-center mb-2">
+                            <label for="password" class="col-sm-2 col-form-label text-end">* 비밀번호</label>
+                            <div class="col-sm-3">
+                                <input type="password" class="form-control" id="password">
+                            </div>
+                        </div>
+
+                        <!-- Password 확인 -->
+                        <div class="row align-items-center mb-2">
+                            <label for="passwordConfirm" class="col-sm-2 col-form-label text-end">* 비밀번호 확인</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="passwordConfirm">
+                            </div>
+                        </div>
+
+                        <!-- 이름 -->
+                        <div class="row align-items-center mb-2">
+                            <label for="name" class="col-sm-2 col-form-label text-end">이름</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="name" th:value="${cmnt.userDetailInfo.userName}">
+                            </div>
+
+                            <!-- 군번 -->
+                            <label for="militaryNumber" class="col-sm-1 col-form-label text-end">군번</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="militaryNumber" th:value="${cmnt.userDetailInfo.userSn}">
+                            </div>
+                        </div>
+
+                        <!-- 소속 -->
+                        <div class="row align-items-center mb-2">
+                            <label for="organization" class="col-sm-2 col-form-label text-end">소속</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="organization">
+                            </div>
+
+                            <!-- 부서 -->
+                            <label for="department" class="col-sm-1 col-form-label text-end">부서</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="department">
+                            </div>
+                        </div>
+
+                        <!-- 특기 -->
+                        <div class="row align-items-center mb-2">
+                            <label for="specialty" class="col-sm-2 col-form-label text-end">특기</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="specialty" th:value="${cmnt.userDetailInfo.userTalent}">
+                            </div>
+
+                            <!-- 계급 -->
+                            <label for="rank" class="col-sm-1 col-form-label text-end">계급</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="rank">
+                            </div>
+                        </div>
+
+                        <!-- 버튼 -->
+                        <div class="row g-3">
+                            <div class="col-sm-6 text-end">
+                                <button type="submit" class="btn btn-danger">수정하기</button>
+                            </div>
+                            <div class="col-sm-6 text-start">
+                                <a class="btn btn-danger" th:href="@{/EXPIS/{bizCode}/cmnt/cmntIntro.do(bizCode=${BIZ_CODE})}">취소</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

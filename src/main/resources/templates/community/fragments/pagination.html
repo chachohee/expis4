@@ -1,0 +1,64 @@
+<div th:fragment="pagination">
+    <ul class="pagination justify-content-center">
+
+        <!-- [<<] 맨 처음으로 -->
+        <li class="page-item" th:classappend="${cmnt.pagingDTO.lastPage == 1} ? 'disabled'">
+            <a th:if="${firstId == 'cmntBoard'}" class="page-link" th:href="@{/EXPIS/{bizCode}/cmnt/boardList.do(nPage=1, boardMSeq=${cmnt.pagingDTO.boardMSeq}, bizCode=${BIZ_CODE})}">
+                <span><i class="fa-solid fa-angles-left"></i></span>
+            </a>
+            <a th:if="${firstId == 'cmntRelatedSites'}" class="page-link" th:href="@{/EXPIS/{bizCode}/cmnt/relatedList.do(nPage=1, bizCode=${BIZ_CODE})}">
+                <span><i class="fa-solid fa-angles-left"></i></span>
+            </a>
+        </li>
+
+        <!-- [<] 이전 페이지 -->
+        <li class="page-item" th:classappend="${cmnt.pagingDTO.lastPage == 1} ? 'disabled'">
+            <a th:if="${firstId == 'cmntBoard'}" class="page-link"
+               th:href="@{/EXPIS/{bizCode}/cmnt/boardList.do(nPage=${cmnt.pagingDTO.lastPage - 1}, boardMSeq=${cmnt.pagingDTO.boardMSeq}, bizCode=${BIZ_CODE})}">
+                <span><i class="fa-solid fa-angle-left"></i></span>
+            </a>
+            <a th:if="${firstId == 'cmntRelatedSites'}" class="page-link"
+               th:href="@{/EXPIS/{bizCode}/cmnt/relatedList.do(nPage=${cmnt.pagingDTO.lastPage - 1}, bizCode=${BIZ_CODE})}">
+                <span><i class="fa-solid fa-angle-left"></i></span>
+            </a>
+        </li>
+
+        <!-- [1] [2] [3] ... -->
+        <li class="page-item"
+            th:each="i : ${#numbers.sequence(cmnt.pagingDTO.startPage, cmnt.pagingDTO.endPage)}"
+            th:classappend="${i == cmnt.pagingDTO.lastPage} ? 'active'">
+            <a th:if="${firstId == 'cmntBoard'}" class="page-link"
+               th:href="@{/EXPIS/{bizCode}/cmnt/boardList.do(nPage=${i}, boardMSeq=${cmnt.pagingDTO.boardMSeq}, bizCode=${BIZ_CODE})}"
+               th:text="${i}">
+            </a>
+            <a th:if="${firstId == 'cmntRelatedSites'}" class="page-link"
+               th:href="@{/EXPIS/{bizCode}/cmnt/relatedList.do(nPage=${i}, bizCode=${BIZ_CODE})}"
+               th:text="${i}">
+            </a>
+        </li>
+
+        <!-- [>] 다음 페이지 -->
+        <li class="page-item" th:classappend="${cmnt.pagingDTO.lastPage == cmnt.pagingDTO.totalPage} ? 'disabled'">
+            <a th:if="${firstId == 'cmntBoard'}" class="page-link"
+               th:href="@{/EXPIS/{bizCode}/cmnt/boardList.do(nPage=${cmnt.pagingDTO.lastPage + 1}, boardMSeq=${cmnt.pagingDTO.boardMSeq}, bizCode=${BIZ_CODE})}">
+                <span><i class="fa-solid fa-angle-right"></i></span>
+            </a>
+            <a th:if="${firstId == 'cmntRelatedSites'}" class="page-link"
+               th:href="@{/EXPIS/{bizCode}/cmnt/relatedList.do(nPage=${cmnt.pagingDTO.lastPage + 1}, bizCode=${BIZ_CODE})}">
+                <span><i class="fa-solid fa-angle-right"></i></span>
+            </a>
+        </li>
+
+        <!-- [>>] 마지막 페이지 -->
+        <li class="page-item" th:classappend="${cmnt.pagingDTO.lastPage == cmnt.pagingDTO.totalPage} ? 'disabled'">
+            <a th:if="${firstId == 'cmntBoard'}" class="page-link"
+               th:href="@{/EXPIS/{bizCode}/cmnt/boardList.do(nPage=${cmnt.pagingDTO.totalPage}, boardMSeq=${cmnt.pagingDTO.boardMSeq}, bizCode=${BIZ_CODE})}">
+                <span><i class="fa-solid fa-angles-right"></i></span>
+            </a>
+            <a th:if="${firstId == 'cmntRelatedSites'}" class="page-link"
+               th:href="@{/EXPIS/{bizCode}/cmnt/relatedList.do(nPage=${cmnt.pagingDTO.totalPage}, bizCode=${BIZ_CODE})}">
+                <span><i class="fa-solid fa-angles-right"></i></span>
+            </a>
+        </li>
+    </ul>
+</div>

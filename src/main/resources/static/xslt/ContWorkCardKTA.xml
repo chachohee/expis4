@@ -1,0 +1,372 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <!-- system 시스템 템플릿 -->
+    <xsl:template match="eXPISInfo">
+        <section class="py-4">
+            <div class="container">
+                <div class='wc-content'>
+                    <div class='wc-topic'>
+                        <xsl:value-of select="system/workcard/@name"/>
+                        <xsl:value-of select="system/workcard/@cardno"/>
+                        <span class="wc-toggle">
+                            <i class="fa-solid fa-arrow-down"></i>
+                        </span>
+                    </div>
+                    <xsl:apply-templates select="system/workcard"/>
+                </div>
+            </div>
+        </section>
+    </xsl:template>
+
+    <!-- workcard 템플릿 -->
+    <xsl:template match="workcard">
+        <div class='wc-task' id='ac-div_1'>
+            <table class='in_table_wc'>
+                <xsl:call-template name="render-workcard-template">
+                    <xsl:with-param name="type" select="@type"/>
+                </xsl:call-template>
+            </table>
+        </div>
+    </xsl:template>
+
+    <!-- workcard 렌더링 템플릿 -->
+    <xsl:template name="render-workcard-template">
+        <xsl:param name="type"/>
+
+        <!-- header -->
+        <xsl:call-template name="render-workcard-header">
+            <xsl:with-param name="typeC" select="contains($type, 'typec')"/>
+            <xsl:with-param name="typeF" select="contains($type, 'typef')"/>
+        </xsl:call-template>
+
+        <!-- body -->
+        <xsl:apply-templates select="wstep">
+            <xsl:with-param name="type" select="$type"/>
+        </xsl:apply-templates>
+
+        <!-- footer -->
+        <xsl:if test="$type = 'typea' or $type = 'typea_img' or $type = 'typec_2'">
+            <xsl:call-template name="render-workcard-footer">
+                <xsl:with-param name="type" select="$type"/>
+            </xsl:call-template>
+        </xsl:if>
+    </xsl:template>
+
+    <!-- header 템플릿 -->
+    <xsl:template name="render-workcard-header">
+        <xsl:param name="typeC"/>
+        <xsl:param name="typeF"/>
+        <thead>
+            <xsl:call-template name="render-workcard-header-info">
+                <xsl:with-param name="typeC" select="$typeC"/>
+                <xsl:with-param name="typeF" select="$typeF"/>
+            </xsl:call-template>
+        </thead>
+    </xsl:template>
+
+    <!-- header-info 템플릿 -->
+    <xsl:template name="render-workcard-header-info">
+        <xsl:param name="typeC"/>
+        <xsl:param name="typeF"/>
+        <tr>
+            <xsl:choose>
+                <xsl:when test="$typeC = 'true'">
+                    <th rowspan="1" colspan="3">기술도서 번호 및 발간일<br/><xsl:value-of select="@tono"/><br/><xsl:value-of select="@pubdate"/></th>
+                    <th rowspan="1" colspan="3">작업구역<br/><xsl:value-of select="@workarea"/></th>
+                    <th rowspan="1" colspan="3">검사 항목<br/><xsl:value-of select="@engineer"/></th>
+                    <th rowspan="1" colspan="3">그림<br/><xsl:value-of select="@cardtime"/></th>
+                    <th rowspan="1" colspan="3">변경판번호<br/><xsl:value-of select="@revno"/></th>
+                    <th rowspan="1" colspan="1">카드번호<br/><xsl:value-of select="@cardno"/></th>
+                </xsl:when>
+                <xsl:when test="$typeF = 'true'">
+                    <th rowspan="1" colspan="3">비행전 검사<br/><xsl:value-of select="@tono"/><br/><xsl:value-of select="@pubdate"/></th>
+                    <th rowspan="1" colspan="3">검사 항목<br/><xsl:value-of select="@engineer"/></th>
+                    <th rowspan="1" colspan="2">전원<br/><xsl:value-of select="@power"/></th>
+                    <th rowspan="1" colspan="1">서비스</th>
+                    <th rowspan="1" colspan="3">그림<br/><xsl:value-of select="@cardtime"/></th>
+                    <th rowspan="1" colspan="1">카드번호<br/><xsl:value-of select="@cardno"/></th>
+                </xsl:when>
+                <xsl:otherwise>
+                    <th rowspan="2" colspan="1" style="width: 10%;">인시수<br/>(분)</th>
+                    <th rowspan="2" colspan="1" style="width: 10%;">작업구역</th>
+                    <th rowspan="1" colspan="2" style="width: 20%;">작업단위부호</th>
+                    <th rowspan="2" colspan="1" style="width: 30%;"><xsl:value-of select="@name"/></th>
+                    <th rowspan="2" colspan="1" style="width: 10%;">검사항목</th>
+                    <th rowspan="2" colspan="2" style="width: 10%;">전원<br/><xsl:value-of select="@power"/></th>
+                    <th rowspan="2" colspan="1" style="width: 10%;">서비스</th>
+                    <th rowspan="2" colspan="1" style="width: 10%;">그림</th>
+                    <th rowspan="2" colspan="1" style="width: 10%;">카드번호<br/><xsl:value-of select="@cardno"/></th>
+                    <tr>
+                        <th>계통</th>
+                        <th>하부계통</th>
+                    </tr>
+                </xsl:otherwise>
+            </xsl:choose>
+        </tr>
+    </xsl:template>
+
+    <!-- wstep 템플릿 -->
+    <xsl:template match="wstep">
+        <xsl:param name="type"/>
+
+        <xsl:variable name="title" select="contains(@type, '제목')"/>
+
+        <xsl:choose>
+            <!-- body에 img 만 표시되는 경우 -->
+            <xsl:when test="$type = 'typec' or $type = 'typef' or $type = 'typeb_2_img' or $type = 'typec_2'">
+                <xsl:apply-templates select="wimg"/>
+            </xsl:when>
+
+            <!-- body에 text가 표시되는 경우 -->
+            <xsl:otherwise>
+                <tr>
+                    <td style="vertical-align: top;" xid="{@id}">
+                        <xsl:value-of select="@steptime"/>
+                    </td>
+                    <td style="vertical-align: top;">
+                        <xsl:value-of select="@steparea"/>
+                    </td>
+                    <td style="vertical-align: top;">
+                        <xsl:choose>
+                            <xsl:when test="contains(../@engineer, 'APG')
+                            or contains(../@engineer, 'COM') or contains(../@engineer, 'AUTO')
+                            or contains(../@engineer, 'INST') or contains(../@engineer, 'ENGINE')
+                            or contains(../@engineer, 'ELECT') or contains(../@engineer, 'EGRESS')">
+
+                                <a href="javascript:void(0)" id="{@id}" title="{@system}"
+                                   onclick="{concat('openPopup({toKey: &quot;', ../@tono, '&quot;, system: &quot;', @system, '&quot;})')}">
+                                    <xsl:value-of select="@system"/>
+                                </a>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:value-of select="@system"/>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </td>
+                    <td style="vertical-align: top;">
+                        <xsl:value-of select="@subsystem"/>
+                    </td>
+                    <td rowspan='1' colspan='8'>
+                        <table class='in_table_wc_dep2'>
+                            <tbody>
+                                <tr style='display: block; border-top:0;'>
+                                    <xsl:choose>
+
+                                        <!-- render-alert 템플릿 호출(alert type일때) -->
+                                        <xsl:when
+                                                test="@type = '주기' or @type = '경고' or @type = '주의'">
+                                            <xsl:call-template name="render-alert">
+                                                <xsl:with-param name="alertType">
+                                                     <xsl:value-of select="@type"/>
+                                                </xsl:with-param>
+                                            </xsl:call-template>
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <!-- render-wstep-body 템플릿 호출(alert type아닌 기본 text일때) -->
+                                            <xsl:if test="normalize-space(string(.))">
+                                                <xsl:call-template name="render-wstep-body">
+                                                    <xsl:with-param name="title" select="$title"/>
+                                                </xsl:call-template>
+                                            </xsl:if>
+
+                                            <!-- wstep에 wimg 노드가 있으면 wimg 템플릿 호출 -->
+                                            <xsl:apply-templates select="wimg"/>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <!-- wimg 템플릿 -->
+    <xsl:template match="wimg">
+        <tr class='no-tr' style='border-top:0;'>
+            <td style="vertical-align: top;" xid="{@id}"/>
+            <td>
+                <div class='ac-noimg'/>
+            </td>
+        </tr>
+    </xsl:template>
+
+    <!-- Alert 템플릿 -->
+    <xsl:template name="render-alert">
+        <xsl:param name="alertType"/>
+        <xsl:variable name="class">
+            <xsl:choose>
+                <xsl:when test="$alertType = '주기'">wc-alert-note</xsl:when>
+                <xsl:when test="$alertType = '경고'">wc-alert-warning</xsl:when>
+                <xsl:when test="$alertType = '주의'">wc-alert-caution</xsl:when>
+            </xsl:choose>
+        </xsl:variable>
+
+        <xsl:variable name="bgClass">
+            <xsl:choose>
+                <xsl:when test="$alertType = '주기'">bg-secondary</xsl:when>
+                <xsl:when test="$alertType = '경고'">bg-danger</xsl:when>
+                <xsl:when test="$alertType = '주의'">bg-warning</xsl:when>
+            </xsl:choose>
+        </xsl:variable>
+
+        <td style="display:block">
+            <div class="frame_0 {$class} alert_class">
+                <div class="{$bgClass}" style="list-style-type: none"> <!-- KTA 계열 list-style-type: none 추가 -->
+                        <xsl:apply-templates select="text"/>
+                </div>
+            </div>
+        </td>
+    </xsl:template>
+
+    <!-- shape 템플릿 -->
+    <xsl:template name="render-shapes">
+        <xsl:param name="shape"/>
+        <xsl:if test="string-length($shape) &gt; 0">
+            <xsl:variable name="first" select="substring($shape, 1, 1)"/>
+            <xsl:variable name="rest" select="substring($shape, 2)"/>
+            <span>
+                <img src="/img/ietm/wc/wc_shape_{$first}.jpg" width="16px" height="16px" class="icon" alt=""/>
+            </span>
+            <xsl:call-template name="render-shapes">
+                <xsl:with-param name="shape" select="$rest"/>
+            </xsl:call-template>
+        </xsl:if>
+    </xsl:template>
+
+    <!-- wstep-body 템플릿 -->
+    <xsl:template name="render-wstep-body">
+        <xsl:param name="title"/>
+
+        <!-- title 이면 인풋박스 표시하지않고, title이면 익풋박스 표시 -->
+        <xsl:choose>
+            <xsl:when test="$title = 'true'">
+                <td style="vertical-align: top;"></td>
+            </xsl:when>
+            <xsl:otherwise>
+                <td style="vertical-align: top;">
+                    <input type='checkbox' value='' name=''/>
+                </td>
+            </xsl:otherwise>
+        </xsl:choose>
+        <td style="width: 20px;">
+            <xsl:call-template name="render-shapes">
+                <xsl:with-param name="shape" select="@shape"/>
+            </xsl:call-template>
+        </td>
+        <td style="width: 30px;">
+            <xsl:value-of select="@significance"/>
+        </td>
+        <td>
+            <xsl:attribute name="style">
+                <xsl:choose>
+                    <!-- title값 true일때, style 속성 설정 -->
+                    <xsl:when test="$title = 'true'">
+                        <xsl:text>display:flex; justify-content:center; font-weight:bold;</xsl:text>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:text>text-align:left;</xsl:text>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:attribute>
+
+            <!-- 실제 콘텐츠 출력 -->
+            <xsl:choose>
+                <!-- 숫자만 -->
+                <xsl:when test="number(@SeqNum) = number(@SeqNum)">
+                    <span class="step-top">
+                        <xsl:value-of select="concat(@SeqNum, '. ')"/>
+                    </span>
+                </xsl:when>
+
+                <!-- A~Z 한 글자 -->
+                <xsl:when test="string-length(@SeqNum) = 1 and contains('ABCDEFGHIJKLMNOPQRSTUVWXYZ', @SeqNum)">
+                    <span class="step-sub">
+                        <xsl:value-of select="concat(@SeqNum, '. ')"/>
+                    </span>
+                </xsl:when>
+
+                <!-- 그 외 -->
+                <xsl:otherwise>
+                    <xsl:apply-templates select="text"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </td>
+    </xsl:template>
+
+    <!-- text 항목을 처리하는 템플릿 -->
+    <xsl:template match="text">
+        <!-- linkType(revelationtype) 도해, 목차 링크에 따른 js 적용 -->
+        <xsl:variable name="linkType">
+            <xsl:choose>
+                <!-- 다중 링크 - osm -->
+                <xsl:when test="contains(@revelationtype, ',')">
+                    <xsl:value-of select="concat('showLinkMulti(&quot;', @id, '&quot;, event)')"/>
+                </xsl:when>
+                <!-- 단일 링크 - osm -->
+                <xsl:when test="contains(@revelationtype, '도해')">
+                    <xsl:value-of
+                            select="concat('openPopup({toKey: &quot;', @tmname, '&quot;, grphId: &quot;', @linkid, '&quot;})')"/>
+                </xsl:when>
+                <xsl:when test="contains(@revelationtype, '목차')">
+                    <xsl:value-of
+                            select="concat('selectTo(&quot;', @tmname, '&quot;); tocoContView(&quot;', @linkid, '&quot;); activateTocLink(&quot;', @linkid, '&quot;);')"/>
+                </xsl:when>
+                <xsl:when test="contains(@revelationtype, 'TO')">
+                    <xsl:value-of select="concat('selectTo(&quot;', @listname, '&quot;)')"/>
+                </xsl:when>
+            </xsl:choose>
+        </xsl:variable>
+        <xsl:choose>
+            <!-- link -->
+            <xsl:when test="@linktype='link'">
+                <!-- tmname = to_key, linkid = grphId - osm -->
+                <div style="display: inline-block;">
+                    <a href="javascript:void(0)" id="{@id}" linkid="{@linkid}" title="{@listname}" tmname="{@tmname}"
+                       viewtype="{@viewtype}" onclick="{$linkType}">
+                        <xsl:value-of select="."/>
+                    </a>
+                    <!-- 다중 링크일 경우 div 생성 - osm -->
+                    <xsl:if test="contains(@revelationtype, ',')">
+                        <div class="layer-popup" id="layer-popup-wc" linkid="{@linkid}" tmname="{@tmname}"
+                             listname="{@listname}" revelationtype="{@revelationtype}"/>
+                    </xsl:if>
+                </div>
+            </xsl:when>
+            <xsl:otherwise>
+                <span class="step1">
+                    <xsl:value-of select="."/>
+                </span>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <!-- footer 템플릿 -->
+    <xsl:template name="render-workcard-footer">
+        <xsl:param name="type"/>
+        <xsl:choose>
+            <xsl:when test="$type = 'typec_2'">
+                <tfoot>
+                    <th rowspan="1" colspan="2">카드번호<br/><xsl:value-of select="@cardno"/></th>
+                    <th rowspan="1" colspan="2">작업구역<br/><xsl:value-of select="@workarea"/></th>
+                    <th rowspan="1" colspan="2">요구정비사<br/><xsl:value-of select="@engineer"/></th>
+                    <th rowspan="1" colspan="2">정비사번호<br/><xsl:value-of select="@engineerno"/></th>
+                    <th rowspan="1" colspan="2">카드시간<br/><xsl:value-of select="@cardtime"/></th>
+                    <th rowspan="1" colspan="3">기술도서 번호 및 발간일<xsl:value-of select="@tono"/><br/><xsl:value-of select="@pubdate"/></th>
+                    <th rowspan="1" colspan="3">변경판번호<br/><xsl:value-of select="@revno"/></th>
+                </tfoot>
+            </xsl:when>
+            <xsl:otherwise>
+                <tfoot>
+                    <th rowspan="1" colspan="1">카드번호<br/><xsl:value-of select="@cardno"/></th>
+                    <th rowspan="1" colspan="3">작업구역<br/><xsl:value-of select="@workarea"/></th>
+                    <th rowspan="1" colspan="1">요구정비사<br/><xsl:value-of select="@engineer"/></th>
+                    <th rowspan="1" colspan="1">정비사번호<br/><xsl:value-of select="@engineerno"/></th>
+                    <th rowspan="1" colspan="1">카드시간<br/><xsl:value-of select="@cardtime"/></th>
+                    <th rowspan="1" colspan="3">기술도서 번호 및 발간일<br/><xsl:value-of select="@tono"/><br/><xsl:value-of select="@pubdate"/></th>
+                    <th rowspan="1" colspan="2">변경판번호<br/><xsl:value-of select="@revno"/></th>
+                </tfoot>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+</xsl:stylesheet>

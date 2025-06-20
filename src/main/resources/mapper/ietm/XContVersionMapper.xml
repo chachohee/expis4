@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.ietm.dao.XContVersionMapper">
+
+	<!-- ResultMap -->
+	<resultMap id="xcontResultMap" type="com.expis.ietm.dto.XContDto">
+		<id		property="toKey"					column="to_key"					javaType="string" />
+		<result	property="tocoId"				column="toco_id"					javaType="string" />
+		<result	property="contId"				column="cont_id"					javaType="string" />
+		<result	property="verId"					column="ver_id"					javaType="string" />
+		<result	property="verName"			column="ver_name"			javaType="string" />
+		<result	property="xth"						column="xth"						javaType="long" />
+		<result	property="xcont"					column="xcont"					javaType="string" />
+		<result	property="createUserId"		column="create_user_id"	javaType="string" />
+		<result	property="createDate"		column="create_date"			javaType="date" />
+	</resultMap>
+	
+	
+	<!-- ResultCount -->
+	<resultMap id="xcontResultCount" type="int">
+		<result property="cnt" column="cnt" />
+	</resultMap>
+	
+	
+	<!-- Column -->
+	<sql id="xcontColumn">
+		  tvx.to_key					AS to_key
+		, tvx.toco_id					AS toco_id
+		, tvx.cont_id					AS cont_id
+		, tvx.ver_id					AS ver_id
+		, tvx.ver_name				AS ver_name
+		, tvx.xth						AS xth
+		, tvx.xcont					AS xcont
+		, tvx.create_user_id		AS create_user_id
+		, tvx.create_date			AS create_date
+	</sql>
+	
+	
+	<!--  Select List -->
+	<select id="selectListDao" resultMap="xcontResultMap">
+		SELECT
+		<include refid="xcontColumn" />
+		FROM tm_ver_xcont tvx
+		WHERE to_key = #{toKey}
+		<trim prefix="AND" prefixOverrides="AND | OR">
+			<if test="tocoId != null">
+			<if test="tocoId != ''">
+			AND toco_id = #{tocoId}
+			</if>
+			</if>
+			<if test="contId != null">AND cont_id = #{contId}</if>
+			<if test="verId != null">AND ver_id = #{verId}</if>
+		</trim>
+		ORDER BY to_key ASC, toco_id ASC, cont_id ASC, ver_id ASC, xth ASC
+	</select>
+	
+	
+	<!--  Select One --> <!-- 사용 20161115 -->
+	<select id="selectDetailDao" resultMap="xcontResultMap">
+		SELECT
+		<include refid="xcontColumn" />
+		FROM tm_ver_xcont tvx
+		WHERE to_key = #{toKey}
+		<trim prefix="AND">
+			<if test="tocoId != null">
+			<if test="tocoId != ''">
+			toco_id = #{tocoId}
+			</if>
+			</if>
+			<if test="contId != null">cont_id = #{contId}</if>
+			<if test="verId != null">ver_id = #{verId}</if>
+		</trim>
+		ORDER BY to_key, toco_id, cont_id, ver_name, ver_id, xth 
+	</select>
+	
+	
+	<!--  Select Count -->
+	<select id="selectCountDao" resultMap="xcontResultCount">
+		SELECT
+			COUNT(*) AS cnt
+		FROM tm_ver_xcont tvx
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+				<if test="contId != null">cont_id = #{contId}</if>
+				<if test="verId != null">ver_id = #{verId}</if>
+			</trim>
+		</where>
+	</select>
+	
+	
+	<!-- Insert -->
+	<insert id="insertDao" parameterType="com.expis.ietm.dto.XContDto">
+		INSERT INTO tm_ver_xcont
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			to_key,
+			toco_id,
+			cont_id,
+			ver_id,
+			<if test="verName != null">ver_name,</if>
+			<if test="xth != null">xth,</if>
+			<if test="xcont != null">xcont,</if>
+			<if test="createUserId != null">create_user_id,</if>
+			create_date
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides="">
+			#{toKey},
+			#{tocoId},
+			#{contId},
+			#{verId},
+			<if test="verName != null">#{verName},</if>
+			<if test="xth != null">#{xth},</if>
+			<if test="xcont != null">#{xcont},</if>
+			<if test="createUserId != null">#{createUserId},</if>
+			SYSDATE
+		</trim>
+	</insert>
+	
+	
+	<!-- Insert --><!-- 사용 20160913 -->
+	<insert id="insertAllDao" parameterType="com.expis.ietm.dto.XContDto">
+		<foreach index="index" item="item" collection="list" open="INSERT ALL " separator=" " close="SELECT * FROM DUAL">
+			INTO tm_ver_xcont
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				to_key,
+				toco_id,
+				cont_id,
+				ver_id,
+				<if test="item.verName != null">ver_name,</if>
+				<if test="item.xth != null">xth,</if>
+				<if test="item.xcont != null">xcont,</if>
+				<if test="item.createUserId != null">create_user_id,</if>
+				create_date
+			</trim>
+			VALUES
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				#{item.toKey},
+				#{item.tocoId},
+				#{item.contId},
+				#{item.verId},
+				<if test="item.verName != null">#{item.verName},</if>
+				<if test="item.xth != null">#{item.xth},</if>
+				<if test="item.xcont != null">#{item.xcont},</if>
+				<if test="item.createUserId != null">#{item.createUserId},</if>
+				SYSDATE
+			</trim>
+		</foreach>
+	</insert>
+	
+	<insert id="insertAllDaoMDB" parameterType="com.expis.ietm.dto.XContDto">
+		insert into	tm_ver_xcont
+		(
+			to_key,
+			toco_id,
+			cont_id,
+			ver_id,
+			ver_name,
+			xth,
+			xcont,
+			create_user_id,
+			create_date
+		)
+		values
+		(
+			#{toKey},
+			#{tocoId},
+			#{contId},
+			#{verId},
+			#{verName},
+			${xth},
+			#{xcont},
+			#{createUserId},
+			SYSDATE
+		)
+	</insert>
+	
+	<!-- Update -->
+	<update id="updateDao" parameterType="com.expis.ietm.dto.XContDto">
+		UPDATE tm_ver_xcont
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="xth != null">xth = #{xth},</if>
+			<if test="xcont != null">xcont = #{xcont},</if>
+			<if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+			modify_date = SYSDATE
+		</trim>
+
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+				<if test="contId != null">cont_id = #{contId}</if>
+				<if test="verId != null">ver_id = #{verId}</if>
+			</trim>
+		</where>
+
+	</update>
+
+	
+	<!-- Delete --><!-- 사용 20160912 -->
+	<delete id="deleteDao" parameterType="com.expis.ietm.dto.XContDto">
+		DELETE FROM tm_ver_xcont
+		WHERE to_key = #{toKey}
+		<if test="tocoId != null">AND toco_id = #{tocoId}</if>
+		<if test="contId != null">AND cont_id = #{contId}</if>
+		<if test="verId != null">AND ver_id = #{verId}</if>
+	</delete>
+	
+	
+	<!-- Delete --><!-- 사용 20160912 -->
+	<delete id="deleteAllDao">
+		DELETE FROM tm_ver_xcont
+	</delete>
+	
+	<select id="versionUpdateInfo" parameterType="com.expis.ietm.dto.XContVersionDto" resultType="com.expis.ietm.dto.XContVersionDto">
+		select	rNum
+				,toKey
+				,chgNo
+				,chgDate
+				,verId
+		from	(
+				select	row_number() over(order by to_number(chg_no) desc) as rNum
+						,to_key		as	toKey
+						,chg_no		as	chgNo
+						,chg_date	as	chgDate
+						,ver_id		as	verId
+				from	tm_ver_info
+				where	to_key = #{toKey}
+				and		chg_no &lt; (
+										select	chg_no	as	chgNo
+										from	tm_ver_info
+										where	ver_id = #{verId}
+										and		to_key = #{toKey}
+									)
+				)				
+		where	rNum = 1
+	</select>
+
+	<select id="versionUpdate" parameterType="com.expis.ietm.dto.XContVersionDto" resultType="com.expis.ietm.dto.XContVersionDto">
+		select	rnum
+				,toKey
+				,contId
+				,verId
+				,verName
+				,xth
+				,xcont
+				,createUserId
+				,createDate
+		from
+			(
+				select	row_number() over(order by to_number(replace(ver_name,'C','')) desc)	as	rnum
+						,to_key									as	toKey
+						,cont_id								as	contId
+						,ver_id									as	verId
+						,to_number(replace(ver_name,'C',''))	as	verName
+						,xth									as	xth
+						,xcont									as	xcont
+						,create_user_id							as	createUserId
+						,create_date							as	createDate
+						
+				from	tm_ver_xcont
+				where	to_key = #{toKey}
+				and		toco_id = #{tocoId}
+				<if test="status == 'update'">
+					and		cont_id = #{verId}
+				</if>	
+			)
+		where	rnum = 1
+	</select>
+	
+	<select id="versionAdd" parameterType="com.expis.ietm.dto.XContVersionDto" resultType="com.expis.ietm.dto.VersionInfoDto">
+		select	to_key		as	toKey
+				,chg_no		as	chgNo
+				,chg_date	as	chgDate
+				,ver_id		as	verId
+		from	tm_ver_info
+		where	ver_id = #{verId}
+		and		to_key = #{toKey}
+	</select>
+	
+	<select id="getLastVersionId" parameterType="com.expis.ietm.parser.ParserDto" resultType="String">
+		SELECT * FROM(
+		SELECT	VER_ID
+		FROM	TM_VER_INFO
+		WHERE	1=1
+		AND		TO_KEY = #{toKey}
+		<!-- ORDER BY CAST(CHG_NO AS INTEGER) DESC -->
+		ORDER BY TO_NUMBER(CHG_NO DEFAULT 0 ON CONVERSION ERROR) DESC
+		) WHERE ROWNUM = 1
+	</select>
+
+</mapper>

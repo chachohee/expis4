@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link th:href="@{/css/ietm/help.css}" rel="stylesheet">
+    <script th:src="@{/component/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/component/jquery/jquery-3.7.1.min.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/ietm_help.js}" type="text/javascript"></script>
+</head>
+<body class="help_wrap" >
+<div class="help_form">
+    <h1></h1>
+    <div class="help_nav">
+        <ul>
+            <li>
+                <a href="javascript:;" id="login_help" onclick="helpOpen('login', 'login');" class="active">로그인</a>
+                <ul id="login_help_list" style="">
+                    <li><a href="javascript:;" id="login_cont" class="active" onclick="openHelpCont('login');">로그인 화면</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="javascript:;" id="main_help" onclick="helpOpen('main', 'main');">초기 화면</a>
+                <ul id="main_help_list" style="display: none;">
+                    <li><a href="javascript:;" id="main_cont" class="active" onclick="openHelpCont('main');">메인 화면</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="javascript:;" id="top_help" onclick="helpOpen('top', 'top')">상단 메뉴</a>
+                <ul id="top_help_list" style="display: none;">
+                    <li><a href="javascript:;" id="top_cont" onclick="openHelpCont('top')">상단 화면</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="javascript:;" id="nav_help" onclick="helpOpen('nav', 'list')">네비게이션 메뉴</a>
+                <ul id="nav_help_list" style="display: none;">
+                    <li><a href="javascript:;" id="list_cont" onclick="openHelpCont('list')">목록</a></li>
+                    <li><a href="javascript:;" id="myto_cont" onclick="openHelpCont('myto')">MY T.O.</a></li>
+                    <li><a href="javascript:;" id="navsearch_cont" onclick="openHelpCont('navsearch')">검색</a></li>
+                    <li><a href="javascript:;" id="memo_cont" onclick="openHelpCont('memo')">메모장</a></li>
+                    <li><a href="javascript:;" id="option_cont" onclick="openHelpCont('option')">옵션</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="javascript:;" id="footer_help" onclick="helpOpen('footer', 'footer')">하단 메뉴</a>
+                <ul id="footer_help_list" style="display: none;">
+                    <li><a href="javascript:;" id="footer_cont" onclick="openHelpCont('footer')">하단 화면</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="javascript:;" id="menual_help" onclick="helpOpen('menual', 'pen')">교범 이용</a>
+                <ul id="menual_help_list" style="display: none;">
+                    <li><a href="javascript:;" id="pen_cont" onclick="openHelpCont('pen')">형광펜 설정</a></li>
+                    <li><a href="javascript:;" id="glossary_cont" onclick="openHelpCont('glossary')">용어 검색</a></li>
+                    <li><a href="javascript:;" id="img_cont" onclick="openHelpCont('img')">이미지</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="help_cont" id="login_help_cont">
+        <strong>상단 내용</strong>
+        <div class="help_cont_dep">
+            <img src="/img/community/kf21.png" alt="이미지" />
+            <p class="txt_title">텍스트</p>
+        </div>
+    </div>
+
+    <div class="help_cont" id="main_help_cont" style="display: none;">
+        <strong>메인 화면 상단 내용</strong>
+        <div class="help_cont_dep">
+            <img src="" alt="이미지" />
+            <p class="txt_title">텍스트</p>
+        </div>
+    </div>
+
+    <div class="help_cont" id="top_help_cont" style="display: none;">
+        <strong>상단 화면 내용</strong>
+        <div class="help_cont_dep">
+            <img src="" alt="이미지" />
+            <p class="txt_title">텍스트</p>
+        </div>
+    </div>
+
+    <div class="help_cont" id="list_help_cont" style="display: none;">
+        <strong>목록 내용</strong>
+        <div class="help_cont_dep">
+            <img src="" alt="이미지" />
+            <p class="txt_title">텍스트</p>
+        </div>
+    </div>
+
+    <div class="help_cont" id="myto_help_cont" style="display: none;">
+        <strong>MY T.O. 내용</strong>
+        <div class="help_cont_dep">
+            <img src="" alt="이미지" />
+            <p class="txt_title">텍스트</p>
+        </div>
+    </div>
+
+    <div class="help_cont" id="verlist_help_cont" style="display: none;">
+        <strong>버전 내용</strong>
+        <div class="help_cont_dep">
+            <img src="" alt="이미지" />
+            <p class="txt_title">텍스트</p>
+        </div>
+    </div>
+
+    <div class="help_cont" id="navsearch_help_cont" style="display: none;">
+        <strong>검색 내용</strong>
+        <div class="help_cont_dep">
+            <img src="" alt="이미지" />
+            <p class="txt_title">텍스트</p>
+        </div>
+    </div>
+
+    <div class="help_cont" id="memo_help_cont" style="display: none;">
+        <strong>메모장 내용</strong>
+        <div class="help_cont_dep">
+            <img src="" alt="이미지" />
+            <p class="txt_title">텍스트</p>
+        </div>
+    </div>
+
+    <div class="help_cont" id="option_help_cont" style="display: none;">
+        <strong>옵션 내용</strong>
+        <div class="help_cont_dep">
+            <img src="" alt="이미지" />
+            <p class="txt_title">텍스트</p>
+        </div>
+    </div>
+
+    <div class="help_cont" id="footer_help_cont" style="display: none;">
+        <strong>하단 내용</strong>
+        <div class="help_cont_dep">
+            <img src="" alt="이미지" />
+            <p class="txt_title">텍스트</p>
+        </div>
+    </div>
+
+    <div class="help_cont" id="pen_help_cont" style="display: none;">
+        <strong>형광펜 내용</strong>
+        <div class="help_cont_dep">
+            <img src="" alt="이미지" />
+            <p class="txt_title">텍스트</p>
+        </div>
+    </div>
+
+    <div class="help_cont" id="glossary_help_cont" style="display: none;">
+        <strong>용어검색 내용</strong>
+        <div class="help_cont_dep">
+            <img src="" alt="이미지" />
+            <p class="txt_title">텍스트</p>
+        </div>
+    </div>
+
+    <div class="help_cont" id="version_help_cont" style="display: none;">
+        <strong>버전 내용</strong>
+        <div class="help_cont_dep">
+            <img src="" alt="이미지" />
+            <p class="txt_title">텍스트</p>
+        </div>
+    </div>
+
+    <div class="help_cont" id="img_help_cont" style="display: none;">
+        <strong>이미지 내용</strong>
+        <div class="help_cont_dep">
+            <img src="" alt="이미지" />
+            <p class="txt_title">텍스트</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!-- 서브사이드바 -->
+<nav th:fragment="subSidebar" class="navbar navbar-expand-md h-100 align-items-start subSidebar-navbar" style="padding: 0;">
+    <div class="container-fluid h-100" style="padding: 0;">
+        <!-- 토글 버튼 -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#subSidebarContent" aria-controls="subSidebarContent"
+                aria-expanded="false" aria-label="Toggle subSidebar">
+            <i class="fa fa-chevron-down"></i>
+        </button>
+
+        <!-- 서브사이드바 내용 -->
+        <div class="collapse navbar-collapse h-100" id="subSidebarContent">
+            <div class="d-flex flex-column flex-shrink-0 sub-sidebar-container">
+                <div id="subSideContents" class="d-flex flex-column sub-sidebar-content">
+
+                    <!-- 교범 검색 버튼 -->
+                    <div id="to-search" class="container-fluid align-items-center row py-1 search-area">
+                        <div class="col-9 col-sm-10">
+                            <input type="search" id="to_search_word" class="form-control form-control-sm"
+                                   placeholder="Search" aria-label="Search">
+                        </div>
+                        <div class="col-3 col-sm-2 text-end">
+                            <button type="submit" id="searchBtn" class="btn btn-sm w-100" onclick="toListSearch()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 관련 교범 버튼 -->
+                    <div id="select-sibling" class="container-fluid align-items-center row py-1 selectSibling-area">
+                        <div class="dropdown col-12">
+                            <button class="btn btn-secondary dropdown-toggle w-100" type="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false" th:text="#{ietm.related.manual.list}">
+                            </button>
+                            <ul id="sibling-to" class="selectSibling dropdown-menu w-100"></ul>
+                        </div>
+                    </div>
+
+                    <!-- 구분선 -->
+<!--                    <div class="separator"></div>-->
+
+                    <!-- 목록/목차 버튼 -->
+                    <div id="to-buttons" class="d-flex justify-content-center flex-wrap px-2 mt-1 to-area menu_to">
+                        <div class="btn_list1">
+                            <button id="btn-to" class="active" title="TO 목록" onclick="toggleToActive('to');"></button>
+                        </div>
+                        <div class="btn_list2">
+                            <button id="btn-toco" class="" title="TO 목차" onclick="toggleToActive('toco');"></button>
+                        </div>
+                    </div>
+
+                    <!-- MY 목록/목차 버튼 -->
+                    <div id="myto-buttons" class="d-flex justify-content-center flex-wrap px-2 mt-1 d-none my-to-area menu_to">
+                        <div class="btn-my-to">
+                            <button id="btn-myto" class="active" title="MYTO 목록" onclick="toggleMyToActive('myto');"></button>
+                        </div>
+                        <div class="btn-my-toco">
+                            <button id="btn-mytoco" class="" title="MYTO 목차" onclick="toggleMyToActive('mytoco');"></button>
+                        </div>
+                        <div class="btn-my-admin">
+                            <button id="btn-to-manage" class="" title="TO 관리" onclick="toggleMyToActive('tomanage'); openToManage();"></button>
+                        </div>
+                    </div>
+
+                    <!-- 구분선 -->
+                    <div class="separator"></div>
+
+                    <!-- 스크롤 가능한 컨텐츠 영역 -->
+                    <div id="maxHeightResize" class="d-flex flex-column container-fluid mt-1 px-1">
+                        <div class="tree_list tree">
+                            <!-- 목록 -->
+                            <div id="to_list" class="tree text-secondary"></div>
+                            <div id="toco_list" class="tree d-none text-secondary"></div>
+                            <!-- MY T.O -->
+                            <div id="myto_list" class="tree d-none text-secondary"></div>
+                            <div id="mytoco_list" class="tree d-none text-secondary"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>

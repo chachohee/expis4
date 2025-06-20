@@ -1,0 +1,473 @@
+/*
+    20250409 - JG 정비절차 - Frame - start
+    item_contents.js 공통 모듈 정리가 끝나고, (오상민 사원님. )
+    Xmlsheet.js에  정비절차 프레임 url이 추가가 되면,
+    이 아래, 모듈을 옮길 예정
+*/
+
+/* JG 정비절차 - 배경 */
+.jg-mnt-back {
+    position: absolute;
+    background-color: #FFFFFF;
+    height: 100% !important;
+    top: 0;
+    margin-left: -3rem;
+    width: -webkit-fill-available;
+}
+
+/* JG 정비절차 - 프레임 */
+.jg-mnt-back .main frame {
+    position: relative;
+}
+
+/* JG 정비절차 - 프레임- 크기 고정 */
+.frame {
+    height: 100%  !important;
+}
+
+/* JG 정비절차 - 프레임 뷰 - 크기 고정 */
+.frame_view {
+    height: 100%  !important;
+}
+
+/* JG 정비절차 -   프레임 뷰 안 */
+.jg-mnt-back  .main frame .main frame_view {
+    position: relative;
+    font-family: &quot;Noto Sans KR&quot;, &quot;Nanum Barun Gothic&quot;;
+    padding-bottom: 43px;
+    display: block;
+    width: 100%;
+    height: 100%  !important;
+    background-color: #e6e7e9;
+    box-sizing: border-box;
+    padding-left : 10%;
+}
+
+.frame_inner{
+    height: 100%  !important;
+}
+
+/*  JG 정비절차 -  프레임 - 왼쪽 */
+.frame_outer {
+    height: 100%  !important;
+    padding : 2%
+}
+
+.frame_inner .row{
+    width : 50%;
+
+}
+
+/*  JG 정비절차 -  프레임 - 왼쪽 - 타이틀 */
+.frame_inner .frame_left_title{
+    position: relative;
+    font-weight: 600;
+    margin: 2em 40px 15px 10px;*
+    margin: 0;
+}
+
+/*  JG 정비절차 -  프레임 안 - 왼쪽  */
+.main frame_view .frame_inner .frame_left_content{
+    position: relative;
+    float: left;
+    width: 100%;
+    padding : 2% ;
+}
+
+/*  JG 정비절차 -  프레임 뷰 안 -  왼쪽 - 컨텐츠 */
+.frame_view .frame_inner .con_left_contents{
+    position: relative;
+    width: 100%;
+    z-index: 998 !important;
+    /* overflow-y: scroll; */
+    height: 100%;
+}
+
+/*  JG 정비절차 -  프레임 뷰 안 - 왼쪽 - 컨텐츠 - 컨텐츠 박스   */
+.frame_view .frame_inner .con_left_contents .contents_box{
+    position: relative;
+    display: flex;
+    float: left !important;
+    width: 83%; /*임시*/
+    line-height: 21px;
+    background: #fff !important;
+    box-sizing: border-box !important;
+    z-index: 998 ;
+    margin-left: 3em
+
+
+}
+
+/*  JG 정비절차 -  프레임 뷰 안 - 왼쪽 - 컨텐츠 - 컨텐츠 박스 - 내용(step)  */
+.step {
+    font-size: 15px;
+    line-height: 20px;
+    letter-spacing: -0.5px;
+    margin: 5px 0 5px;
+    position: relative;
+    width: -webkit-fill-available;
+}
+
+
+/*  JG 정비절차 -  오른쪽   */
+.frame_outer .frame_inner .con_right{
+    background: white;
+    overflow: auto;
+    box-sizing: border-box;
+    width: 100%;
+    float: right;
+    display: contents;
+    top : 0px;
+    z-index: 999 !important;
+    height: 100% !important;
+
+}
+
+/*  JG 정비절차 -  프레임 뷰 안 - 오른쪽 - 컨텐츠 박스   */
+.con_right .right_contents_box{
+        position: relative;
+        display: flex;
+        justify-content: center !important;
+        align-items: center;
+        width: 50%;
+        height: 100% !important;
+        margin-top: 0 !important;
+        /* padding-bottom: 43px; */
+        float: inline-end;
+        top: -30%;
+}
+
+/*  JG 정비절차 -  오른쪽 안 - 첫 번째(배경)*/
+.con_right .right_contents_box .inner1 {
+    display: table;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+/*  JG 정비절차 -  오른쪽 안 - 두 번째(내용)*/
+ .con_right .right_contents_box .inner2{
+    display: table-cell;
+    border: 0;
+    vertical-align: middle;
+}
+
+.div_version {
+    position: relative;
+    display: inline-block;
+    margin: auto;
+    width: 100%;
+}
+
+
+.inner2 .div_version .version_bar_update {
+    position: absolute;
+    left: 30px;
+    top: 1px;
+    bottom: 1px;
+    display: inline-block;
+    width: 6px;
+    background-color: #839197;
+    cursor: pointer;
+    z-index: 101;
+}
+
+.ac-object {
+    text-align: center;
+    position: relative;
+}
+
+/*  교범 가운데  - 공간 */
+.jg-mnt-back .book_center {
+    position: absolute;
+    left: 50%;
+    height: 100%;
+    z-index: 100;
+    margin-left: -40px;
+    top: 0 !important;
+}
+
+/*  교범 가운데  -  그림 */
+.book_center .bg {
+    width: 92px;
+    height: 100%;
+    center left repeat-y;
+}
+
+.book_center .mnt_bg_img{
+  background-position: left center;
+  background-repeat: repeat-y;
+  width: 100%;
+  height: 100%;
+}
+
+/* 버튼 */
+.jg-mnt-back .frame_outer .bottom_btn_box {
+    position: absolute;
+    height: 43px;
+    width: 100% !important;
+    bottom: 40px;
+    text-align: center !important;
+    background-color: #8892a0 !important;
+    z-index: 9999 !important;
+    left: : 0;
+    margin-left: -2%;
+
+.frame_view .bottom_btn_box ul{
+    position: absolute;
+    bottom: 40px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+
+
+/*  JG 정비절차 -  프레임 뷰 안 - 오른쪽 - 컨텐츠 박스 - 그림   */
+/*.frame_view .frame_inner .con_right .contents_box .inner2{
+    display: table-cell !important;
+    border: 0  !important;
+    vertical-align: middle !important;
+}*/
+
+/* JG 정비절차 - 기존 contents 내용 활용중 */
+/* 이미지, 이미지명 가운데 정렬 */
+.gs-grphprim {text-align: left;}
+
+/* 브라우저 크기에 따른 이미지 사이즈 조정 */
+.gs-grphprim img {
+    max-width: 100%;
+    height: auto;
+    display: inline-block;
+}
+/* --- */
+
+/* 제목 볼드처리 */
+.gs-title {font-weight: bold;}
+
+/* alert type에 대한 css */
+/* 주기 */
+/*
+.gs-alert-note {
+    position: relative;
+    bottom: 0px;
+    width: 100%;
+    text-align: center;
+   */
+/* z-index: 999;*//*
+
+
+    position: relative;
+}
+
+.gs-alert-note > div {
+    margin: 0 auto;
+    display: inline-block;
+    width: 85px;
+    height: 29px;
+    line-height: 30px;
+
+    font-weight: 600;
+    border-radius: 3px;
+    box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+    background-color: #bebebe;
+}
+
+.gs-alert-note p { margin: 0 auto; font-weight: normal; text-align: center;  color: #fff;}
+*/
+
+/* 주의 *//*
+.gs-alert-caution {
+    margin: 0 auto;
+    padding: 22px 5px 15px;
+    background: url(/img/ietm/wc/alert_caution.png) no-repeat 50% 0;
+    position: relative;
+}
+.gs-alert-caution > div {
+    background-color: #ffd98d;
+    padding: 15px;
+    border: 2px solid #facc71;
+    border-radius: 5px;
+}
+
+.gs-alert-caution p {font-weight: normal; text-align: left;}
+
+*//* 경고 *//*
+.gs-alert-warning {
+    margin: 0 auto;
+    padding: 22px 5px 15px;
+    background: url(/img/ietm/wc/alert_warning.png) no-repeat 50% 0;
+    position: relative;
+}
+
+.gs-alert-warning > div {
+    background-color: #fcdbdb;
+    padding: 15px;
+    border: 2px solid #facaca;
+    border-radius: 5px;
+}
+
+.gs-alert-warning p {font-weight: normal; text-align: left;}
+
+*//* alert 박스 안 메세지 위치 조정 *//*
+.para1 {
+    display: block;
+    margin: 10px 0 10px 10px;
+    position:relative;
+    vertical-align: middle;
+}*/
+/* --- */
+
+/* 테이블 */
+.gs-table {
+    position: relative;
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    table-layout: auto;
+}
+
+.gs-table th,
+.gs-table td {
+    border: 1px solid #666;
+    padding: 8px;
+    text-align: center;
+}
+
+.gs-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+/* --- */
+
+
+
+/* - 기존로직 S - 20250409
+
+/* 이미지, 이미지명 가운데 정렬 */
+
+.gs-grphprim {text-align: center;}
+
+
+/* 브라우저 크기에 따른 이미지 사이즈 조정 */
+
+.gs-grphprim img {
+    max-width: 100%;
+    height: auto;
+    display: inline-block;
+}
+
+/* --- *//*
+
+
+*/
+/* 제목 볼드처리 *//*
+
+.gs-title {font-weight: bold;}
+
+*/
+/* alert type에 대한 css *//*
+
+*/
+/* 주기 *//*
+
+.gs-alert-note {
+    position: relative;
+    margin: 0 auto;
+    padding: 22px 5px 15px;
+    background: url(/img/ietm/wc/alert_note_huss.png) no-repeat 50% 0;
+    position: relative;
+}
+
+.gs-alert-note > div {
+    background-color: #ebedec;
+    padding: 15px;
+    border: 2px solid #bdbdbd;
+    border-radius: 5px;
+}
+
+.gs-alert-note p {font-weight: normal; text-align: left;}
+
+*/
+/* 주의 *//*
+
+.gs-alert-caution {
+    margin: 0 auto;
+    padding: 22px 5px 15px;
+    background: url(/img/ietm/wc/alert_caution.png) no-repeat 50% 0;
+    position: relative;
+}
+.gs-alert-caution > div {
+    background-color: #ffd98d;
+    padding: 15px;
+    border: 2px solid #facc71;
+    border-radius: 5px;
+}
+
+.gs-alert-caution p {font-weight: normal; text-align: left;}
+
+*/
+/* 경고 *//*
+
+.gs-alert-warning {
+    margin: 0 auto;
+    padding: 22px 5px 15px;
+    background: url(/img/ietm/wc/alert_warning.png) no-repeat 50% 0;
+    position: relative;
+}
+
+.gs-alert-warning > div {
+    background-color: #fcdbdb;
+    padding: 15px;
+    border: 2px solid #facaca;
+    border-radius: 5px;
+}
+
+.gs-alert-warning p {font-weight: normal; text-align: left;}
+
+*/
+/* alert 박스 안 메세지 위치 조정 *//*
+
+.para1 {
+    display: block;
+    margin: 10px 0 10px 10px;
+    position:relative;
+    vertical-align: middle;
+}
+*/
+/* --- *//*
+
+
+*/
+/* 테이블 *//*
+
+.gs-table {
+    position: relative;
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    table-layout: auto;
+}
+
+.gs-table th,
+.gs-table td {
+    border: 1px solid #666;
+    padding: 8px;
+    text-align: center;
+}
+
+.gs-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+*/
+/* --- *//*
+
+
+기존로직 S - 20250409  - */

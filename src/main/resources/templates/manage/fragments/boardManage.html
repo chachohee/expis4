@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="boardManage">
+    <div th:if="${secondId == 'all'}">
+        <div class="d-flex justify-content-end p-1">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#adminBoardCreate">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </div>
+        <div class="d-flex flex-column flex-shrink-0 p-3">
+            <h5>
+                <span th:text="#{admin.board.total.posts}">총 게시물</span>
+                [ <span th:text="${boardManagerData.allBoardMList.size()}"></span> ]
+            </h5>
+            <div class="table-responsive small">
+                <table class="table table-striped table-sm">
+                    <colgroup>
+                        <col style="width:auto;">
+                        <col style="width:40%;">
+                        <col style="width:auto;">
+                        <col style="width:auto;">
+                        <col style="width:auto;">
+                        <col style="width:auto;">
+                        <col style="width:auto;">
+                        <col style="width:auto;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th scope="col" th:text="#{admin.board.number}">순번</th>
+                        <th scope="col" th:text="#{admin.board.name}">게시판 이름</th>
+                        <th scope="col" th:text="#{admin.board.type}">게시판 종류</th>
+                        <th scope="col" th:text="#{admin.board.writing }">글쓰기</th>
+                        <th scope="col" th:text="#{admin.board.attachments}">첨부파일</th>
+                        <th scope="col" th:text="#{admin.board.comment}">댓글</th>
+                        <th scope="col" th:text="#{admin.board.reply}">덧글</th>
+                        <th scope="col">
+                            <span th:text="#{admin.board.condition}">상태</span>
+                            <a th:href="@{/EXPIS/{bizCode}/manage/allBoard.do(sortKind=${boardManagerData.sortKind == 'asc' ? 'desc' : 'asc'}, bizCode=${BIZ_CODE})}"
+                               th:text="#{admin.board.yn}">[Y/N]</a>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="board, status : ${boardManagerData.allBoardMList}" style="cursor: pointer;">
+                        <td th:text="${status.count}" data-bs-toggle="modal"
+                            th:attr="data-bs-target='#allBoard-' + ${board.boardMSeq}"></td>
+                        <td th:text="${board.boardName}" data-bs-toggle="modal"
+                            th:attr="data-bs-target='#allBoard-' + ${board.boardMSeq}"></td>
+                        <td th:text="${board.boardType}" data-bs-toggle="modal"
+                            th:attr="data-bs-target='#allBoard-' + ${board.boardMSeq}"></td>
+                        <td th:text="${board.boardWriteYn}" data-bs-toggle="modal"
+                            th:attr="data-bs-target='#allBoard-' + ${board.boardMSeq}"></td>
+                        <td th:text="${board.boardFileYn}" data-bs-toggle="modal"
+                            th:attr="data-bs-target='#allBoard-' + ${board.boardMSeq}"></td>
+                        <td th:text="${board.boardCommentYn}" data-bs-toggle="modal"
+                            th:attr="data-bs-target='#allBoard-' + ${board.boardMSeq}"></td>
+                        <td th:text="${board.boardReplyYn}" data-bs-toggle="modal"
+                            th:attr="data-bs-target='#allBoard-' + ${board.boardMSeq}"></td>
+                        <td>
+                            <a th:href="@{/EXPIS/{bizCode}/manage/boardDelete.do(boardMSeq=${board.boardMSeq}, statusKind=${board.statusKind == '10' ? '40' : '10'}, bizCode=${BIZ_CODE})}">
+                                <span th:if="${board.statusKind == '10'}" class="fa-solid fa-y no-underline"
+                                      style="color: #ff0000; text-decoration: none;"
+                                      onclick="return confirm('게시판을 비활성화 하시겠습니까?');"></span>
+                                <span th:if="${board.statusKind == '40'}" class="fa-solid fa-n no-underline"
+                                      style="color: #adadad; text-decoration: none;"
+                                      onclick="return confirm('게시판을 활성화 하시겠습니까?');"></span>
+                            </a>
+                        </td>
+                        <td colspan="8" align="center" th:if="${#lists.isEmpty(boardManagerData.allBoardMList)}" th:text="#{admin.board.no.user}">
+                            등록된 사용자가 없습니다.
+                        </td>
+                        <div class="modal fade" th:id="'allBoard-' + ${board.boardMSeq}" tabindex="-1"
+                             aria-labelledby="modalTitle" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <form th:action="@{/EXPIS/{bizCode}/manage/boardMUpdate.do(bizCode=${BIZ_CODE})}"
+                                          method="post"
+                                          enctype="multipart/form-data">
+                                        <input type="hidden" name="boardMSeq" th:value="${board.boardMSeq}">
+                                        <input type="hidden" name="boardOrderNum" th:value="${board.boardOrderNum}">
+                                        <input type="hidden" name="board_now_page" th:value="${boardManagerData.nPage}">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="modalTitleEditBoard" th:text="#{admin.board.edit}">게시판 수정</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-3 row">
+                                                <label for="editBoardName" class="col-sm-4 col-form-label" th:text="#{admin.board.edit}">게시판
+                                                    이름</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control" name="boardName"
+                                                           id="editBoardName" th:value="${board.boardName}">
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 row">
+                                                <label for="editBoardType" class="col-sm-4 col-form-label" th:text="#{admin.board.type}">게시판
+                                                    종류</label>
+                                                <div class="col-sm-8">
+                                                    <select class="form-select" id="editBoardType" name="boardType"
+                                                            required>
+                                                        <option th:text="${board.boardType}" th:value="${board.boardType}" selected></option>
+                                                        <option value="Notice" th:if="${board.boardType != 'Notice'}" th:text="#{admin.board.notice}">Notice</option>
+                                                        <option value="Board" th:if="${board.boardType != 'Board'}" th:text="#{admin.board.board}">Board</option>
+                                                        <option value="Download" th:if="${board.boardType != 'Download'}" th:text="#{admin.board.download}">Download</option>
+                                                        <option value="Custom" th:if="${board.boardType != 'Custom'}" th:text="#{admin.board.custom}">Custom</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 row">
+                                                <label class="col-sm-4 col-form-label" th:text="#{admin.board.allow.write}">글쓰기 허용</label>
+                                                <div class="col-sm-8">
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="boardWriteYn"
+                                                               id="writeYes" value="Y"
+                                                               th:checked="${board.boardWriteYn == 'Y'}">
+                                                        <label class="form-check-label" for="writeYes" th:text="#{admin.board.yes}">Yes</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="boardWriteYn"
+                                                               id="writeNo" value="N"
+                                                               th:checked="${board.boardWriteYn == 'N'}">
+                                                        <label class="form-check-label" for="writeNo" th:text="#{admin.board.no}">No</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 row">
+                                                <label class="col-sm-4 col-form-label" th:text="#{admin.board.attach}">첨부파일 허용</label>
+                                                <div class="col-sm-8">
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="boardFileYn"
+                                                               id="fileYes" value="Y"
+                                                               th:checked="${board.boardFileYn == 'Y'}">
+                                                        <label class="form-check-label" for="fileYes" th:text="#{admin.board.yes}">Yes</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="boardFileYn"
+                                                               id="fileNo" value="N"
+                                                               th:checked="${board.boardFileYn == 'N'}">
+                                                        <label class="form-check-label" for="fileNo" th:text="#{admin.board.no}">No</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 row">
+                                                <label class="col-sm-4 col-form-label" th:text="#{admin.board.allow.reply}">댓글 허용</label>
+                                                <div class="col-sm-8">
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio"
+                                                               name="boardCommentYn" id="commentYes" value="Y"
+                                                               th:checked="${board.boardCommentYn == 'Y'}">
+                                                        <label class="form-check-label" for="commentYes" th:text="#{admin.board.yes}">Yes</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio"
+                                                               name="boardCommentYn" id="commentNo" value="N"
+                                                               th:checked="${board.boardCommentYn == 'N'}">
+                                                        <label class="form-check-label" for="commentNo" th:text="#{admin.board.no}">No</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 row">
+                                                <label class="col-sm-4 col-form-label" th:text="#{admin.board.allow.reply}">덧글 허용</label>
+                                                <div class="col-sm-8">
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="boardReplyYn"
+                                                               id="replyYes" value="Y"
+                                                               th:checked="${board.boardReplyYn == 'Y'}">
+                                                        <label class="form-check-label" for="replyYes" th:text="#{admin.board.yes}">Yes</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="boardReplyYn"
+                                                               id="replyNo" value="N"
+                                                               th:checked="${board.boardReplyYn == 'N'}">
+                                                        <label class="form-check-label" for="replyNo" th:text="#{admin.board.no}">No</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="submit" class="btn btn-danger" th:text="#{admin.board.modify}">수정</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{admin.board.cancel}">
+                                                    취소
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="modal fade" id="adminBoardCreate" tabindex="-1" aria-labelledby="modalTitle"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <form th:action="@{/EXPIS/{bizCode}/manage/boardMInsert.do(bizCode=${BIZ_CODE})}"
+                                  method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="boardMSeq" value="0">
+                                <input type="hidden" name="boardOrderNum" value="0">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="modalTitleAddBoard" th:text="#{admin.board.register}">게시판 등록</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3 row">
+                                        <label for="addBoardName" class="col-sm-4 col-form-label" th:text="#{admin.board.name}">게시판 이름</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" name="boardName" id="addBoardName"
+                                                   placeholder="제목을 입력하세요" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label for="addBoardType" class="col-sm-4 col-form-label" th:text="#{admin.board.type}">게시판 종류</label>
+                                        <div class="col-sm-8">
+                                            <select class="form-select" id="addBoardType" name="BoardType" required>
+                                                <option value="" disabled selected th:text="#{admin.board.select}">선택</option>
+                                                <option value="Notice" th:text="#{admin.board.notice}">Notice</option>
+                                                <option value="Board" th:text="#{admin.board.board}">Board</option>
+                                                <option value="Download" th:text="#{admin.board.download}">Download</option>
+                                                <option value="Custom" th:text="#{admin.board.custom}">Custom</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label class="col-sm-4 col-form-label" th:text="#{admin.board.allow.write}">글쓰기 허용</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="boardWriteYn"
+                                                       id="addWriteYes" value="Y" checked>
+                                                <label class="form-check-label" for="writeYes" th:text="#{admin.board.yes}">Yes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="boardWriteYn"
+                                                       id="addWriteNo" value="N">
+                                                <label class="form-check-label" for="writeNo" th:text="#{admin.board.no}">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label class="col-sm-4 col-form-label" th:text="#{admin.board.attach}">첨부파일 허용</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="boardFileYn"
+                                                       id="addFileYes" value="Y" checked>
+                                                <label class="form-check-label" for="fileYes" th:text="#{admin.board.yes}">Yes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="boardFileYn"
+                                                       id="addFileNo" value="N">
+                                                <label class="form-check-label" for="fileNo" th:text="#{admin.board.no}">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label class="col-sm-4 col-form-label" th:text="#{admin.board.allow.comments}">댓글 허용</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="boardCommentYn"
+                                                       id="addCommentYes" value="Y" checked>
+                                                <label class="form-check-label" for="commentYes" th:text="#{admin.board.yes}">Yes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="boardCommentYn"
+                                                       id="addCommentNo" value="N">
+                                                <label class="form-check-label" for="commentNo" th:text="#{admin.board.no}">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label class="col-sm-4 col-form-label" th:text="#{admin.board.allow.reply}">덧글 허용</label>
+                                        <div class="col-sm-8">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="boardReplyYn"
+                                                       id="addReplyYes" value="Y" checked>
+                                                <label class="form-check-label" for="replyYes" th:text="#{admin.board.yes}">Yes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="boardReplyYn"
+                                                       id="addReplyNo" value="N">
+                                                <label class="form-check-label" for="replyNo" th:text="#{admin.board.no}">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-danger" th:text="#{admin.board.modify}">수정</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{admin.board.cancel}">취소
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${secondId == 'active'}">
+        <div class="d-flex flex-column flex-shrink-0 p-3">
+            <div class="table-responsive small">
+                <table class="table table-striped table-sm">
+                    <colgroup>
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:auto;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th scope="col" th:text="#{admin.board.number}">순번</th>
+                        <th scope="col" th:text="#{admin.board.name}">게시판 이름</th>
+                        <th scope="col" th:text="#{admin.board.type}">게시판 종류</th>
+                        <th scope="col" th:text="#{admin.board.writing}">글쓰기</th>
+                        <th scope="col" th:text="#{admin.board.attachments}">첨부파일</th>
+                        <th scope="col" th:text="#{admin.board.comment}">댓글</th>
+                        <th scope="col" th:text="#{admin.board.reply}">덧글</th>
+                        <th scope="col" th:text="#{admin.board.condition}">상태</th>
+                        <th scope="col" th:text="#{admin.board.order}">순서</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="board : ${boardManagerData.menuMList}">
+                        <td th:text="${board.boardMSeq}"></td>
+                        <td th:text="${board.boardName}"></td>
+                        <td th:text="${board.boardType}"></td>
+                        <td th:text="${board.boardWriteYn}"></td>
+                        <td th:text="${board.boardFileYn}"></td>
+                        <td th:text="${board.boardCommentYn}"></td>
+                        <td th:text="${board.boardReplyYn}"></td>
+                        <td th:text="${board.statusKind == '10' ? '활성' : '비활성'}"></td>
+                        <td class="list_controll">
+                            <button
+                                    type="button"
+                                    class="up"
+                                    onclick="indexUpdate(this)"
+                                    th:data-seq="${board.boardMSeq}"
+                                    th:data-order="${board.boardOrderNum}">
+                                <i class="fa-solid fa-arrow-up"></i>
+                            </button>
+                            <button
+                                    type="button"
+                                    class="down"
+                                    onclick="indexUpdate(this)"
+                                    th:data-seq="${board.boardMSeq}"
+                                    th:data-order="${board.boardOrderNum}">
+                                <i class="fa-solid fa-arrow-up fa-rotate-180"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="col-12 text-center" th:if="${#lists.isEmpty(boardManagerData.menuMList)}">
+                    <p class="text-muted mt-4" th:text="#{admin.board.no.activation}">활성화 된 게시판이 없습니다.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div th:if="${secondId == 'activeBoard'}">
+        <form method="get" th:action="@{/EXPIS/{bizCode}/manage/activateBoard.do(bizCode=${BIZ_CODE})}"
+              class="d-flex align-items-center mb-3">
+            <input type="hidden" th:value="${boardManagerData.statusKind}" id="hidden_status_kind">
+            <div class="input-group">
+                <button type="submit" name="statusKind" class="btn btn-sm btn-primary" value="10" th:text="#{admin.board.activation}">활성화</button>
+                <button type="submit" name="statusKind" class="btn btn-sm btn-primary" value="40" th:text="#{admin.board.disabled}">비활성화</button>
+            </div>
+        </form>
+        <hr>
+        <div class="d-flex flex-column flex-shrink-0 p-3">
+            <div class="d-flex justify-content-end mb-3">
+                <div class="input-group" style="width: auto;">
+                    <select class="form-select form-select-sm" id="aciveBoardMSeq" name="filterOption"
+                            style="width: 150px;" onchange="selectBoardList()">
+                        <option th:each="boardM : ${boardManagerData.boardMasterList}"
+                                th:text="${boardM.boardName}"
+                                th:value="${boardM.boardMSeq}"
+                                th:selected="${boardM.boardMSeq == boardManagerData.boardMSeq}">
+                        </option>
+                        <option th:if="${#lists.isEmpty(boardManagerData.boardMasterList)}" selected th:text="#{admin.board.select}">
+                            선택
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <h5>
+                <span th:text="#{admin.board.total.posts}"></span>
+                [ <span th:text="${boardManagerData.totCnt}"></span> ]</h5>
+            <div class="table-responsive small">
+                <table class="table table-striped table-sm">
+                    <colgroup>
+                        <col style="width:10%;">
+                        <col style="width:auto;">
+                        <col style="width:20%;">
+                        <col style="width:10%;">
+                        <col style="width:10%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th scope="col" th:text="#{admin.board.number}">순번</th>
+                        <th scope="col" th:text="#{admin.board.title}">제목</th>
+                        <th scope="col" th:text="#{admin.board.writer}">작성자</th>
+                        <th scope="col" th:text="#{admin.board.date}">등록일</th>
+                        <th scope="col" th:text="#{admin.board.view}">조회수</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="board, status : ${boardManagerData.boardList}">
+                        <td th:text="${status.count}"></td>
+                        <td>
+                            <a th:href="@{/EXPIS/{bizCode}/manage/activateBoardDetail.do(boardDSeq=${board.boardDSeq}, statusKind=${boardManagerData.statusKind}, nPage=${boardManagerData.nPage}, boardMSeq=${boardManagerData.boardMSeq}, bizCode=${BIZ_CODE})}"
+                               th:text="${board.boardTitle}">
+                            </a>
+                        </td>
+                        <td th:text="${board.viewUserId}"></td>
+                        <td th:text="${board.createDate}"></td>
+                        <td th:text="${board.boardCount}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="col-12 text-center" th:if="${#lists.isEmpty(boardManagerData.boardList)}">
+                    <p class="text-muted mt-4" th:text="#{admin.board.no.writing}">등록된 게시글이 없습니다.</p>
+                </div>
+            </div>
+            <div class="pagination-container text-center mt-4">
+                <nav th:replace="manage/fragments/pagination :: pagination"></nav>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${secondId == 'activeBoardDetail'}">
+        <div class="col-md-12 col-lg-12">
+            <div class="content">
+                <div class="row mb-6">
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header">
+                            <h2 class="mb-0" th:text="${boardManagerData.boardDetail.boardTitle}"></h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-sm-6">
+                                    <small class="text-muted" th:text="#{admin.board.date}">등록일</small>
+                                    <p class="fw-bold mb-0" th:text="${boardManagerData.boardDetail.createDate}"></p>
+                                </div>
+                                <div class="col-sm-6 text-sm-end">
+                                    <small class="text-muted" th:text="#{admin.board.view}">조회수</small>
+                                    <p class="fw-bold mb-0" th:text="${boardManagerData.boardDetail.boardCount}"></p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="board-contents btn text-white"
+                                 th:utext="${boardManagerData.boardDetail.boardContents}"></div>
+                            <div th:if="${boardManagerData.boardDetail.boardFSeq == 0}" class="mt-3">
+                                <small class="text-muted" th:text="#{admin.board.no.file}">첨부파일이 없습니다.</small>
+                            </div>
+                            <div th:if="${boardManagerData.boardDetail.boardFSeq != null && boardManagerData.boardDetail.boardFSeq != 0}"
+                                 class="mt-3">
+                                <h6>첨부파일</h6>
+                                <a th:href="@{/EXPIS/{bizCode}/cmnt/doDownload.do(fileSeq=${boardManagerData.file.fileSeq}, bizCode=${BIZ_CODE})}"
+                                   class="btn btn-link">
+                                    <span th:text="${boardManagerData.file.fileOrgNm}"></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a th:href="@{/EXPIS/{bizCode}/manage/activateBoard.do(nPage=${boardManagerData.nPage}, boardMSeq=${boardManagerData.boardMSeq}, statusKind=${boardManagerData.statusKind}, bizCode=${BIZ_CODE})}"
+                           class="btn btn-outline-secondary" th:text="#{admin.board.list}">목록</a>
+                        <form th:action="@{/EXPIS/{bizCode}/manage/activateBoardDetailDelete.do(bizCode=${BIZ_CODE})}"
+                              method="get" class="d-inline">
+                            <input type="hidden" name="boardDSeq" th:value="${boardManagerData.boardDetail.boardDSeq}">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('정말 삭제하시겠습니까?');" th:text="#{admin.board.delete}">삭제
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="comments">
+                        <div class="comments-body">
+                            <h3 class="comments-title mb-3" th:text="#{admin.board.comment}">댓글</h3>
+                            <div class="col-12 text-center" th:if="${#lists.isEmpty(boardManagerData.commentList)}">
+                                <p class="text-muted mt-4" th:text="#{admin.board.no.comments}">등록된 댓글이 없습니다.</p>
+                            </div>
+                            <ul class="list-group mb-4">
+                                <li th:each="comment : ${boardManagerData.commentList}" class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <p class="mb-0">
+                                            <strong th:text="${comment.createUserId}">작성자</strong>
+                                            <span class="text-muted small" th:text="${comment.createDate}">등록일</span>
+                                        </p>
+                                    </div>
+                                    <p class="mt-2 mb-0" th:text="${comment.boardComments}">댓글 내용</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div th:if="${secondId == 'related'}">
+        <div>
+            <div class="d-flex justify-content-end p-1">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#relatedSitesCreate">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+            <div class="d-flex flex-column flex-shrink-0 p-3">
+                <h5>
+                    <span th:text="#{admin.board.total.posts}">총 게시물</span>
+                    [ <span th:text="${boardManagerData.totCnt}"></span> ]
+                </h5>
+                <div class="table-responsive small">
+                    <table class="table table-striped table-sm">
+                        <colgroup>
+                            <col style="width:10%;">
+                            <col style="width:20%;">
+                            <col style="width:20%;">
+                            <col style="width:auto;">
+                            <col style="width:10%;">
+                            <col style="width:10%;">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th scope="col" th:text="#{admin.board.number}">순번</th>
+                            <th scope="col" th:text="#{admin.board.url}">URL</th>
+                            <th scope="col" th:text="#{admin.board.site}">사이트명</th>
+                            <th scope="col" th:text="#{admin.board.explain}">설명</th>
+                            <th scope="col" th:text="#{admin.board.log}">로고</th>
+                            <th scope="col" th:text="#{admin.board.delete}">삭제</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="lists, status : ${boardManagerData.relatedList}">
+                            <td th:text="${status.count}"></td>
+                            <td>
+                                <a data-bs-toggle='modal'
+                                   th:attr="data-bs-target='#relatedSitesDetail-' + ${lists.relSeq}"
+                                   th:text="${lists.relUrl}" style="cursor: pointer;"></a>
+                            </td>
+                            <td>
+                                <a data-bs-toggle='modal'
+                                   th:attr="data-bs-target='#relatedSitesDetail-' + ${lists.relSeq}"
+                                   th:text="${lists.relTitle}" style="cursor: pointer;"></a>
+                            </td>
+                            <td th:text="${lists.relContents}"></td>
+                            <td>
+                                <a th:if="${lists.fileSeq != 0}"
+                                   th:href="@{/EXPIS/{bizCode}/cmnt/doDownload.do(fileSeq=${lists.fileSeq}, bizCode=${BIZ_CODE})}"
+                                   class="fa-solid fa-y no-underline" style="color: #ff0000; text-decoration: none;">
+                                    <input type="hidden" th:value="${lists.fileSeq}">
+                                    <input type="hidden" th:value="${lists.relSeq}">
+                                </a>
+                                <a th:if="${lists.fileSeq == 0}" class="fa-solid fa-n no-underline"
+                                   style="color: #adadad; text-decoration: none;"></a>
+                            </td>
+                            <td>
+                                <a onclick="if(confirm('정말 삭제하시겠습니까?')) relatedSitesDelete();" style="cursor: pointer;"><i
+                                        class="fa-regular fa-trash-can"></i>
+                                    <input type="hidden" id="fileSeqDelete" th:value="${lists.fileSeq}">
+                                    <input type="hidden" id="relSeqDelete" th:value="${lists.relSeq}">
+                                </a>
+                            </td>
+                            <div class="modal fade" th:id="'relatedSitesDetail-' + ${lists.relSeq}" tabindex="-1"
+                                 aria-hidden="true">
+                                <div class="modal-dialog modal-lg modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">
+                                                <span th:text="#{admin.board.reg.detail}">관련 사이트 상세 정보</span>
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="table"
+                                                 style="display: table; width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
+                                                <div class="table-row" style="display: table-row;">
+                                                    <div class="table-cell"
+                                                         style="display: table-cell; padding: 8px; border: 1px solid #dee2e6; font-weight: bold;">
+                                                        <label for="relSeqDetail" th:text="#{admin.board.number}">순번</label>
+                                                    </div>
+                                                    <div class="table-cell"
+                                                         style="display: table-cell; padding: 8px; border: 1px solid #dee2e6;">
+                                                        <div id="relSeqDetail" th:text="${lists.relSeq}"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="table-row" style="display: table-row;">
+                                                    <div class="table-cell"
+                                                         style="display: table-cell; padding: 8px; border: 1px solid #dee2e6; font-weight: bold;">
+                                                        <label for="relTitleDetail" th:text="#{admin.board.title}">제목</label>
+                                                    </div>
+                                                    <div class="table-cell"
+                                                         style="display: table-cell; padding: 8px; border: 1px solid #dee2e6;">
+                                                        <div id="relTitleDetail" th:text="${lists.relTitle}"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="table-row" style="display: table-row;">
+                                                    <div class="table-cell"
+                                                         style="display: table-cell; padding: 8px; border: 1px solid #dee2e6; font-weight: bold;">
+                                                        <label for="relUrlDetail" th:text="#{admin.board.url}">Url</label>
+                                                    </div>
+                                                    <div class="table-cell"
+                                                         style="display: table-cell; padding: 8px; border: 1px solid #dee2e6;">
+                                                        <div id="relUrlDetail" th:text="${lists.relUrl}"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="table-row" style="display: table-row;">
+                                                    <div class="table-cell"
+                                                         style="display: table-cell; padding: 8px; border: 1px solid #dee2e6; font-weight: bold;">
+                                                        <label for="relContentsDetail" th:text="#{admin.board.explain}">설명</label>
+                                                    </div>
+                                                    <div class="table-cell"
+                                                         style="display: table-cell; padding: 8px; border: 1px solid #dee2e6;">
+                                                        <div id="relContentsDetail"
+                                                             th:text="${lists.relContents}"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="table-row" style="display: table-row;">
+                                                    <div class="table-cell"
+                                                         style="display: table-cell; padding: 8px; border: 1px solid #dee2e6; font-weight: bold;">
+                                                        <label for="fileMasterDtosDetail" th:text="#{admin.board.log}">로고</label>
+                                                    </div>
+                                                    <div class="table-cell"
+                                                         style="display: table-cell; padding: 8px; border: 1px solid #dee2e6;">
+                                                        <img id="fileMasterDtosDetail" th:text="${lists.fileOrgNm}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                                        th:attr="data-bs-target='#relatedSitesEdit-' + ${lists.relSeq}" th:text="#{admin.board.modify}">
+                                                    수정
+                                                </button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{admin.board.close}">
+                                                    닫기
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal fade" th:id="'relatedSitesEdit-' + ${lists.relSeq}" tabindex="-1"
+                                 aria-hidden="true">
+                                <div class="modal-dialog modal-lg modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" th:text="#{admin.board.reg.edit}">관련 사이트 수정</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                        </div>
+                                        <form th:action="@{/EXPIS/{bizCode}/manage/relatedUpdate.do(bizCode=${BIZ_CODE})}"
+                                              method="post"
+                                              enctype="multipart/form-data">
+                                            <input type="hidden" name="relSeq" th:value="${lists.relSeq}">
+                                            <input type="hidden" name="relSeq" th:value="${lists.fileSeq}">
+                                            <input type="hidden" name="fileTranYn" value="Y">
+                                            <input type="hidden" name="boardKind" value="Modify">
+                                            <div class="modal-body">
+                                                <div class="table"
+                                                     style="display: table; width: 100%; border-collapse: collapse; border: 1px solid #dee2e6;">
+                                                    <div class="table-row" style="display: table-row;">
+                                                        <div class="table-cell"
+                                                             style="display: table-cell; padding: 8px; border: 1px solid #dee2e6; font-weight: bold;">
+                                                            <label for="relTitle" th:text="#{admin.board.title}">제목</label>
+                                                        </div>
+                                                        <div class="table-cell"
+                                                             style="display: table-cell; padding: 8px; border: 1px solid #dee2e6;">
+                                                            <input type="text" id="relTitle" name="relTitle"
+                                                                   class="form-control" th:value="${lists.relTitle}"
+                                                                   required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="table-row" style="display: table-row;">
+                                                        <div class="table-cell"
+                                                             style="display: table-cell; padding: 8px; border: 1px solid #dee2e6; font-weight: bold;">
+                                                            <label for="relUrl" th:text="#{admin.board.url}">URL</label>
+                                                        </div>
+                                                        <div class="table-cell"
+                                                             style="display: table-cell; padding: 8px; border: 1px solid #dee2e6;">
+                                                            <input type="text" id="relUrl" name="relUrl"
+                                                                   class="form-control" th:value="${lists.relUrl}"
+                                                                   required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="table-row" style="display: table-row;">
+                                                        <div class="table-cell"
+                                                             style="display: table-cell; padding: 8px; border: 1px solid #dee2e6; font-weight: bold;">
+                                                            <label for="relContents" th:text="#{admin.board.explain}">설명</label>
+                                                        </div>
+                                                        <div class="table-cell"
+                                                             style="display: table-cell; padding: 8px; border: 1px solid #dee2e6;">
+                                <textarea id="relContents" name="relContents" class="form-control" rows="3" required
+                                          th:text="${lists.relContents}"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="table-row" style="display: table-row;">
+                                                        <div class="table-cell"
+                                                             style="display: table-cell; padding: 8px; border: 1px solid #dee2e6; font-weight: bold;">
+                                                            <label for="urlEdit" th:text="#{admin.board.log}">로고</label>
+                                                        </div>
+                                                        <div class="table-cell"
+                                                             style="display: table-cell; padding: 8px; border: 1px solid #dee2e6;">
+                                                            <input type="file" id="urlEdit" name="pup_imgFile"
+                                                                   class="form-control" accept="image/*">
+                                                            <!--                                                                <p>현재 로고: <span th:text="${lists.fileOrgNm}"></span></p>-->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="submit" class="btn btn-primary" th:text="#{admin.board.modify}">수정</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{admin.board.close}">
+                                                    닫기
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="col-12 text-center" th:if="${#lists.isEmpty(boardManagerData.relatedList)}">
+                        <p class="text-muted mt-4" th:text="#{admin.board.no.rel}">현재 등록된 사이트가 없습니다.</p>
+                    </div>
+                    <div class="modal fade" id="relatedSitesCreate" data-bs-backdrop="static" data-bs-keyboard="false"
+                         tabindex="-1" aria-labelledby="relatedSitesLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content">
+                                <form th:action="@{/EXPIS/{bizCode}/manage/relatedInsert.do(bizCode=${BIZ_CODE})}"
+                                      method="post"
+                                      enctype="multipart/form-data">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="relatedSitesLabel" th:text="#{admin.board.reg.detail}">관련 사이트 상세 정보</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <table class="table table-bordered">
+                                            <tbody>
+                                            <tr>
+                                                <td><label for="title" class="form-label" th:text="#{admin.board.title}">제목</label></td>
+                                                <td>
+                                                    <input type="text" id="title" name="relTitle" class="form-control"
+                                                           placeholder="제목을 입력하세요" required>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><label for="url" class="form-label" th:text="#{admin.board.url}">URL</label></td>
+                                                <td>
+                                                    <input type="text" id="url" name="relUrl" class="form-control"
+                                                           placeholder="URL 주소를 입력하세요" required>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><label for="attachment" class="form-label" th:text="#{admin.board.log}">로고</label></td>
+                                                <td>
+                                                    <input type="file" id="attachment" name="pup_imgFile"
+                                                           class="form-control" accept="image/*">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><label for="content" class="form-label" th:text="#{admin.board.explain}">설명</label></td>
+                                                <td>
+                                                    <textarea id="content" name="relContents" class="form-control"
+                                                              rows="3" placeholder="내용을 입력하세요" required></textarea>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary" th:text="#{admin.board.insert}">등록</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{admin.board.close}">닫기
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--                <div class="pagination-container text-center mt-4">-->
+                <!--                    <nav th:replace="manage/fragments/pagination :: pagination"></nav>-->
+                <!--                </div>-->
+            </div>
+        </div>
+    </div>
+</div>

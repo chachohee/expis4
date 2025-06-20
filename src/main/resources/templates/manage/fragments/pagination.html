@@ -1,0 +1,45 @@
+<div th:fragment="pagination">
+    <ul class="pagination justify-content-center">
+
+        <!-- [<<] 맨 처음으로 -->
+        <li class="page-item" th:classappend="${boardManagerData.pagingDTO.lastPage == 1} ? 'disabled'">
+            <a th:if="${secondId == 'activeBoard'}" class="page-link" th:href="@{/EXPIS/{bizCode}/manage/activateBoard.do(nPage=1, boardMSeq=${boardManagerData.pagingDTO.boardMSeq}, bizCode=${bizCode})}">
+                <span><i class="fa-solid fa-angles-left"></i></span>
+            </a>
+        </li>
+
+        <!-- [<] 이전 페이지 -->
+        <li class="page-item" th:classappend="${boardManagerData.pagingDTO.lastPage == 1} ? 'disabled'">
+            <a th:if="${secondId == 'activeBoard'}" class="page-link"
+               th:href="@{/EXPIS/{bizCode}/manage/activateBoard.do(nPage=${boardManagerData.pagingDTO.lastPage - 1}, boardMSeq=${boardManagerData.pagingDTO.boardMSeq}, bizCode=${bizCode})}">
+                <span><i class="fa-solid fa-angle-left"></i></span>
+            </a>
+        </li>
+
+        <!-- [1] [2] [3] ... -->
+        <li class="page-item"
+            th:each="i : ${#numbers.sequence(boardManagerData.pagingDTO.startPage, boardManagerData.pagingDTO.endPage)}"
+            th:classappend="${i == boardManagerData.pagingDTO.lastPage} ? 'active'">
+            <a th:if="${secondId == 'activeBoard'}" class="page-link"
+               th:href="@{/EXPIS/{bizCode}/manage/activateBoard.do(nPage=${i}, boardMSeq=${boardManagerData.pagingDTO.boardMSeq}, bizCode=${bizCode})}"
+               th:text="${i}">
+            </a>
+        </li>
+
+        <!-- [>] 다음 페이지 -->
+        <li class="page-item" th:classappend="${boardManagerData.pagingDTO.lastPage == boardManagerData.pagingDTO.totalPage} ? 'disabled'">
+            <a th:if="${secondId == 'activeBoard'}" class="page-link"
+               th:href="@{/EXPIS/{bizCode}/manage/activateBoard.do(nPage=${boardManagerData.pagingDTO.lastPage + 1}, boardMSeq=${boardManagerData.pagingDTO.boardMSeq}, bizCode=${bizCode})}">
+                <span><i class="fa-solid fa-angle-right"></i></span>
+            </a>
+        </li>
+
+        <!-- [>>] 마지막 페이지 -->
+        <li class="page-item" th:classappend="${boardManagerData.pagingDTO.lastPage == boardManagerData.pagingDTO.totalPage} ? 'disabled'">
+            <a th:if="${secondId == 'activeBoard'}" class="page-link"
+               th:href="@{/EXPIS/{bizCode}/manage/activateBoard.do(nPage=${boardManagerData.pagingDTO.totalPage}, boardMSeq=${boardManagerData.pagingDTO.boardMSeq}, bizCode=${bizCode})}">
+                <span><i class="fa-solid fa-angles-right"></i></span>
+            </a>
+        </li>
+    </ul>
+</div>

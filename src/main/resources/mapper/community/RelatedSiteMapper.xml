@@ -1,0 +1,150 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MyBatis 3 Mapper//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.expis.community.dao.RelatedSiteMapper">
+    <select id="relatedCount" resultType="int">
+        select	count(rel_seq)
+        from	cm_relt_site
+        where	status_kind = '10'
+    </select>
+
+    <select id="relatedCmnt" parameterType="RelatedDTO" resultType="RelatedDTO">
+        select	tNum
+             ,relSeq
+             ,relTitle
+             ,relUrl
+             ,relContents
+             ,createUserId
+             ,createDate
+             ,fileSeq
+             ,fileOrgnm
+             ,fileStrNm
+             ,fileType
+        from
+            (
+                select	row_number() over (order by rs.rel_seq desc)	as	tNum
+						,rel_seq		as	relSeq
+                     ,rel_title	as	relTitle
+                     ,rel_url	as	relUrl
+                     ,rel_contents	as	relContents
+                     ,CASE WHEN up.user_name IS NOT NULL THEN up.user_name || '(' || up.user_id || ')' end	as	createUserId
+                     ,rs.create_date	as	createDate
+                     ,rs.file_seq	as	fileSeq
+                     ,cfn.file_orgnm  as  fileOrgnm
+                     ,cfn.file_strnm	as	fileStrNm
+                     ,cfn.file_type	as	fileType
+                from	cm_relt_site rs
+                            left join cm_files_new cfn
+                                      on rs.file_seq = cfn.file_seq
+                            left join ur_user_profile up
+                                      on cfn.create_user_id = up.user_id
+                where	rs.status_kind = '10'
+                order by rs.rel_seq desc
+            )
+        where tNum between #{startRow} and #{endRow}
+    </select>
+
+    <select id="relatedSelect" resultType="RelatedDTO" parameterType="RelatedDTO">
+        select
+            rNum
+             ,tNum
+             ,relSeq
+             ,relUrl
+             ,relTitle
+             ,fileSeq
+             ,relContents
+             ,createUserId
+             ,createDate
+             ,(select count(rel_seq) from cm_relt_site where status_kind = '10')	as rtCnt
+        from
+            (
+                select	ROW_NUMBER() OVER (ORDER BY crs.rel_seq asc)	as	rNum
+						,ROW_NUMBER() OVER (ORDER BY crs.rel_seq desc)	as	tNum
+						,crs.rel_seq		as	relSeq
+                     ,crs.rel_title	as	relTitle
+                     ,crs.rel_url	as	relUrl
+                     ,crs.file_seq	as	fileSeq
+                     ,crs.rel_contents	as	relContents
+                     ,CASE WHEN up.user_name IS NOT NULL THEN up.user_name || '(' || up.user_id || ')' end	as	createUserId
+                     ,to_char(crs.create_date, 'YYYY-MM-DD')	as	createDate
+                from	cm_relt_site crs
+                            left join ur_user_profile up on crs.create_user_id = up.user_id
+                where	crs.status_kind = '10'
+                order by crs.rel_seq desc
+            )
+        where	tNum between #{startRow} and #{endRow}
+    </select>
+
+    <select id="relatedDetail" parameterType="int" resultType="RelatedDTO">
+        select	rel_seq		as	relSeq
+             ,rel_title	as	relTitle
+             ,rel_url	as	relUrl
+             ,file_seq	as	fileSeq
+             ,rel_contents	as	relContents
+             ,create_user_id	as	createUserId
+             ,create_date	as	createDate
+        from	cm_relt_site
+        where	status_kind = '10'
+          and		rel_seq = #{relSeq}
+    </select>
+
+    <insert id="relatedInsert" parameterType="RelatedDTO">
+        <selectKey keyProperty="relSeq" resultType="int" order="BEFORE">
+            select 	nvl(max(rel_seq), 0) + 1 as relSeq
+            from 	cm_relt_site
+        </selectKey>
+
+        insert into cm_relt_site	(
+        rel_seq
+        ,rel_title
+        ,rel_url
+        ,file_seq
+        ,rel_contents
+        ,create_user_id
+        ,create_date
+        ,status_kind
+        )
+        values
+        (
+        #{relSeq}
+        ,#{relTitle}
+        ,#{relUrl}
+        ,#{fileSeq}
+        ,#{relContents}
+        ,#{createUserId}
+        ,sysdate
+        ,'10'
+        )
+    </insert>
+
+    <update id="updateRelated" parameterType="RelatedDTO">
+        update	cm_relt_site
+        set		rel_title = #{relTitle}
+          ,rel_url = #{relUrl}
+          ,file_seq = #{fileSeq}
+          ,rel_contents = #{relContents}
+          ,modify_user_id =  #{modifyUserId}
+          ,modify_date = sysdate
+        where	rel_seq = #{relSeq}
+    </update>
+
+    <update id="deleteRelated" parameterType="RelatedDTO">
+        update	cm_relt_site
+        set		status_kind = '40'
+          ,modify_user_id =  #{modifyUserId}
+          ,modify_date = sysdate
+        where	rel_seq = #{relSeq}
+    </update>
+
+    <select id="relDetail" parameterType="int" resultType="RelatedDTO">
+        select	rel_seq		as	relSeq
+             ,rel_title	as	relTitle
+             ,rel_url	as	relUrl
+             ,file_seq	as	fileSeq
+             ,rel_contents	as	relContents
+             ,create_user_id	as	createUserId
+             ,create_date	as	createDate
+        from	cm_relt_site
+        where	status_kind = '10'
+          and		rel_seq = #{relSeq}
+    </select>
+</mapper>
+

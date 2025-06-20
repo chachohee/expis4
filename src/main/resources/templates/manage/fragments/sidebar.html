@@ -1,0 +1,140 @@
+<div th:fragment="sidebar" class="d-flex flex-column flex-shrink-0 p-3 h-100"
+     xmlns:th="http://www.w3.org/1999/xhtml">
+    <div class="topInfo d-flex justify-content-between align-items-center">
+        <div class="fw-bold">
+            <span th:if="${userDto != null}" th:text="${userDto.getUserName()}">사용자</span><span th:text="#{admin.accountMng.sir}">님</span>
+            <span th:if="${userDto == null}" > &nbsp; </span>
+        </div>
+        <nav>
+            <ul class="nav justify-content-center">
+                <li class="nav-item"> <a class="nav-link " th:href="@{/EXPIS/{bizCode}/ietm/toMain.do(bizCode=${bizCode})}"> <i class="fa fa-home fa-lg"></i> </a></li>
+                <li class="nav-item"> <a class="nav-link " th:href="@{/EXPIS/{bizCode}/cmnt/cmntIntro.do(bizCode=${bizCode})}"> <i class="fa fa-users fa-lg"></i> </a></li>
+                <li class="nav-item"> <a class="nav-link " th:href="@{/manage/{bizCode}/manage/approvalManage.do(bizCode=${bizCode})}"> <i class="fa fa-power-off fa-lg"></i> </a></li>
+            </ul>
+        </nav>
+    </div>
+    <hr class="top">
+    <ul id="menulist" class="nav nav-pills nav-underline flex-column mb-auto">
+        <li class="nav-item">
+            <a href="#" class="nav-link " data-bs-target="#areaAccount">
+                <i class="fa fa-regular fa-user fa-lg"></i> <label th:text="#{admin.accountMng}">계정관리.</label>
+            </a>
+            <div class="collapse subButton" id="areaAccount">
+                <nav>
+                    <ul class="nav nav-underline flex-column">
+                        <li class="nav-item"> <a class="nav-link " data-role="account" th:href="@{/EXPIS/{bizCode}/manage/approvalManage.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.accountMng.account}">승인관리</label> </a></li>
+                        <li class="nav-item"> <a class="nav-link " data-role="user" th:href="@{/EXPIS/{bizCode}/manage/user.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.accountMng.user}">사용자 관리</label> </a></li>
+                        <li class="nav-item"> <a class="nav-link " data-role="nonuser" th:href="@{/EXPIS/{bizCode}/manage/notConnManage.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.accountMng.nonuser}">미접속자 관리</label> </a></li>
+                        <li class="nav-item"> <a class="nav-link " data-role="locked" th:href="@{/EXPIS/{bizCode}/manage/lockedManage.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.accountMng.locked}">비활성 사용자 관리</label> </a></li>
+                        <li class="nav-item"> <a class="nav-link " data-role="history" th:href="@{/EXPIS/{bizCode}/manage/approvalHistory.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.accountMng.history}">사용자 이력 관리</label> </a></li>
+                        <li class="nav-item"> <a class="nav-link " data-role="password" th:href="@{/EXPIS/{bizCode}/manage/passwordManage.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.accountMng.password}">비밀번호 관리</label> </a></li>
+                    </ul>
+                </nav>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link " data-bs-target="#areaBoard">
+                <i class="fa fa-regular fa-comment fa-lg"></i> <label th:text="#{admin.boardMng}">게시판 관리</label>
+            </a>
+            <div class="collapse subButton" id="areaBoard">
+                <nav>
+                    <ul class="nav nav-underline flex-column">
+                        <li class="nav-item"> <a class="nav-link " data-role="all" th:href="@{/EXPIS/{bizCode}/manage/allBoard.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.boardMng.all}">모든게시판</label> </a></li>
+                        <li class="nav-item"> <a class="nav-link " data-role="active" th:href="@{/EXPIS/{bizCode}/manage/board.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.boardMng.active}">활성화게시판</label> </a></li>
+                        <li class="nav-item"> <a class="nav-link " data-role="detail" th:href="@{/EXPIS/{bizCode}/manage/activateBoard.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.boardMng.detail}">게시판 상세</label> </a></li>
+                        <li class="nav-item"> <a class="nav-link " data-role="related" th:href="@{/EXPIS/{bizCode}/manage/relatedSites.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.boardMng.related}">관련사이트</label> </a></li>
+                    </ul>
+                </nav>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link " data-bs-target="#areaRegister">
+                <i class="fa fa-book fa-lg"></i> <label th:text="#{admin.toMng}">T.O 관리</label>
+            </a>
+            <div class="collapse subButton" id="areaRegister">
+                <nav>
+                    <ul class="nav nav-underline flex-column">
+                        <li class="nav-item"> <a class="nav-link " data-role="systree" th:href="@{/EXPIS/{bizCode}/manage/systreeWrite.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.toMng.systree}">SysTree 파일등록</label> </a></li>
+                        <li class="nav-item"> <a class="nav-link " data-role="register" th:href="@{/EXPIS/{bizCode}/manage/singletoWrite.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.toMng.register}">저작 T.O 등록</label> </a></li>
+                    </ul>
+                </nav>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link " data-bs-target="#areaCover">
+                <i class="fa fa-regular fa-newspaper fa-lg"></i> <label th:text="#{admin.coverMng}">표지관리</label>
+            </a>
+            <div class="collapse subButton" id="areaCover">
+                <nav>
+                    <ul class="nav nav-underline flex-column">
+                        <li class="nav-item"> <a class="nav-link " data-role="cover" th:href="@{/EXPIS/{bizCode}/manage/coverManage.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.coverMng.cover}">표지관리</label> </a></li>
+                    </ul>
+                </nav>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link " data-bs-target="#areaHistory">
+                <i class="fa fa-regular fa-newspaper fa-lg"></i> <label th:text="#{admin.historyMng}">이력관리</label>
+            </a>
+            <div class="collapse subButton" id="areaHistory">
+                <nav>
+                    <ul class="nav nav-underline flex-column">
+                        <li class="nav-item"> <a class="nav-link " data-role="list" th:href="@{/EXPIS/{bizCode}/manage/historyList.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.historyMng.list}">목차정보</label> </a></li>
+                        <li class="nav-item"> <a class="nav-link " data-role="version" th:href="@{/EXPIS/{bizCode}/manage/historyVer.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.historyMng.version}">버전별 정보</label> </a></li>
+                    </ul>
+                </nav>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link " data-bs-target="#areaStatistics">
+                <i class="fa fa-chart-pie fa-lg"></i> <label th:text="#{admin.statisticsMng}">통계관리</label>
+            </a>
+            <div class="collapse subButton" id="areaStatistics">
+                <nav>
+                    <ul class="nav nav-underline flex-column">
+                        <li class="nav-item"> <a class="nav-link " data-role="user" th:href="@{/EXPIS/{bizCode}/manage/userStatistics.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.statisticsMng.user}">사용자 접속통계</label> </a></li>
+                        <li class="nav-item"> <a class="nav-link " data-role="ietm" th:href="@{/EXPIS/{bizCode}/manage/toStatistics.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.statisticsMng.ietm}">교범 접속 통계</label> </a></li>
+                    </ul>
+                </nav>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link " data-bs-target="#areaLog">
+                <i class="fa fa-chalkboard fa-lg"></i> <label th:text="#{admin.logMng}">로그관리</label>
+            </a>
+            <div class="collapse subButton" id="areaLog">
+                <nav>
+                    <ul class="nav nav-underline flex-column">
+                        <li class="nav-item"> <a class="nav-link " data-role="view" th:href="@{/EXPIS/{bizCode}/manage/logInfo.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.logMng.view}">로그보기</label> </a></li>
+                        <li class="nav-item"> <a class="nav-link " data-role="code" th:href="@{/EXPIS/{bizCode}/manage/logCode.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.logMng.code}">로그코드</label> </a></li>
+                    </ul>
+                </nav>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link " data-bs-target="#areaSystem">
+                <i class="fa fa-server fa-lg"></i> <label th:text="#{admin.systemMng}">시스템옵션</label>
+            </a>
+            <div class="collapse subButton" id="areaSystem">
+                <nav>
+                    <ul class="nav nav-underline flex-column">
+                        <li class="nav-item"> <a class="nav-link " data-role="ietm" th:href="@{/EXPIS/{bizCode}/manage/systemOption.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.systemMng.ietm}">IETM 옵션</label> </a></li>
+                        <li class="nav-item"> <a class="nav-link " data-role="board" th:href="@{/EXPIS/{bizCode}/manage/cmntOption.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.systemMng.board}">게시판 옵션</label> </a></li>
+                    </ul>
+                </nav>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link " data-bs-target="#areaGlossary">
+                <i class="fa fa-gear fa-lg"></i> <label th:text="#{admin.toolMng}">도구</label>
+            </a>
+            <div class="collapse subButton" id="areaGlossary">
+                <nav>
+                    <ul class="nav nav-underline flex-column">
+                        <li class="nav-item"> <a class="nav-link " data-role="glossary" th:href="@{/EXPIS/{bizCode}/manage/glossary.do(bizCode=${bizCode})}"> <i class="fa fa-minus fa-xs"></i> <label th:text="#{admin.toolMng.glossary}">용어편집</label> </a></li>
+                    </ul>
+                </nav>
+            </div>
+        </li>
+    </ul>
+</div>

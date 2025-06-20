@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eXPIS-III</title>
+    <link href="/component/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/component/fontawesome/css/all.min.css" rel="stylesheet">
+    <link href="/css/ietm/ietm_tree.css" rel="stylesheet">
+    <link href="/css/ietm/ietm.css" rel="stylesheet">
+    <link href="/css/ietm/subSidebar.css" rel="stylesheet">
+    <link href="/css/ietm/memo.css" rel="stylesheet">
+    <link href="/css/ietm/help.css" rel="stylesheet">
+    <link href="/css/ietm/ipb/ipb.css" rel="stylesheet">
+    <link href="/css/ietm/cont.css" rel="stylesheet">
+    <link href="/css/ietm/jg/jg_input.css" rel="stylesheet">
+    <link href="/css/ietm/jg/jg_Mnt.css" rel="stylesheet">
+    <link href="/css/ietm/popup/layerPopup.css" rel="stylesheet">
+    <link href="/css/ietm/wc/wc.css" rel="stylesheet">
+    <script th:src="@{/component/jquery/jquery-3.7.1.min.js}" type="text/javascript"></script>
+    <script th:src="@{/component/bootstrap/js/bootstrap.bundle.min.js}" type="text/javascript"></script>
+    <script th:src="@{/component/fabric/fabric.min.js}" type="text/javascript"></script>
+    <script th:src="@{/js/common/messages.js}" type="text/javascript"></script>
+    <script th:src="@{/js/common/xmlsheet.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/ietm.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/ietm_comm.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/ietm_help.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/ietm_tree.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/ietm_contents.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/ietm_image.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/ietm_version.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/to_ipb.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/to_list.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/subSidebar.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/option.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/memo.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/unit.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/airplane.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/ipb.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/wc.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/popup/contPopup.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/fi.js}" type="text/javascript"></script>
+    <script th:src="@{/js/ietm/ietm_search.js}" type="text/javascript"></script>
+    <script th:src="@{/js/manage/cover.js}" type="text/javascript"></script>
+
+    <!-- 상수 js -->
+    <script th:src="@{/js/ietm/constants/nodeType.js}" type="text/javascript"></script>
+
+</head>
+<body>
+<script th:inline="javascript">
+    var bizCode = [[${bizCode}]];
+    var TOKEY = '';
+    var ietmEnterSearchTerm = [[#{ietm_enter_search_term}]];
+    var ietmEnterMoreLetters = [[#{ietm_enter_more_letters}]];
+    var ietmSelectManualToc = [[#{ietm_select_manual_toc}]];
+    var ietmCommaNotUsed = [[#{ietm_comma_not_used}]];
+    var ietmEnterMoreLimit = [[#{ietm_enter_more_limit}]];
+    var ietmSelectManualPlease = [[#{ietm_select_manual_please}]];
+    var ietmOpenPopupFail = [[#{ietm_open_popup_fail}]];
+    var ietmGoToTop = [[#{ietm_go_to_top}]];
+    var ietmNextPageContents = [[#{ietm.next.page.contents}]]
+</script>
+<div class="wrapper">
+    <header class="fixed-top d-flex align-items-center px-3">
+        <!-- 로고 -->
+        <div class="header-logo mr-4">
+            <h5 class="mb-0">eXPIS-III</h5>
+        </div>
+
+        <!-- IETM 정보 -->
+        <div class="header-info d-flex flex-grow-1">
+            <div class="info-item px-3">
+                <label class="top_title" th:text="#{ietm.top.to.type}">항공기</label>:<span id="top_to_type">-</span>
+            </div>
+            <div class="info-item px-3">
+                <label class="top_title" th:text="#{ietm.top.to.key}">교범번호</label>:<span id="top_to_key">-</span>
+            </div>
+            <div class="info-item px-3">
+                <label class="top_title" th:text="#{ietm.top.to.date}">발간일</label>:<span id="top_to_verdate">-</span>
+            </div>
+            <div class="info-item px-3">
+                <label class="top_title" th:text="#{ietm.top.to.sssn}">SSSN</label>:<span id="top_to_sssn">-</span>
+            </div>
+        </div>
+
+        <!-- 상단 검색 -->
+        <div class="header-search mx-3">
+            <div th:replace="~{ietm/fragments/topSearch :: topSearch}"></div>
+        </div>
+
+        <!-- 북마크 -->
+        <div class="header-bookmark">
+            <a class="nav-link" href="#" title="북마크" data-bs-toggle="tooltip" data-bs-placement="bottom">
+                <i class="fa-solid fa-bookmark fa-xl" style="color: #FFD43B;"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- <div class="d-flex flex-column"> !-- 전체 컨테이너 -->
+    <!-- 콘텐츠 영역 -->
+    <div class="container-fluid content-container">
+        <div class="main-container row h-100 no-gutters">
+            <!-- 사이드바 -->
+            <div class="sidebar-container col-auto d-none d-md-flex ">
+                <div th:replace="~{ietm/fragments/sidebar :: sidebar}"></div>
+            </div>
+            <!-- 서브 사이드바 -->
+            <div class="subSidebar px-0 col-auto d-none d-xl-block position-relative overflow-auto" id="treeCol">
+                <div th:replace="~{ietm/fragments/subSidebar :: subSidebar}"></div>
+            </div>
+            <!-- 서브 유효목록 -->
+            <div class="container-fluid side-panel text-bg-light d-none" id="sub_version">
+                <div th:replace="~{ietm/fragments/subVersion :: subVersion}"></div>
+            </div>
+            <!-- 서브 검색 -->
+            <div class="container-fluid side-search text-bg-light d-none" id="sub_search">
+                <div th:replace="~{ietm/fragments/subSearch :: subSearch}"></div>
+            </div>
+            <!-- 토글 버튼 -->
+            <div id="toggleButton" class="ms-1" style="height: 3rem; width: 1.5rem;">
+                <div class="right-toggle">
+                    <i id="rightButton" class="fa-solid fa-caret-right fa-2x" onclick="openSubSidebar()"></i>
+                </div>
+                <div class="left-toggle">
+                    <i id="leftButton" class="fa-solid fa-caret-left fa-2x" onclick="closeSubSidebar()"></i>
+                </div>
+            </div>
+            <!-- 메인 컨텐츠 & IPB -->
+            <main class=" col content-wrapper">
+                <div class="main-content">
+                    <div th:replace="~{ietm/fragments/ietmHome :: ietmHome}"></div>
+                </div>
+                <!-- IPB CONTROL -->
+                <div th:replace="~{ietm/fragments/ipb/ipbControl :: ipbControl}"></div>
+                <!-- fi -->
+                <!--<div class="fi_canvas_box" id="fi" style="display: none">
+                    <div contenteditable="false" class="main con" id="main_fi_contents"></div>
+                </div>-->
+                <!-- fi popup -->
+                <div class="container-fluid" id="fipopup" style="display: none">
+                    <div th:replace="~{ietm/fragments/fi/fi_main :: fi_main}"></div>
+                </div>
+            </main>
+
+        </div>
+    </div>
+    <!-- /콘텐츠 영역 -->
+
+    <footer class="fixed-bottom">
+        <div class="d-flex align-items-center px-3">
+
+            <!-- 네비게이션 버튼 -->
+            <div class="footer-nav d-flex flex-shrink-0 px-3">
+                <button class="btn footer-btn" title="Up">
+                    <a href="javascript:void(0);" onclick="cursorUp()" class="btn_top" title="목차상에서 상위항목으로 이동"></a>
+                </button>
+                <button class="btn footer-btn" title="Down">
+                    <a href="javascript:void(0);" onclick="cursorDown()" class="btn_bottom" title="목차상에서 하위항목으로 이동"></a>
+                </button>
+                <button class="btn footer-btn" title="Left">
+                    <a href="javascript:void(0);" onclick="frameBtn('prev');" class="btn_left" title="이전항목으로 이동"></a>
+                </button>
+                <button class="btn footer-btn" title="Right">
+                    <a href="javascript:void(0);" onclick="frameBtn('next');" class="btn_right" title="다음항목으로 이동"></a>
+                </button>
+                <button class="btn footer-btn" title="Back">
+                    <a href="javascript:void(0);" onclick="prevTo()" class="btn_back" title="돌아가기"></a>
+                </button>
+            </div>
+
+            <!-- 프레임 버튼 -->
+            <div class="footer-view">
+                <button class="btn footer-btn" title="Page View">
+                    <a href="javascript:void(0);" title="페이지 보기" class="btn_page_view" onclick="changeValue('01','02','view');" onmouseup="optionUpdate();"></a>
+                </button>
+                <button class="btn footer-btn" title="Split View">
+                    <a href="javascript:void(0);" title="프레임 보기" class="btn_split_view" onclick="changeValue('02','01','view');" onmouseup="optionUpdate();"></a>
+                </button>
+            </div>
+
+            <!-- 메뉴 버튼 -->
+            <div class="footer-actions d-flex flex-shrink-0 align-items-center">
+                <div class="d-flex">
+                    <button class="btn footer-btn" title="Control">
+                        <a href="javascript:void(0);" title="IETM Control" class="btn_remote disabled" onclick="popUpEvent('remo');"></a>
+                    </button>
+                    <button class="btn footer-btn" title="Air Type">
+                        <a href="javascript:void(0);" title="항공기 형상" class="btn_fighter" onclick="openWin('airplane');"></a>
+                    </button>
+                    <button class="btn footer-btn" title="Calculator">
+                        <a href="javascript:void(0);" title="단위 변환" class="btn_calculator" onclick="openWin('unit');"></a>
+                    </button>
+                    <button class="btn footer-btn" title="Print">
+                        <a href="javascript:void(0);" title="출력" class="btn_print" onclick="openWin('print');"></a>
+                    </button>
+                    <button class="btn footer-btn" title="Help">
+                        <a href="javascript:void(0);" title="도움말" class="btn_advice" onclick="openWin('help');"></a>
+                    </button>
+                </div>
+
+                <!-- 구분선 -->
+                <div class="separator"></div>
+
+                <button class="btn footer-btn" title="IETM HOME">
+                    <a class="btn btn_home" title="IETM 홈" data-bs-toggle="tooltip" data-bs-placement="top"
+                       th:href="@{/EXPIS/{bizCode}/ietm/toMain.do(bizCode=${bizCode})}"></a>
+                </button>
+                <button class="btn footer-btn" title="Help">
+                    <a class="btn_community" title="관리자" data-bs-toggle="tooltip" data-bs-placement="top"
+                       th:href="@{/EXPIS/{bizCode}/manage/approvalManage.do(bizCode=${bizCode})}" ></a>
+                </button>
+                <button class="btn footer-btn" title="Help">
+                    <a class="btn btn_community" title="커뮤니티" data-bs-toggle="tooltip" data-bs-placement="top"
+                       th:href="@{/EXPIS/{bizCode}/cmnt/cmntIntro.do(bizCode=${bizCode})}"></a>
+                </button>
+                <button class="btn footer-btn" title="Help">
+                    <a class="btn btn_logout" title="로그아웃" data-bs-toggle="tooltip" data-bs-placement="top"
+                       th:href="@{/EXPIS/{bizCode}/logout(bizCode=${bizCode})}"></a>
+                </button>
+            </div>
+        </div>
+
+    </footer>
+
+    <!-- 하단 모달 -->
+    <div th:replace="~{ietm/fragments/airplane :: airplane}"></div>
+    <div th:replace="~{ietm/fragments/unit :: unit}"></div>
+
+</div> <!-- /wrapper -->
+
+<!-- messages.properties -->
+<input type="hidden" id="books" th:value="#{ietm.cover.tech.books}"/>
+<input type="hidden" id="distribute" th:value="#{admin.distribute}"/>
+<input type="hidden" id="distributeValue" th:value="#{admin.distribute.value}"/>
+<input type="hidden" id="warning" th:value="#{ietm.caution.warning}"/>
+<input type="hidden" id="warningValue" th:value="#{ietm.caution.warning.value}"/>
+<input type="hidden" id="notice" th:value="#{admin.cover.notice}"/>
+<input type="hidden" id="noticeValue" th:value="#{admin.cover.notice.value}"/>
+<input type="hidden" id="business" th:value="#{ietm.dep.of.business}"/>
+<input type="hidden" id="verLabel" th:value="#{ietm.cover.verLabel}"/>
+</body>
+</html>

@@ -1,0 +1,74 @@
+.input-item {
+    padding: 3px 0 10px 15px;
+}
+.input-item > li {
+     font-weight: bold;
+ }
+
+li {
+    display: list-item;
+    text-align: -webkit-match-parent;
+    unicode-bidi: isolate;
+}
+
+.input-item > li > ul > li {
+    font-weight: normal;
+    margin: 10px 0 10px 20px;
+}
+
+.input-item table {
+   position: relative;
+   width: 100%;
+   border-collapse: collapse;
+   border-spacing: 0;
+   color: #000;
+   margin: 10px 0;
+   font-size: 1em;
+}
+
+.input-item tbody {
+   display: table-row-group;
+   vertical-align: middle;
+   unicode-bidi: isolate;
+   border-color: inherit;
+}
+
+.input-item tr {
+    display: table-row;
+    vertical-align: inherit;
+    unicode-bidi: isolate;
+    border-color: inherit;
+}
+
+.input-item th {
+    border: 1px solid #000;
+    padding: 5px;
+    text-align: center;
+    vertical-align: middle;
+    word-break: break-all;
+    text-align:center;
+    background-color: #f5faff;
+    color: #2a73a6;
+    border-top: 2px solid #2a73a6;
+    font-weight: 600;" padding="5px;
+}
+
+.input-item td {
+    text-align: center;
+    border-top: 1.1px solid #000;
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+}
+
+.input-item a{
+   display: inline-block;
+   color: #2a73a6;
+   text-decoration-line:none;
+   font-family:'Noto Sans KR','Nanum Barun Gothic';
+   font-weight:bold;
+}
+
+#boldNone {
+   font-weight : normal;
+}

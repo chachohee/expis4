@@ -1,0 +1,198 @@
+/* 이미지, 이미지명 가운데 정렬 */
+.gs-grphprim {text-align: center; background-color: #fff;}
+
+/* 브라우저 크기에 따른 이미지 사이즈 조정 */
+.gs-grphprim img {
+    max-width: 100%;
+    height: auto;
+    display: inline-block;
+}
+/* --- */
+
+/* tocoLink */
+.toco-link {text-align:center; font-weight:bold; background-color: #fff}
+.toco-link a {color:#398af9; font-weight:bold;}
+/* --- */
+
+/* 이미지 하단 버튼 */
+.img_controll {text-align:center; margin-top:10px;}
+.img_controll a {display:inline-block; width:25px; margin-left:5px; height:25px; background:#8f969b url(/img/common/ico_cont_img.png) no-repeat 0 0; text-indent:-99999999px; border-radius:3px;}
+
+.img_controll a:hover {background-color:#eb7070;}
+.img_controll a.down {background-position:0 0; margin-left:0;}
+.img_controll a.print {background-position:0 -25px;}
+.img_controll a.popup {background-position:0 -50px;}
+.img_controll a.video {background-position:0 -73px;}
+/* --- */
+
+/* 제목 볼드처리 */
+.gs-title {font-weight: bold;}
+
+/* alert type에 대한 css */
+/* 주기 */
+.gs-alert-note {
+    position: relative;
+    margin: 0 auto;
+    padding: 22px 5px 15px;
+    background: url(/img/ietm/wc/alert_note_huss.png) no-repeat 50% 0;
+    position: relative;
+}
+
+.gs-alert-note > div {
+    background-color: #ebedec;
+    padding: 15px;
+    border: 2px solid #bdbdbd;
+    border-radius: 5px;
+}
+
+.gs-alert-note p {font-weight: normal; text-align: left;}
+
+/* 주의 */
+.gs-alert-caution {
+    margin: 0 auto;
+    padding: 22px 5px 15px;
+    background: url(/img/ietm/wc/alert_caution.png) no-repeat 50% 0;
+    position: relative;
+}
+.gs-alert-caution > div {
+    background-color: #ffd98d;
+    padding: 15px;
+    border: 2px solid #facc71;
+    border-radius: 5px;
+}
+
+.gs-alert-caution p {font-weight: normal; text-align: left;}
+
+/* 경고 */
+.gs-alert-warning {
+    margin: 0 auto;
+    padding: 22px 5px 15px;
+    background: url(/img/ietm/wc/alert_warning.png) no-repeat 50% 0;
+    position: relative;
+}
+
+.gs-alert-warning > div {
+    background-color: #fcdbdb;
+    padding: 15px;
+    border: 2px solid #facaca;
+    border-radius: 5px;
+}
+
+.gs-alert-warning p {font-weight: normal; text-align: left;}
+
+/* alert 박스 안 메세지 위치 조정 */
+.para1 {
+    display: block;
+    margin: 10px 0 10px 10px;
+    position:relative;
+    vertical-align: middle;
+}
+/* --- */
+
+/* 테이블 */
+.gs-table {
+    position: relative;
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    table-layout: auto;
+    background-color: #fff;
+}
+
+.gs-table th,
+.gs-table td {
+    border: 1px solid #666;
+    padding: 8px;
+    text-align: center;
+}
+
+.gs-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+/* --- */
+
+/* --input 항목 version_bar -- */
+.div_version {
+    display: block !important;
+}
+.version_bar_update{
+   top: -21px;
+   bottom: 0px;
+}
+/* WC에 있는 .version_bar_update가 작동하지 않아서 important 제거
+.version_bar_update{
+   top: -21px !important;
+   bottom: 0px !important;
+}
+*/
+span.version_bar_update.table {
+    top: -25px !important;
+    bottom: -18px !important;
+    margin-left: 1px;
+}
+.input_table {
+    padding-left: 7px;
+}
+.div_version_position {
+    padding-left: 3.75px;
+}
+/* -- FI-underline 강조선-- */
+.lin-underline{
+   text-decoration: underline !important;
+}
+
+/*--- IPB 색인 검색 테이블 ---*/
+.img_list {padding:20px;}
+.img_list caption {font-size:0;}
+.all_list {width: 100%; border-collapse: collapse; border-spacing: 0; color: #000; margin: 10px 0; font-size: 1.1em;}
+.all_list thead th {background-color: #f5faff; color: #2a73a6; border: 0; border-top: 2px solid #2a73a6; border-bottom: 1px solid #2a73a6; font-weight: 600;}
+.all_list th {padding: 10px; text-align: center; vertical-align: middle;}
+.all_list th a {text-decoration: none; color: #000;}
+.all_list td {padding: 10px; text-align: left; vertical-align: middle;}
+.all_list tbody tr:first-child td {border-top: 0;}
+.all_list tbody tr:nth-child(even) td {background-color: #efefef;}
+.all_list tbody td a {display:block; color:#2f7dcb; padding-left:8px; text-decoration: none; font-weight: bold; background:url(/img/common/img_list_bullet.png) no-repeat 0 11px;}
+#to_sub_toco_body {margin-top: -11px;}
+#to_sub_toco_body > .all_list {margin: 0; border-bottom: 1px solid #2a73a6;}
+/* --- */
+
+/* in_table_ipb */
+.in_table_ipb {width:1860px; min-width:100%; border-collapse: collapse; border-spacing: 0; color: #000; margin: 0;table-layout: fixed;}
+.in_table_ipb th,.ipb_table td {border: 1px solid #e0e0e0; padding: 7px; text-align: center; vertical-align: middle;}
+.in_table_ipb th{background-color: #f5faff; color: #2a73a6; font-weight: 600;}
+.in_table_ipb td.caption{border:0; background-color:#fff; height:25px; padding-left:6px; text-align:center; font-weight:bold;}
+.in_table_ipb td{text-align:center; border:1px solid #e0e0e0; padding:7px; font-weight:normal;word-break:break-all;}
+.in_table_ipb thead th:first-child,
+.in_table_ipb tbody td:first-child {border-left:0;}
+.in_table_ipb td a{display: inline-block; padding: 3px; color: #398af9; /*text-decoration: underline;*/}
+.in_table_ipb td.ipb_nom{text-align:left; border:1px solid #e0e0e0; padding:7px; font-weight:normal;}
+.in_table_ipb .hidden_col {display: none;}
+.in_table_ipb thead {position:sticky; top:0px;}
+.ipb_data_diff_td{background-color: red; opacity: 50%;color: white;}
+
+
+/* 토글 버튼(내용 접고 펼치기) */
+.text-with-icon {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    background-color: #e2eaf1;
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.text-content {
+    flex: 1;
+    text-align: left;
+}
+
+.icon-button {
+    margin-left: 10px;
+    cursor: pointer;
+    color: #007bff;
+    font-size: 16px;
+}

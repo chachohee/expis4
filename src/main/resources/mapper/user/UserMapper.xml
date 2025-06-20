@@ -1,0 +1,835 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- oracle -->
+<mapper namespace="com.expis.user.dao.UserMapper">
+
+    <resultMap id="userResultMap" type="com.expis.user.dto.UserDto">
+        <result property="userId"			column="user_id"			javaType="string" />
+        <result property="userPw"			column="user_pw"			javaType="string" />
+        <result property="userName"			column="user_name"			javaType="string" />
+        <result property="userEname"		column="user_ename"			javaType="string" />
+        <result property="userUnit"			column="user_unit"			javaType="string" />
+        <result property="userPart"			column="user_part"			javaType="string" />
+        <result property="userGrade"		column="user_grade"			javaType="string" />
+        <result property="userTalent"		column="user_talent"		javaType="string" />
+        <result property="userSn"			column="user_sn"			javaType="string" />
+        <result property="userPhone"		column="user_phone"			javaType="string" />
+        <result property="userCellphone"	column="user_cellphone"		javaType="string" />
+        <result property="userEmail"		column="user_email"			javaType="string" />
+        <result property="authority"		column="user_role_code"		javaType="string" />
+        <result property="userHopeCode"		column="user_hope_code"		javaType="string" />
+        <result property="userAccountEndDate"		column="user_account_end_date"		javaType="string" />
+        <result property="printRoleCode"	column="print_role_code"	javaType="string" />
+        <result property="printWordKind"	column="print_word_kind"	javaType="string" />
+        <result property="pwChangeDate"		column="pw_change_date"		javaType="string" />
+        <result property="statusKind"		column="status_kind"		javaType="string" />
+        <result property="createUserId"		column="create_user_id"		javaType="string" />
+        <result property="createDate"		column="create_date"		javaType="string" />
+        <result property="modifyUserId"		column="modify_user_id"		javaType="string" />
+        <result property="modifyDate"		column="modify_date"		javaType="string" />
+        <result property="userRoleCode"		column="user_role_code"		javaType="string" />
+        <result property="pageNum"			column="page_num"			javaType="int" />
+        <result property="tNum"				column="tNum"				javaType="int" />
+        <result property="approSeq"			column="appro_seq"			javaType="string" />
+        <result property="approStatus"		column="appro_status"		javaType="string" />
+    </resultMap>
+
+    <resultMap id="mainResultMap" type="com.expis.ietm.dto.MainDto">
+        <id property="toKey" 			column="to_key"			javaType="string" />
+        <id property="tocoId" 			column="toco_id"		javaType="string" />
+        <result property="toName"		column="to_name"		javaType="string" />
+        <result property="tocoName"		column="toco_name"		javaType="string" />
+        <result property="sessionId"	column="session_id"		javaType="string" />
+        <result property="userId"		column="user_id"		javaType="string" />
+        <result property="statusKind"	column="status_kind"	javaType="string" />
+        <result property="targetKind"	column="target_kind"	javaType="string" />
+        <result property="userPw"		column="user_pw"		javaType="string" />
+        <result property="ipAddress"	column="conn_ip"		javaType="string" />
+        <result property="connDate"		column="conn_date"		javaType="string" />
+        <result property="disconnDate"	column="disconn_date"	javaType="string" />
+<!--        <result property="mainDto"		column="mainDto"		javaType="list"/>-->
+        <result property="vcKind"		column="vcont_kind"		javaType="string"/>
+<!--        <result property="num"									javaType="int" />-->
+    </resultMap>
+
+
+    <!-- 로그아웃 시간 저장 -->
+    <update id="loginOutUpdate" parameterType="com.expis.ietm.dto.MainDto">
+        update ur_conn_user_history
+        <trim prefix="SET" suffixOverrides=",">
+            status_kind = '10',
+            disconn_date = sysdate,
+        </trim>
+        where 	session_id = #{sessionId}
+        and 	status_kind = '20'
+    </update>
+
+    <select id="getSLoginIngoTest" parameterType="com.expis.ietm.dto.MainDto"	resultMap="mainResultMap">
+        select	 to_char(conn_date, 'YYYY-MM-DD hh24:mi:ss')	as conn_date
+        ,to_char(disconn_date, 'YYYY-MM-DD hh24:mi:ss')	as disconn_date
+        from	ur_conn_user_history
+        where	conn_seq = ( select conn_seq from
+        (
+        select	distinct max(conn_seq) over (order by disconn_date desc nulls last) as conn_seq
+        from	ur_conn_user_history where user_id=#{userId} )
+        where	rownum = 1
+        )
+    </select>
+
+    <!-- 최초 로그인인지 아닌지 확인 -->
+    <select id="countConnUser" parameterType="com.expis.ietm.dto.MainDto"
+            resultType="int">
+        select 	count(user_id)
+        from	ur_conn_user_history
+        where 	user_id=#{userId}
+    </select>
+
+    <!-- 정상적인 방법아님 -->
+    <update id="loginOutUpdateTest" parameterType="com.expis.ietm.dto.MainDto">
+        update ur_conn_user_history
+        <trim prefix="SET" suffixOverrides=",">
+            status_kind = '10',
+            disconn_date = sysdate,
+        </trim>
+        where 	session_id = #{sessionId}
+    </update>
+
+    <!-- 0일때 처리방법 -->
+    <insert id="insertUserId" parameterType="com.expis.ietm.dto.MainDto">
+        <selectKey keyProperty="connSeq" resultType="int" order="BEFORE">
+            select nvl(max(conn_seq)+1,1) as connSeq
+            from ur_conn_user_history
+        </selectKey>
+        insert into
+        ur_conn_user_history
+        (
+        conn_seq
+        ,session_id
+        ,user_id
+        ,conn_ip
+        ,conn_date
+        ,disconn_date
+        ,status_kind
+        )
+        values
+        (
+        #{connSeq}
+        ,#{sessionId}
+        ,#{userId}
+        ,#{ipAddress}
+        ,sysdate
+        ,null
+        ,'20'
+        )
+    </insert>
+
+    <update id="updateLogoutTime">
+        update	ur_conn_user_history
+        set		disconn_date = sysdate
+        where	#{connSeq} > conn_seq
+        and		user_id = #{userId}
+        and		disconn_date is null
+    </update>
+
+    <select id="userCount" parameterType="com.expis.user.dto.UserDto" resultType="int">
+        select	count(user_id)
+        from	ur_user_profile
+        where	status_kind != '40'
+        and 	user_role_code != 'V'
+        and		user_role_code != 'W'
+        and		user_role_code != 'Z'
+        and 	${searchCate} like '%' || LOWER(#{searchValue}) || '%'
+    </select>
+
+
+    <!-- 사용자 정보 select -->
+    <select id="selectUserInfo" parameterType="com.expis.user.dto.UserDto" resultMap="userResultMap">
+        select	 user_id
+        ,user_pw
+        ,user_name
+        ,user_ename
+        ,user_unit
+        ,user_part
+        ,user_grade
+        ,user_talent
+        ,user_sn
+        ,user_phone
+        ,user_cellphone
+        ,user_email
+        ,user_role_code
+        ,user_hope_code
+        ,print_role_code
+        ,print_word_kind
+        ,to_char(pw_change_date, 'yyyy-mm-dd') as pw_change_date
+        ,status_kind
+        ,create_user_id
+        ,create_date
+        ,modify_user_id
+        ,modify_date
+        from	ur_user_profile
+        where	user_id = #{userId}
+        <if test="userPw != null">
+            and		user_pw = #{userPw}
+        </if>
+        and		user_role_code != 'W'
+        and		status_kind = '10'
+
+    </select>
+
+    <!-- select : 사용자 아이디로 정보 조회 - 계정 정보 조회용도  - jingi.kim -->
+    <select id="selectUserByUserId" parameterType="com.expis.user.dto.UserDto" resultMap="userResultMap">
+        select	 user_id
+        ,user_pw
+        ,user_name
+        ,user_ename
+        ,user_unit
+        ,user_part
+        ,user_grade
+        ,user_talent
+        ,user_sn
+        ,user_phone
+        ,user_cellphone
+        ,user_email
+        ,user_role_code
+        ,user_hope_code
+        ,to_char(user_account_end_date, 'yyyy-mm-dd') as user_account_end_date
+        ,print_role_code
+        ,print_word_kind
+        ,to_char(pw_change_date, 'yyyy-mm-dd') as pw_change_date
+        ,status_kind
+        ,create_user_id
+        ,create_date
+        ,modify_user_id
+        ,modify_date
+        from	ur_user_profile
+        where	user_id = #{userId}
+        and		user_role_code != 'W'
+
+    </select>
+
+    <!-- insert : 로그인 실패 기록 - jingi.kim -->
+    <insert id="insertFailConnHistory" parameterType="com.expis.ietm.dto.MainDto">
+        <selectKey keyProperty="connSeq" resultType="int" order="BEFORE">
+            select nvl(max(conn_seq)+1,1) as connSeq
+            from ur_fail_conn_user_history
+        </selectKey>
+        insert into
+        ur_fail_conn_user_history
+        (
+        conn_seq
+        ,user_id
+        ,conn_ip
+        ,conn_date
+        ,status_kind
+        ,create_date
+        )
+        values
+        (
+        #{connSeq}
+        ,#{userId}
+        ,#{ipAddress}
+        ,sysdate
+        ,'20'
+        ,sysdate
+        )
+    </insert>
+
+    <!-- select : 로그인 실패 횟수 조회 - jingi.kim -->
+    <select id="selectCountFailConnHistoryByUserId" parameterType="com.expis.ietm.dto.MainDto" resultType="int">
+        select	count(user_id)
+        from	ur_fail_conn_user_history
+        where	user_id 		= #{userId}
+        and		status_kind 	= '20'
+    </select>
+
+    <!-- update : 로그인 실패 상태 업데이트 - jingi.kim -->
+    <update id="updateFailConnHistoryStatusByUserId">
+        update	ur_fail_conn_user_history
+        set		status_kind 	= '10'
+        ,modify_date 	= sysdate
+        where	user_id 		= #{userId}
+        and		status_kind 	= '20'
+    </update>
+
+    <select id="selectListUserInfo" parameterType="com.expis.user.dto.UserDto" resultMap="userResultMap">
+        select	<if test="sortKind == 'asc'">
+        (${totalCount} + 1) - tNum  as tNum
+    </if>
+        <if test="sortKind == 'desc'">
+            tNum  as tNum
+        </if>
+        ,user_id as userId
+        ,user_pw as userPw
+        ,user_name as userName
+        ,user_ename as userEname
+        ,user_unit as userUnit
+        ,user_part as userPart
+        ,user_grade as userGrade
+        ,user_talent as userTalent
+        ,user_sn as userSn
+        ,user_phone as userPhone
+        ,user_cellphone as userCellphone
+        ,user_email as userEmail
+        ,user_role_code as userRoleCode
+        ,user_hope_code as userHopeCode
+        ,print_role_code as printRoleCode
+        ,print_word_kind as printWordKind
+        ,pw_change_date as pwChangeDate
+        ,status_kind as statusKind
+        ,create_user_id as createUserId
+        ,create_date as createDate
+        ,modify_user_id as modifyUserId
+        ,modify_date as modifyDate
+        from
+        (
+        select	row_number () over (order by ${sortBy} ${sortKind}, modify_date desc)	as	tNum
+        ,user_id as user_id
+        ,user_pw
+        ,lower(user_name) as user_name
+        ,user_ename
+        ,case when user_unit is null then '-'
+        else lower(user_unit) end	user_unit
+        ,case when user_part is null then '-'
+        else user_part end	as	user_part
+        ,case when user_grade is null then '-'
+        else user_grade end	as user_grade
+        ,user_talent
+        ,case when user_sn is null then '-'
+        else user_sn end as user_sn
+        ,user_phone
+        ,case when user_cellphone is null then '-'
+        else user_cellphone end	user_cellphone
+        ,case when user_email is null then '-'
+        else LOWER(user_email) end user_email
+        ,user_role_code
+        ,user_hope_code
+        ,print_role_code
+        ,print_word_kind
+        ,pw_change_date
+        ,status_kind
+        ,create_user_id
+        ,create_date
+        ,modify_user_id
+        ,modify_date
+        from	ur_user_profile
+        where	user_role_code != 'V'
+        and		user_role_code != 'W'
+        and		user_role_code != 'Z'
+        and		status_kind != '40'
+        and		${searchCate} like '%' || LOWER(#{searchValue}) || '%'
+        )
+        where	tNum between #{startRow} and #{endRow}
+    </select>
+
+    <insert id="insertUserProfile" parameterType="com.expis.user.dto.UserDto">
+        insert into ur_user_profile
+        (
+        user_id
+        ,user_pw
+        ,user_name
+        ,user_ename
+        ,user_unit
+        ,user_part
+        ,user_grade
+        ,user_talent
+        ,user_sn
+        ,user_phone
+        ,user_cellphone
+        ,user_email
+        ,user_role_code
+        ,user_hope_code
+        <if test="userAccountEndDate != null">
+            ,user_account_end_date
+        </if>
+        ,print_role_code
+        ,print_word_kind
+        ,modify_user_id
+        ,modify_date
+        ,create_user_id
+        ,create_date
+        ,status_kind
+        ,pw_change_date
+        )
+        values
+        (
+        #{userId}
+        ,#{userPw}
+        ,#{userName, jdbcType=VARCHAR}
+        ,#{userEname, jdbcType=VARCHAR}
+        ,#{userUnit, jdbcType=VARCHAR}
+        ,#{userPart, jdbcType=VARCHAR}
+        ,#{userGrade, jdbcType=VARCHAR}
+        ,#{userTalent, jdbcType=VARCHAR}
+        ,#{userSn, jdbcType=VARCHAR}
+        ,#{userPhone, jdbcType=VARCHAR}
+        ,#{userCellphone, jdbcType=VARCHAR}
+        ,#{userEmail, jdbcType=VARCHAR}
+        ,#{userRoleCode, jdbcType=VARCHAR}
+        ,#{userHopeCode, jdbcType=VARCHAR}
+        <if test="userAccountEndDate != null">
+            ,#{userAccountEndDate}
+        </if>
+        ,#{printRoleCode, jdbcType=VARCHAR}
+        ,#{printWordKind, jdbcType=VARCHAR}
+        ,#{createUserId}
+        ,sysdate
+        ,#{createUserId}
+        ,sysdate
+        ,'10'
+        ,sysdate
+        )
+    </insert>
+
+    <update id="updateUser" parameterType="com.expis.user.dto.UserDto">
+        update	ur_user_profile
+        set		user_name = #{userName}
+        ,user_unit = #{userUnit}
+        ,user_part = #{userPart}
+        ,user_grade	= #{userGrade}
+        ,user_talent = #{userTalent}
+        ,user_sn = #{userSn}
+        ,user_phone	= #{userPhone}
+        ,user_cellphone	= #{userCellphone}
+        ,user_email	= #{userEmail}
+        ,print_role_code = #{printRoleCode}
+        ,modify_user_id	= #{modifyUserId}
+        ,modify_date = sysdate
+        ,status_kind = #{statusKind}
+        ,pw_change_date = sysdate
+        <if test="userPw != ''">
+            ,user_pw = #{userPw}
+        </if>
+        <if test="userEname != null">
+            ,user_ename = #{userEname}
+        </if>
+        <if test="userRoleCode != null">
+            ,user_role_code	= #{userRoleCode}
+        </if>
+        <if test="printWordKind != null">
+            ,print_word_kind = #{printWordKind}
+        </if>
+        <if test="userAccountEndDate != null">
+            ,user_account_end_date = #{userAccountEndDate}
+        </if>
+        <if test="userAccountEndDate == null">
+            ,user_account_end_date = null
+        </if>
+        where	user_id = #{userId}
+    </update>
+
+
+    <!-- 아이디가 있는지 없는지 확인 -->
+    <select id="loginCheck" parameterType="com.expis.ietm.dto.MainDto"
+            resultType="int">
+        select count(user_id) num
+        from ur_user_profile
+        where
+        user_id = #{userId}
+    </select>
+
+    <!-- 아이디가 있으면 아이디 비번 찾아오기 -->
+    <select id="userPwCheck" parameterType="com.expis.ietm.dto.MainDto"
+            resultMap="mainResultMap">
+        select 	user_id
+        ,user_pw
+        from 	ur_user_profile
+        where 	user_id = #{userId}
+    </select>
+
+    <select id="userOverlap" parameterType="String" resultType="int">
+        select	count(user_id)
+        from	ur_user_profile
+        <!-- 221201 jysi EDIT : 임시수정, status_kind 관계없이 DB에 존재하는 아이디는 중복 처리 -->
+        <!-- where	status_kind = '10'
+            and user_id = #{userId}  -->
+        where user_id = #{userId}
+    </select>
+
+    <select id="userSnOverlap" parameterType="String" resultType="int">
+        select	count(user_sn)
+        from	ur_user_profile
+        where	status_kind = '10'
+        and 	user_sn = #{userSn}
+
+        <if test="userId != 'none'">
+            and		user_id != #{userId}
+        </if>
+    </select>
+
+    <select id="userDetailInfo" parameterType="String" resultMap="userResultMap">
+        select	user_id
+        ,user_pw
+        ,user_name
+        ,user_unit
+        ,user_part
+        ,user_grade
+        ,user_talent
+        ,user_sn
+        ,nvl(user_phone, '')	as user_phone
+        ,user_cellphone
+        ,user_email
+        ,user_role_code
+        ,case when user_hope_code is null then '-'
+        else user_hope_code end	user_hope_code
+        ,print_role_code
+        ,print_word_kind
+        ,user_account_end_date	as	userAccountEndDate
+        from	ur_user_profile
+        where	status_kind != '40'
+        and user_id = #{userId}
+        and rownum = 1
+    </select>
+
+    <update id="userActivate" parameterType="com.expis.user.dto.UserDto">
+        update	ur_user_profile
+        set		modify_user_id	= #{modifyUserId}
+        ,modify_date = sysdate
+        ,status_kind = #{statusKind}
+        where	user_id = #{userId}
+    </update>
+
+    <delete id="userDelete" parameterType="String">
+        delete from ur_user_profile
+        where	user_id = #{userId}
+    </delete>
+
+    <select id="userSelectEmail" parameterType="com.expis.user.dto.UserDto" resultType="String">
+        select	user_email	as	userEmail
+        from	ur_user_profile
+        where	user_id = #{userId}
+        and		user_name = #{userName}
+        and		user_sn = #{userSn}
+        and		status_kind = '10'
+    </select>
+
+    <update id="changePw" parameterType="com.expis.user.dto.UserDto">
+        update	ur_user_profile
+        set		user_pw = #{userPw}
+        ,pw_change_date = sysdate
+        where	user_id = #{userId}
+        and		user_sn = #{userSn}
+    </update>
+
+    <select id="userIdSearch" parameterType="com.expis.user.dto.UserDto" resultType="String">
+        select	user_id	as	userId
+        from	ur_user_profile
+        where	user_name = #{userName}
+        <if test="userEmail == 'none'">
+            and		user_sn = #{userSn}
+        </if>
+        <if test="userSn == 'none'">
+            and		user_email = #{userEmail}
+        </if>
+
+        and	status_kind = '10'
+    </select>
+
+    <select id="manageCount" parameterType="com.expis.user.dto.UserDto" resultType="int">
+        select	count(user_id)
+        from	ur_user_profile
+        where	(user_role_code = 'W' or user_role_code = 'Z')
+        and		${searchCate} like '%' || LOWER(#{searchValue}) || '%'
+        and		status_kind != '40'
+    </select>
+
+    <select id="manageSelectList" parameterType="com.expis.user.dto.UserDto" resultMap="userResultMap">
+        select
+        <if test="sortKind == 'asc'">
+            (${totalCount} + 1) - tNum  as tNum
+        </if>
+        <if test="sortKind == 'desc'">
+            tNum  as tNum
+        </if>
+        ,user_id as userId
+        ,user_name as userName
+        ,user_ename as userEname
+        ,user_email as userEmail
+        ,user_role_code as userRoleCode
+        ,user_hope_code as userHopeCode
+        ,print_role_code as printRoleCode
+        ,print_word_kind as printWordKind
+        ,pw_change_date as pwChangeDate
+        ,status_kind as statusKind
+        ,create_user_id as createUserId
+        ,create_date as createDate
+        from
+        (
+        select	row_number () over (order by user_role_code ${sortKind}, create_date desc)	as	tNum
+        ,user_id as user_id
+        ,lower(user_name) as user_name
+        ,user_ename
+        ,user_email
+        ,user_role_code
+        ,user_hope_code
+        ,print_role_code
+        ,print_word_kind
+        ,pw_change_date
+        ,status_kind
+        ,create_user_id
+        ,to_char(create_date, 'YYYY-MM-DD hh24:mi:ss') as create_date
+        from	ur_user_profile
+        where	(user_role_code = 'W' or	user_role_code = 'Z')
+        and		${searchCate} like '%' || LOWER(#{searchValue}) || '%'
+        and		status_kind != '40'
+        )
+        where	tNum between #{startRow} and #{endRow}
+    </select>
+
+    <update id="updateRoleCode" parameterType="com.expis.user.dto.UserDto" >
+        update	ur_user_profile
+        set		user_role_code = #{userRoleCode}
+        ,modify_date = sysdate
+        ,modify_user_id = #{modifyUserId}
+        ,pw_change_date = sysdate
+        <if test="printRoleCode != 'none'">
+            ,print_role_code = #{printRoleCode}
+        </if>
+        where	user_id = #{userId}
+    </update>
+
+    <insert id="insertApprovalHistory" parameterType="com.expis.user.dto.UserDto">
+        <selectKey keyProperty="approSeq" resultType="int" order="BEFORE">
+            select   nvl(max(appro_seq), 0) + 1 as approSeq
+            from     ur_approval_history
+        </selectKey>
+
+        insert into ur_approval_history
+        (
+        appro_seq
+        ,user_id
+        ,appro_status
+        ,modify_user_id
+        ,modify_date
+        ,create_user_id
+        ,create_date
+        ,status_kind
+        )
+        values
+        (
+        #{approSeq}
+        ,#{userId}
+        ,#{approStatus}
+        ,#{modifyUserId}
+        ,sysdate
+        ,#{modifyUserId}
+        ,sysdate
+        ,'10'
+        )
+    </insert>
+
+    <select id="approvalHistoryCount" resultType="int">
+        select	count(appro_seq)
+        from	ur_approval_history
+        where	status_kind != '40'
+    </select>
+
+    <select id="approvalHistorySelect" parameterType="com.expis.user.dto.UserDto" resultType="com.expis.user.dto.UserDto">
+        select
+        (${totalCount} + 1) - tNum  as tNum
+        ,approSeq
+        ,userId
+        ,approStatus
+        ,modifyUserId
+        ,modifyDate
+        ,createUserId
+        ,createDate
+        ,statusKind
+        from
+        (
+        select	row_number () over (order by ahy.create_date desc)	as	tNum
+        ,ahy.appro_seq		as	approSeq
+        ,case when ahy.user_id is not null and uup.user_name is not null
+        then '[' ||ahy.user_id || '], ' || '[' || uup.user_name || ']'
+        else '[' ||ahy.user_id || ']'
+        end as	userId
+        ,ahy.appro_status	as	approStatus
+        ,ahy.modify_user_id	as	modifyUserId
+        ,to_char(ahy.modify_date, 'YYYY-MM-DD hh24:mi:ss') as	modifyDate
+        ,ahy.create_user_id	as	createUserId
+        ,to_char(ahy.create_date, 'YYYY-MM-DD hh24:mi:ss')	as	createDate
+        ,ahy.status_kind	as	statusKind
+        from	ur_approval_history ahy
+        left join ur_user_profile uup
+        on	ahy.user_id = uup.user_id
+        where	ahy.status_kind != 40
+        )
+        where	tNum between #{startRow} and #{endRow}
+    </select>
+
+    <update id="pwValidationModify">
+        update	ad_system_option
+        set		opt_pw_validation_info	=	#{optPwValidationInfo}
+        ,opt_pw_validation_msg	=	#{optPwValidationMsg}
+        ,opt_pw_min_length		=	#{optPwMinLength}
+        ,opt_pw_max_length		=	#{optPwMaxLength}
+    </update>
+
+    <select id="userEndDate" parameterType="String" resultMap="userResultMap">
+        select	user_id
+        ,user_account_end_date
+        ,user_role_code
+        from	ur_user_profile
+        where	status_kind &lt;&gt; '40'
+        and user_id = #{userId}
+    </select>
+
+    <!-- 2023.10.26 - 미접속자 수 - jingi.kim -->
+    <select id="userNotconnManageCount" resultType="int">
+        select	count(user_id)
+        from	ur_user_profile uup
+        where	user_role_code != 'V'
+        and user_role_code != 'W'
+        and user_role_code != 'Z'
+        and status_kind != '40'
+        and	${searchCate} like '%' || LOWER(#{searchValue}) || '%'
+        and extract(day from sysdate-create_date) &gt; #{diffDays}
+        and NOT EXISTS (
+        select distinct user_id from ur_conn_user_history where extract(day from sysdate-conn_date) &gt; #{diffDays} and uup.user_id = user_id
+        )
+    </select>
+
+    <!-- 2023.10.26 - 미접속자 정보 - jingi.kim -->
+    <select id="selectNotconnManageList" parameterType="com.expis.user.dto.UserDto" resultMap="userResultMap">
+        select
+        <if test="sortKind == 'asc'">
+            (${totalCount} + 1) - tNum  as tNum
+        </if>
+        <if test="sortKind == 'desc'">
+            tNum  as tNum
+        </if>
+        ,user_id as userId
+        ,user_name as userName
+        ,user_ename as userEname
+        ,user_email as userEmail
+        ,user_role_code as userRoleCode
+        ,user_hope_code as userHopeCode
+        ,print_role_code as printRoleCode
+        ,print_word_kind as printWordKind
+        ,pw_change_date as pwChangeDate
+        ,status_kind as statusKind
+        ,create_user_id as createUserId
+        ,create_date as createDate
+        from	(
+        select	row_number () over (order by create_date desc)	as	tNum
+        ,user_id as user_id
+        ,lower(user_name) as user_name
+        ,user_ename
+        ,user_email
+        ,user_role_code
+        ,user_hope_code
+        ,print_role_code
+        ,print_word_kind
+        ,pw_change_date
+        ,status_kind
+        ,create_user_id
+        ,to_char(create_date, 'YYYY-MM-DD hh24:mi:ss') as create_date
+        from	ur_user_profile up
+        where 	user_role_code != 'V'
+        and user_role_code != 'W'
+        and	user_role_code != 'Z'
+        and status_kind != '40'
+        and	${searchCate} like '%' || LOWER(#{searchValue}) || '%'
+        and extract(day from sysdate-create_date) &gt; #{diffDays}
+        and NOT EXISTS (
+        select distinct user_id from ur_conn_user_history where extract(day from sysdate-conn_date) &gt; #{diffDays} and up.user_id = user_id
+        )
+        ) uup
+        WHERE tNum between #{startRow} and #{endRow}
+    </select>
+
+    <!-- 2023.10.27 - 비활성화 사용자 수 - jingi.kim -->
+    <select id="userLockedManageCount" resultType="int">
+        select	count(user_id)
+        from	ur_user_profile
+        where	status_kind = '20'
+        and user_role_code != 'V'
+        and	user_role_code != 'W'
+        and	user_role_code != 'Z'
+        and	${searchCate} like '%' || LOWER(#{searchValue}) || '%'
+    </select>
+
+    <!-- 2023.10.27 - 비활성화 사용자 정보 - jingi.kim -->
+    <select id="selectLockedManageList" parameterType="com.expis.user.dto.UserDto" resultMap="userResultMap">
+        select	<if test="sortKind == 'asc'">
+        (${totalCount} + 1) - tNum  as tNum
+    </if>
+        <if test="sortKind == 'desc'">
+            tNum  as tNum
+        </if>
+        ,user_id as userId
+        ,user_name as userName
+        ,user_ename as userEname
+        ,user_email as userEmail
+        ,user_role_code as userRoleCode
+        ,user_hope_code as userHopeCode
+        ,print_role_code as printRoleCode
+        ,print_word_kind as printWordKind
+        ,pw_change_date as pwChangeDate
+        ,status_kind as statusKind
+        ,create_user_id as createUserId
+        ,create_date as createDate
+        from
+        (
+        select	row_number () over (order by create_date desc)	as	tNum
+        ,user_id as user_id
+        ,lower(user_name) as user_name
+        ,user_ename
+        ,user_email
+        ,user_role_code
+        ,user_hope_code
+        ,print_role_code
+        ,print_word_kind
+        ,pw_change_date
+        ,status_kind
+        ,create_user_id
+        ,to_char(create_date, 'YYYY-MM-DD hh24:mi:ss') as create_date
+        from	ur_user_profile
+        where	user_role_code != 'V'
+        and	user_role_code != 'W'
+        and	user_role_code != 'Z'
+        and	status_kind = '20'
+        and	${searchCate} like '%' || LOWER(#{searchValue}) || '%'
+        ) t1
+        where	tNum between #{startRow} and #{endRow}
+    </select>
+
+    <!-- 최초 로그인 정보 -->
+    <select id="getSLoginIngo" parameterType="com.expis.ietm.dto.MainDto"
+            resultMap="mainResultMap">
+        SELECT rownum, conn_date
+        FROM (
+        select 	to_char(conn_date, 'YYYY-MM-DD HH24:MI:SS') as conn_date
+        from	ur_conn_user_history
+        where	status_kind = '20'
+        and 	user_id=#{userId}
+        ORDER BY conn_date ASC )
+    </select>
+
+    <!-- 최종 로그아웃 -->
+    <select id="getDisConnDate" parameterType="com.expis.ietm.dto.MainDto"
+            resultMap="mainResultMap">
+
+        select 	rownum
+        ,to_char(disconn_date, 'YYYY-MM-DD HH24:MI:SS') as disconn_date
+        from
+        (
+        select 	nvl(disconn_date,sysdate)as disconn_date
+        ,rownum
+        from 	ur_conn_user_history
+        where 	status_kind ='10'
+        and 	user_id =#{userId}
+        order by conn_seq desc
+        )
+        where 	rownum &lt; '2'
+    </select>
+
+    <!-- 정상적인 방법아님 -->
+    <select id="getDisConnDateTest" parameterType="com.expis.ietm.dto.MainDto"
+            resultMap="mainResultMap">
+        select	 nvl(conn_date, '')	as conn_date
+        ,nvl(disconn_date, '')	as dissconn_date
+        from	ur_conn_user_history
+        where	conn_seq = (select max(conn_seq) from ur_conn_user_history where user_id=#{userId} and #{connSeq} &gt;  conn_seq)
+    </select>
+
+</mapper>

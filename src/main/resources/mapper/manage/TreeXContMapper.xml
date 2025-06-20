@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.manage.dao.TreeXContMapper">
+    <parameterMap type="java.util.HashMap" id="HashMap"/>
+
+    <!-- ResultMap -->
+    <resultMap id="treeResultMap" type="com.expis.manage.dto.TreeXContDto">
+        <id	    property="treeKind"			column="tree_kind"				javaType="string" />
+        <result	property="refToKey"			column="ref_to_key"			javaType="string" />
+        <result	property="refUserId"			column="ref_user_id"			javaType="string" />
+        <result	property="treeXth"				column="tree_xth"				javaType="long" />
+        <result	property="treeXcont"			column="tree_xcont"			javaType="string" />
+        <result	property="statusKind"			column="status_kind"			javaType="string" />
+        <result	property="createUserId"		column="create_user_id"	javaType="string" />
+        <result	property="createDate"		column="create_date"			javaType="date" />
+    </resultMap>
+
+
+    <!-- ResultCount -->
+    <resultMap id="treeResultCount" type="int">
+        <result property="cnt" column="cnt" />
+    </resultMap>
+
+
+    <!-- Column -->
+    <sql id="treeColumn">
+        ttx.tree_kind				AS tree_kind
+        , ttx.ref_to_key			AS ref_to_key
+        , ttx.ref_user_id			AS ref_user_id
+        , ttx.tree_xth				AS tree_xth
+        , ttx.tree_xcont			AS tree_xcont
+        , ttx.status_kind			AS status_kind
+        , ttx.create_user_id		AS create_user_id
+        , ttx.create_date			AS create_date
+    </sql>
+
+
+    <!--  Select Count --><!-- 미사용 -->
+    <select id="selectCountDao" parameterType="com.expis.manage.dto.TreeXContDto" resultMap="treeResultCount">
+        SELECT
+        COUNT(*) AS cnt
+        FROM tm_tree_xcont ttx
+        <where>
+            <if test="statusKind != null">
+                status_kind = #{statusKind}
+            </if>
+            <if test="statusKind == null">
+                status_kind = '10'
+            </if>
+            <if test="treeKind != null">AND tree_kind = #{treeKind}</if>
+            <if test="refToKey != null">AND ref_to_key = #{refToKey}</if>
+            <if test="refUserId != null">AND ref_user_id = #{refUserId}</if>
+        </where>
+
+    </select>
+
+
+    <!--  Select List -->
+    <select id="selectListDao" parameterType="com.expis.manage.dto.TreeXContDto" resultMap="treeResultMap">
+        SELECT
+        <include refid="treeColumn" />
+        FROM tm_tree_xcont ttx
+
+        <where>
+            <if test="statusKind != null">
+                status_kind = #{statusKind}
+            </if>
+            <if test="statusKind == null">
+                status_kind = '10'
+            </if>
+            <if test="treeKind != null">AND tree_kind = #{treeKind}</if>
+            <if test="refToKey != null">AND ref_to_key = #{refToKey}</if>
+            <if test="refUserId != null">AND ref_user_id = #{refUserId}</if>
+        </where>
+
+        ORDER BY tree_xth ASC
+    </select>
+
+
+    <!--  Select One --><!-- 미사용 -->
+    <select id="selectDetailDao" parameterType="com.expis.manage.dto.TreeXContDto" resultMap="treeResultMap">
+        SELECT
+        <include refid="treeColumn" />
+        FROM tm_tree_xcont ttx
+        WHERE tree_kind = #{treeKind}
+        <if test="refToKey != null">AND ref_to_key = #{refToKey}</if>
+        <if test="refUserId != null">AND ref_user_id = #{refUserId}</if>
+    </select>
+
+
+    <!-- Insert -->
+    <insert id="insertDao" parameterType="com.expis.manage.dto.TreeXContDto">
+        INSERT INTO tm_tree_xcont
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            tree_kind,
+            <if test="refToKey != null">ref_to_key,</if>
+            <if test="refUserId != null">ref_user_id,</if>
+            <if test="treeXth != null">tree_xth,</if>
+            <if test="treeXcont != null">tree_xcont,</if>
+            <if test="statusKind != null">status_kind,</if>
+            <if test="createUserId != null">create_user_id,</if>
+            create_date
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{treeKind},
+            <if test="refToKey != null">#{refToKey},</if>
+            <if test="refUserId != null">#{refUserId},</if>
+            <if test="treeXth != null">#{treeXth},</if>
+            <if test="treeXcont != null">#{treeXcont},</if>
+            <if test="statusKind != null">#{statusKind},</if>
+            <if test="createUserId != null">#{createUserId},</if>
+            SYSDATE
+        </trim>
+    </insert>
+
+    <insert id="insertAllDaoMDB" parameterType="com.expis.manage.dto.TreeXContDto">
+        insert into	tm_tree_xcont
+        (
+        tree_kind,
+        ref_to_key,
+        ref_user_id,
+        tree_xth,
+        tree_xcont,
+        status_kind,
+        create_user_id,
+        create_date
+        )
+        values
+        (
+        #{treeKind},
+        #{refToKey},
+        #{refUserId},
+        ${treeXth},
+        #{treeXcont},
+        #{statusKind},
+        #{createUserId},
+        SYSDATE
+        )
+    </insert>
+
+    <!-- Insert All -->
+    <insert id="insertAllDao" parameterType="com.expis.manage.dto.TreeXContDto">
+        <foreach index="index" item="item" collection="list" open="INSERT ALL " separator=" " close="SELECT * FROM DUAL">
+            INTO tm_tree_xcont
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                tree_kind,
+                <if test="item.refToKey != null">ref_to_key,</if>
+                <if test="item.refUserId != null">ref_user_id,</if>
+                <if test="item.treeXth != null">tree_xth,</if>
+                <if test="item.treeXcont != null">tree_xcont,</if>
+                <if test="item.statusKind != null">status_kind,</if>
+                <if test="item.createUserId != null">create_user_id,</if>
+                create_date
+            </trim>
+            VALUES
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                #{item.treeKind},
+                <if test="item.refToKey != null">#{item.refToKey},</if>
+                <if test="item.refUserId != null">#{item.refUserId},</if>
+                <if test="item.treeXth != null">#{item.treeXth},</if>
+                <if test="item.treeXcont != null">#{item.treeXcont},</if>
+                <if test="item.statusKind != null">#{item.statusKind},</if>
+                <if test="item.createUserId != null">#{item.createUserId},</if>
+                SYSDATE
+            </trim>
+        </foreach>
+    </insert>
+
+
+    <!-- Update --><!-- 미사용 -->
+    <update id="updateDao" parameterType="com.expis.manage.dto.TreeXContDto">
+        UPDATE tm_tree_xcont
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="treeXth != null">tree_xth = #{treeXth},</if>
+            <if test="treeXcont != null">tree_xcont = #{treeXcont},</if>
+            <if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+            modify_date = SYSDATE
+        </trim>
+        WHERE tree_kind = #{treeKind}
+        <if test="refToKey != null">AND ref_to_key = #{refToKey}</if>
+        <if test="refUserId != null">AND ref_user_id = #{refUserId}</if>
+    </update>
+
+
+    <!-- Delete -->
+    <delete id="deleteDao" parameterType="com.expis.manage.dto.TreeXContDto">
+        DELETE FROM tm_tree_xcont
+        WHERE tree_kind = #{treeKind}
+        <if test="refToKey != null">AND ref_to_key = #{refToKey}</if>
+        <if test="refUserId != null">AND ref_user_id = #{refUserId}</if>
+    </delete>
+
+
+    <!-- Delete -->
+    <delete id="deleteAllDao">
+        DELETE FROM tm_tree_xcont
+    </delete>
+
+
+    <!-- Select Sibling List -->
+    <select id="selectSiblingList" parameterType="String" resultMap="treeResultMap">
+        select    tsi.to_key		as ref_to_key
+        , tsi.sys_name	as ref_user_id
+        , tti.to_save_yn as status_kind
+        from	tm_sys_info tsi
+        left join	tm_to_info tti
+        on			tti.to_key = tsi.to_key
+        where	p_sys_id =
+        (
+        select  p_sys_id
+        from    tm_sys_info
+        where   to_key = #{toKey}
+        and rownum = 1
+        )
+        and tti.to_save_yn is not null
+        order by sys_ord
+    </select>
+
+    <select id="selectInsertTmList" resultType="String">
+        select
+        ttx.ref_to_key			AS refToKey
+        from	tm_tree_xcont ttx
+        where status_kind = '10'
+        and ttx.ref_to_key is not null
+        group by ttx.ref_to_key
+    </select>
+
+</mapper>

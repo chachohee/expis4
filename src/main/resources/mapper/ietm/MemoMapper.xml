@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.ietm.dao.MemoMapper">
+
+	<!-- ResultMap -->
+	<resultMap id="memoResultMap" type="com.expis.ietm.dto.MemoDto">
+		<id		property="memoSeq"			column="memo_seq"			javaType="long" />
+		<result	property="toKey"					column="to_key"					javaType="string" />
+		<result property="tocoId" 				column="toco_id" 				javaType="String" />
+		<result property="tocoName" 			column="toco_name" 			javaType="String" />
+		<result	property="subject"				column="subject"					javaType="string" />
+		<result	property="cont"					column="cont"						javaType="string" />
+		<result	property="shareYn"				column="share_yn"				javaType="string" />
+		<result	property="statusKind"			column="status_kind"			javaType="string" />
+		<result	property="createUserId"		column="create_user_id"	javaType="string" />
+		<result	property="createDate"		column="create_date"			javaType="string" />
+		<result	property="modifyUserId"		column="modify_user_id"	javaType="string" />
+		<result	property="modifyDate"		column="modify_date"			javaType="string" />
+		<result	property="createUserInfo"	column="create_user_info"	javaType="string" />
+<!-- 		<result	property="memoStatus"		column="status_kind"			javaType="string" /> -->
+		<result	property="memoStatus"		column="memoStatus"			javaType="string" />
+	</resultMap>
+	
+	<resultMap id="memoTotCnt" type="int">
+		<result	property="totCnt" column="tot_cnt"   />
+	</resultMap>
+
+
+	<!-- by ejkim 2022.01.11 fn_ur_user_name 함수가 존재하지 않음 확인필요 -->
+	<!-- Column -->
+	<sql id="memoCol">
+		  Bm.memo_seq		AS memo_seq 
+		, Bm.to_key			AS to_key
+		, Bm.toco_id		AS toco_id
+		, Bm.subject		AS subject
+		, Bm.cont			AS cont
+		, Bm.share_yn		AS	share_yn
+		, Bm.status_kind	AS status_kind
+		, Bm.create_user_id	AS create_user_id
+		, Bm.create_date	AS create_date
+		, Bm.modify_user_id	AS modify_user_id
+		, Bm.modify_date	AS modify_date
+<!--		, fn_ur_user_name(Bm.create_user_id) AS create_user_info-->
+	</sql>
+	
+	
+	<!-- Select Total Count -->
+	<select id="selectCountDao" parameterType="com.expis.ietm.dto.MemoDto" resultMap="memoTotCnt" >
+			SELECT count(memo_seq) as tot_cnt 
+			FROM tm_fn_memo
+			WHERE status_kind != 40
+	</select>
+	
+	
+	<!-- Select List -->
+	<select id="selectListDao" parameterType="com.expis.ietm.dto.MemoDto" resultMap="memoResultMap">
+		select	memo_seq 
+				,to_key
+				,toco_id
+				,subject
+				,status_kind
+				,create_user_id
+				,create_date
+				,modify_user_id
+				,modify_date
+				,cont
+				,share_yn
+        		,toco_name
+        		,create_user_info
+				,memoStatus
+		from (
+				select	 tfm.memo_seq 
+						,tfm.to_key
+						,tfm.toco_id
+						,tfm.subject
+						,tfm.status_kind
+						,tfm.create_user_id
+						,to_char(tfm.create_date, 'YYYY-MM-DD HH24:MI:SS') as	create_date
+						,tfm.modify_user_id
+						,to_char(tfm.modify_date, 'YYYY-MM-DD HH24:MI:SS') as	modify_date
+						,tfm.cont
+						,tfm.share_yn
+						,case when tci.p_toco_id = '0' then
+							'표지'
+						 else
+						 	tci.toco_name
+						 end	toco_name
+						,(select user_name from ur_user_profile where user_id = tfm.create_user_id) as create_user_info
+						,tfm.status_kind as memoStatus
+				from	tm_fn_memo tfm 
+				left join tm_toco_info tci
+					on tfm.toco_id = tci.toco_id
+				where	tfm.status_kind != 40	
+				and		share_yn = 'Y'
+				
+				<if test="toKey != null">
+					and		tfm.to_key = #{toKey, jdbcType=VARCHAR}
+					<if test="tocoId != null">
+						and		tfm.toco_id = #{tocoId, jdbcType=VARCHAR}
+					</if>
+				</if>
+
+				<if test="searchValue != null and searchValue != 'none' and searchValue != ''">
+					and tfm.cont like '%' || #{searchValue, jdbcType=VARCHAR} || '%'
+				</if>
+
+				union
+				select	 tfm.memo_seq 
+						,tfm.to_key
+						,tfm.toco_id
+						,tfm.subject
+						,tfm.status_kind
+						,tfm.create_user_id
+						,to_char(tfm.create_date, 'YYYY-MM-DD HH24:MI:SS') as	create_date
+						,tfm.modify_user_id
+						,to_char(tfm.modify_date, 'YYYY-MM-DD HH24:MI:SS') as	modify_date
+						,tfm.cont
+						,tfm.share_yn
+						,case when tci.p_toco_id = '0' then
+							'표지'
+						 else
+						 	tci.toco_name
+						 end	toco_name
+						,(select user_name from ur_user_profile where user_id = tfm.create_user_id) as create_user_info
+						,tfm.status_kind as memoStatus
+				from	tm_fn_memo tfm 
+				left join tm_toco_info tci
+					on tfm.toco_id = tci.toco_id
+				where	tfm.create_user_id = #{createUserId, jdbcType=VARCHAR}
+				and		tfm.status_kind != 40
+				and		share_yn = 'N'
+				
+				<if test="toKey != null">
+					and		tfm.to_key = #{toKey, jdbcType=VARCHAR}
+					<if test="tocoId != null">
+						and		tfm.toco_id = #{tocoId, jdbcType=VARCHAR}
+					</if>
+				</if>
+
+				<if test="searchValue != null and searchValue != 'none' and searchValue != ''">
+					and tfm.cont like '%' || #{searchValue, jdbcType=VARCHAR} || '%'
+				</if>
+
+			)
+		<choose>
+			<when test="sortCode == 01">
+				order by share_yn desc, modify_date desc
+			</when>
+			<when test="sortCode == 02">
+				order by share_yn desc, modify_date
+			</when>
+			<otherwise>
+				order by share_yn asc, modify_date
+			</otherwise>
+		</choose>
+		
+	</select>
+	
+	
+	<!-- Select Detail -->
+	<select id="selectDetailDao" resultMap="memoResultMap">
+		SELECT
+		<include refid="memoCol" />
+		FROM tm_fn_memo bm
+		WHERE memo_seq = #{memoSeq}
+	</select>
+	
+	
+	<!-- Insert -->
+	<insert id="insertDao" parameterType="com.expis.ietm.dto.MemoDto">
+		<selectKey keyProperty="memoSeq" resultType="long" order="BEFORE">
+			SELECT decode(max(memo_seq), null, 1, max(memo_seq)+1) as memo_seq FROM tm_fn_memo
+		</selectKey>
+		
+		INSERT INTO tm_fn_memo
+		<trim prefix="(" suffix=")">
+			memo_seq,
+			subject,
+			cont,
+			<if test="toKey != null">to_key,</if>
+			<if test="tocoId != null">toco_id,</if>
+			<if test="createUserId != null">create_user_id,</if>
+			create_date,
+			<if test="modifyUserId != null">modify_user_id,</if>
+			modify_date,
+			<if test="shareYn != null">share_yn,</if>
+			status_kind
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")">
+			#{memoSeq},
+			#{subject},
+			#{cont},
+			<if test="toKey != null">#{toKey},</if>
+			<if test="tocoId != null">#{tocoId},</if>
+			<if test="createUserId != null">#{createUserId},</if>
+			SYSDATE,
+			<if test="modifyUserId != null">#{modifyUserId},</if>
+			SYSDATE,
+			<if test="shareYn != null">#{shareYn},</if>
+			10
+		</trim>
+	</insert>
+	
+	
+	<!-- Update -->
+	<update id="updateDao" parameterType="com.expis.ietm.dto.MemoDto">
+		UPDATE tm_fn_memo
+		SET cont = #{cont}
+		<if test="toKey != null">,toKey = #{toKey, jdbcType=VARCHAR}</if>
+		<if test="subject != null">,subject = #{subject, jdbcType=VARCHAR}</if>
+		<if test="tocoId != null">,toco_id = #{tocoId, jdbcType=VARCHAR}</if>
+		,modify_user_id = #{modifyUserId, jdbcType=VARCHAR}
+		,modify_date = SYSDATE
+		<if test="shareYn != null">,share_yn = #{shareYn, jdbcType=VARCHAR}</if>
+		WHERE memo_seq = #{memoSeq}
+	</update>
+
+
+
+	<!-- Delete -->
+	<update id="deleteDao" parameterType="com.expis.ietm.dto.MemoDto">
+		UPDATE	tm_fn_memo
+		SET		status_kind = #{statusKind},
+				modify_user_id = #{modifyUserId}
+		WHERE	memo_seq = #{memoSeq}
+	</update>
+	
+	<!-- 2023.03.31 jysi EDIT : 메모 공유 기능 작성자 정보 오류 수정 -->
+	<select id="selectSingleMemo" parameterType="com.expis.ietm.dto.MemoDto" resultType="com.expis.ietm.dto.MemoDto">
+		select	memo_seq		as	memoSeq
+				,to_key			as	tokey
+				,toco_id		as	tocoId
+				,subject
+				,status_kind	as	statusKind
+				,create_user_id	as	createUserId
+				,create_date	as	createDate
+				,modify_user_id	as	modifyUserId
+				,modify_date	as	modifyDate
+				,cont
+				,share_yn		as	shareYn
+				,(select toco_name from tm_toco_info where to_key=#{toKey} and toco_id=#{tocoId} and status_kind = '10')	as tocoName
+				,(select user_name from ur_user_profile where user_id = tfm.create_user_id) AS createUserInfo
+		from	tm_fn_memo tfm
+		where	status_kind &lt;&gt; '40'
+		and		to_key = #{toKey}
+		and		toco_id = #{tocoId}
+		and		(create_user_id = #{createUserId, jdbcType=VARCHAR} OR share_yn = 'Y')
+		<if test="toKey != null">
+			and		to_key = #{toKey, jdbcType=VARCHAR}
+		</if>
+		order by memo_seq asc
+	</select>
+	
+	<!-- 교범 내용에 해당하는 Memo List -->
+	<select id="selectListFromToDao" parameterType="com.expis.ietm.dto.MemoDto" resultMap="memoResultMap">
+		SELECT	 tfm.memo_seq 
+				, tfm.to_key
+				, tfm.toco_id
+				, tfm.subject
+<!-- 				, tfm.status_kind -->
+				, tfm.create_user_id
+				, tfm.create_date
+				, tfm.modify_user_id
+				, to_char(tfm.modify_date, 'YYYY-MM-DD HH24:MI:SS')	as	modify_date
+				, tfm.cont
+				, tfm.share_yn
+				, tti.toco_name
+				,(select user_name from ur_user_profile where user_id = tfm.create_user_id) as create_user_info 
+		FROM	tm_fn_memo tfm ,
+			(    
+		    SELECT LEVEL toco_level, tti.*
+		    FROM tm_toco_info tti
+		    WHERE to_key = #{toKey}
+		    START WITH toco_id = #{tocoId}
+		    CONNECT BY PRIOR toco_id = p_toco_id
+		    ORDER BY to_key ASC, toco_ord ASC
+		    ) tti
+		WHERE	tfm.status_kind != 40
+		AND		tfm.to_key = tti.to_key
+		AND		tfm.toco_id = tti.toco_id
+		AND		( tfm.create_user_id = #{createUserId, jdbcType=VARCHAR} OR tfm.share_yn = 'Y' )
+		<if test="toKey != null">
+		and		tfm.to_key = #{toKey, jdbcType=VARCHAR}
+		</if>
+		ORDER BY tti.to_key ASC, tti.toco_ord ASC, tti.toco_id ASC, tfm.memo_seq ASC
+	</select>
+	
+	
+	<insert id="insertMemoMI" parameterType="com.expis.ietm.dto.MemoDto">
+		MERGE INTO tm_fn_memo tfm
+			 USING DUAL ON ( tfm.to_key = #{toKey} AND tfm.toco_id = #{tocoId} AND tfm.create_user_id = #{createUserId} )
+			  WHEN MATCHED THEN 
+			UPDATE SET  
+			       cont = #{cont}
+				 , subject = #{subject}
+				 , modify_user_id = #{modifyUserId}
+				 , modify_date = SYSDATE
+				 , share_yn = #{shareYn}
+			 WHEN NOT MATCHED THEN 
+			 INSERT 
+			 <trim prefix="(" suffix=")" suffixOverrides=",">
+					memo_seq,
+					subject,
+					cont,
+				<if test="toKey != null">to_key,</if>
+				<if test="tocoId != null">toco_id,</if>
+				<if test="createUserId != null">create_user_id,</if>
+					create_date,
+				<if test="shareYn != null">share_yn,</if>
+					status_kind
+			 </trim>
+			 values
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+					( SELECT decode(max(memo_seq), null, 1, max(memo_seq)+1) as memo_seq FROM tm_fn_memo ), 
+					#{subject},
+					#{cont},
+					<if test="toKey != null">#{toKey},</if>
+					<if test="tocoId != null">#{tocoId},</if>
+					<if test="createUserId != null">#{createUserId},</if>
+					SYSDATE,
+					<if test="shareYn != null">#{shareYn},</if>
+					#{statusKind}
+			</trim>		
+	</insert>
+</mapper>

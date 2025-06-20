@@ -1,0 +1,782 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MyBatis 3 Mapper//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.expis.community.dao.BoardDetailMapper">
+    <!-- ResultMap -->
+    <resultMap id="boardMasterDTO" type="BoardMasterDTO">
+        <result column="board_m_seq" property="boardMSeq" javaType="int"/>
+        <result column="board_name" property="boardName" javaType="String"/>
+        <result column="board_type" property="boardType" javaType="String"/>
+        <result column="board_file_yn" property="boardFileYn" javaType="String"/>
+        <result column="board_write_yn" property="boardWriteYn" javaType="String"/>
+        <result column="board_reply_yn" property="boardReplyYn" javaType="String"/>
+        <result column="board_comment_yn" property="boardCommentYn" javaType="String"/>
+        <result column="board_count_yn" property="boardCountYn" javaType="String"/>
+        <result column="board_notice_yn" property="boardNoticeYn" javaType="String"/>
+        <result column="notice_day" property="noticeDay" javaType="int"/>
+
+        <result column="board_d_seq" property="boardDSeq" javaType="int"/>
+        <result column="board_title" property="boardTitle" javaType="String"/>
+        <result column="board_contents" property="boardContents" javaType="String"/>
+        <result column="board_p_seq" property="boardPSeq" javaType="int"/>
+        <result column="board_f_seq" property="boardFSeq" javaType="int"/>
+        <result column="board_count" property="boardCount" javaType="int"/>
+        <result column="board_top_yn" property="boardTopYn" javaType="String"/>
+
+        <result column="status_kind" property="statusKind" javaType="String"/>
+        <result column="create_user_id" property="createUserId" javaType="String"/>
+        <result column="create_date" property="createDate" javaType="Date"/>
+        <result column="modify_user_id" property="modifyUserId" javaType="String"/>
+        <result column="modify_date" property="modifyDate" javaType="Date"/>
+    </resultMap>
+
+    <select id="introBoardList" parameterType="BoardMasterDTO" resultType="BoardMasterDTO">
+        select	boardMSeq
+             ,boardName
+             ,boardDSeq
+             ,boardTitle
+             ,createDate
+             ,viewUserId
+        from
+            (
+                select	cbd.board_m_seq		as	boardMSeq
+                     ,board_d_seq	as	boardDSeq
+                     ,board_name		as	boardName
+                     ,board_title	as	boardTitle
+                     ,to_char(cbd.create_date, 'yyyy-mm-dd') as createDate
+                     ,case when uup.user_name is not null then uup.user_name ||'(' || uup.user_id || ')' end as viewUserId
+                from	cm_board_detail cbd
+                            left join cm_board_master cbm
+                                      on		cbd.board_m_seq = cbm.board_m_seq
+                            left join ur_user_profile uup
+                                      on		cbd.create_user_id = uup.user_id
+                where	cbd.board_m_seq = #{boardMSeq}
+                  and		board_p_seq = 0
+                  and		cbd.status_kind = '10'
+                order by board_d_seq desc
+            )
+        where	rownum &lt; 11
+    </select>
+
+    <select id="boardTotalCount" resultType="int" parameterType="BoardMasterDTO">
+        select	count(board_d_seq)
+        from
+        (
+        select	cbd.board_title
+        ,cbd.board_contents
+        ,cbd.board_d_seq
+        ,case when uup.user_name is not null then uup.user_name ||'(' || uup.user_id || ')' end as viewUserId
+        from	cm_board_detail cbd
+        left join ur_user_profile uup
+        on cbd.create_user_id = uup.user_id
+        where	board_m_seq = #{boardMSeq}
+        and		cbd.status_kind = '10'
+        )
+        <where>
+            <if test="searchValue != 'none'">
+                <if test="searchCate == 'title'">
+                    board_title like '%' || #{searchValue} || '%'
+                </if>
+                <if test="searchCate == 'contents'">
+                    board_contents like '%' || #{searchValue} || '%'
+                </if>
+                <if test="searchCate == 'writer'">
+                    viewUserId like '%' || #{searchValue} || '%'
+                </if>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectBoardTopList" resultType="BoardMasterDTO">
+        select	boardTitle
+             ,boardDSeq
+             ,boardMSeq
+             ,boardCount
+             ,viewUserId
+             ,createDate
+        from
+            (
+                select	cbd.board_title		as	boardTitle
+                     ,cbd.board_d_seq	as	boardDSeq
+                     ,cbd.board_m_seq	as	boardMSeq
+                     ,cbd.board_count	as	boardCount
+                     ,case when up.user_name is not null then up.user_name ||'('|| up.user_id || ')' end as viewUserId
+                     ,to_char(cbd.create_date, 'yyyy-mm-dd')  as  createDate
+                from	cm_board_detail cbd
+                            left join ur_user_profile up
+                                      on		cbd.modify_user_id = up.user_id
+                where	cbd.board_m_seq = #{boardMSeq}
+                  and		cbd.board_top_yn = 'Y'
+                  and		cbd.status_kind = '10'
+                order by cbd.create_date desc
+            )
+        where	rownum &lt; 4
+    </select>
+
+    <select id="selectBoardDetailList" resultType="BoardMasterDTO">
+        select  tNum
+        ,rNum
+        ,boardTitle
+        ,boardDSeq
+        ,boardPSeq
+        ,boardRSeq
+        ,boardMSeq
+        ,boardCount
+        ,boardTopYn
+        ,boardContents
+        ,createDate
+        ,viewUserId
+        ,statusKind
+        ,tabCnt
+        ,commentsCount
+        from (
+        select	ROW_NUMBER() OVER (order by boardRSeq desc, boardDSeq)  as   tnum
+        ,rNum
+        ,boardTitle
+        ,boardDSeq
+        ,boardPSeq
+        ,boardRSeq
+        ,boardMSeq
+        ,boardCount
+        ,boardTopYn
+        ,boardContents
+        ,to_char(create_date, 'yyyy-mm-dd')  as  createDate
+        ,statusKind
+        ,viewUserId
+        ,(select count(board_c_seq) from cm_board_comments where boardDSeq = board_d_seq and status_kind = '10') as commentsCount
+        ,(select count(board_title)	from cm_board_detail where status_kind = '10'  ) as tabCnt
+        from
+        (
+        select	row_number() over (order by cbd.board_d_seq)  as rNum
+        ,board_title  as  boardTitle
+        ,board_d_seq  as  boardDSeq
+        ,board_p_seq  as  boardPSeq
+        ,board_d_seq  as  boardRSeq
+        ,board_m_seq  as  boardMSeq
+        ,board_count	as	boardCount
+        ,board_top_yn	as	boardTopYn
+        ,board_contents as boardContents
+        ,cbd.create_date
+        ,CASE WHEN up.user_NAME IS NOT NULL THEN up.user_name ||'('|| up.user_id || ')' END as viewUserId
+        ,cbd.status_kind  as  statusKind
+        from	cm_board_detail	cbd
+        left join ur_user_profile up
+        on		cbd.create_user_id = up.user_id
+        where	cbd.board_p_seq = 0
+        and		cbd.status_kind = '10'
+        and     (cbd.xth IS NULL OR cbd.xth = 1 )
+        and		cbd.board_m_seq = #{boardMSeq}
+        <if test="searchValue != 'none'">
+            <if test="searchCate == 'title'">
+                and	board_title like '%' || #{searchValue} || '%'
+            </if>
+            <if test="searchCate == 'contents'">
+                and	board_contents like '%' || #{searchValue} || '%'
+            </if>
+            <if test="searchCate == 'writer'">
+                and	up.user_name ||'('|| up.user_id || ')' like '%' || #{searchValue} || '%'
+            </if>
+        </if>
+        union	all
+        select	null  as rNum
+        ,board_title  as  boardTitle
+        ,board_d_seq  as  boardDSeq
+        ,board_p_seq  as  boardPSeq
+        ,board_p_seq   as  board_r_seq
+        ,board_m_seq  as  boardMSeq
+        ,board_count	as	boardCount
+        ,board_top_yn	as	boardTopYn
+        ,board_contents as boardContents
+        ,cbd.create_date
+        ,CASE WHEN up.user_NAME IS NOT NULL THEN up.user_name ||'('|| up.user_id || ')' END as viewUserId
+        ,cbd.status_kind  as  statusKind
+        from	cm_board_detail cbd
+        left join ur_user_profile up
+        on		cbd.create_user_id = up.user_id
+        where	cbd.board_p_seq != 0
+        and		cbd.status_kind = '10'
+        and		cbd.board_m_seq = #{boardMSeq}
+        )
+        where statusKind = '10'
+        and  boardMSeq = #{boardMSeq}
+        <if test="searchValue != 'none'">
+            <if test="searchCate == 'title'">
+                and	boardTitle like '%' || #{searchValue} || '%'
+            </if>
+            <if test="searchCate == 'contents'">
+                and	boardContents like '%' || #{searchValue} || '%'
+            </if>
+            <if test="searchCate == 'writer'">
+                and	viewUserId like '%' || #{searchValue} || '%'
+            </if>
+        </if>
+        )
+        where tnum BETWEEN #{startRow} and #{endRow}
+
+    </select>
+
+    <select id="selectBoardDetail" parameterType="int" resultType="BoardMasterDTO">
+        select 	cbd.board_title		as	boardTitle
+             ,cbd.board_contents	as	boardContents
+             ,cbd.board_m_seq	as	boardMSeq
+             ,cbd.board_d_seq	as	boardDSeq
+             ,cbd.board_p_seq	as	boardPSeq
+             ,cbd.board_f_seq	as	boardFSeq
+             ,cbd.board_count	as	boardCount
+             ,cbd.board_top_yn	as	boardTopYn
+             ,cfn.file_orgnm		as	fileOrgNm
+             ,cfn.file_seq		as	boardFSeq
+             ,CASE WHEN up.user_NAME IS NOT NULL THEN up.user_name ||'('|| up.user_id || ')' END as viewUserId
+             ,cbd.create_user_id	as	createUserId
+             ,to_char(cbd.create_date, 'yyyy-mm-dd hh24:mi:ss') 		as 	createDate
+        from 	cm_board_detail cbd
+                    left join cm_files_new cfn
+                              on cbd.board_f_seq = cfn.file_seq
+                    left join ur_user_profile up
+                              on		cbd.create_user_id = up.user_id
+        where	cbd.board_d_seq = #{boardDSeq}
+
+    </select>
+
+    <insert id="insertBoardDetail" parameterType="BoardMasterDTO">
+        <selectKey keyProperty="boardDSeq" resultType="int" order="BEFORE">
+            select 	nvl(max(board_d_seq), 0) + 1 as boardDSeq
+            from 	cm_board_detail
+        </selectKey>
+        insert into cm_board_detail (
+        board_d_seq
+        ,board_m_seq
+        ,board_title
+        ,board_contents
+        ,board_p_seq
+        ,board_f_seq
+        ,board_count
+        ,board_top_yn
+        ,status_kind
+        ,create_user_id
+        ,create_date
+        ,modify_user_id
+        ,modify_date
+        ) values (
+        #{boardDSeq}
+        ,#{boardMSeq}
+        ,#{boardTitle}
+        ,#{boardContents}
+        ,#{boardPSeq}
+        ,#{boardFSeq}
+        ,0
+        ,#{boardTopYn}
+        ,'10'
+        ,#{createUserId}
+        ,sysdate
+        ,#{createUserId}
+        ,sysdate
+        )
+    </insert>
+
+    <update id="updateBoardDetailHitCount" parameterType="int">
+        update 	cm_board_detail
+        set 	board_count = board_count + 1
+        where 	board_d_seq = #{boardDSeq}
+    </update>
+
+    <update id="updateBoardDetail" parameterType="BoardMasterDTO">
+        update 	cm_board_detail
+        set		board_title = #{boardTitle}
+          ,board_contents = #{boardContents}
+          ,board_f_seq = #{boardFSeq}
+          ,board_top_yn = #{boardTopYn}
+          ,modify_user_id = #{modifyUserId}
+          ,modify_date = sysdate
+        where	board_d_seq = #{boardDSeq}
+    </update>
+
+
+    <!-- 2023.06.27 - 데이터 분리 추가 - jingi.kim -->
+    <select id="selectXTHBoardDetail" parameterType="int" resultType="BoardMasterDTO">
+        select 	cbd.board_title		as	boardTitle
+             ,cbd.board_contents	as	boardContents
+             ,cbd.board_m_seq	as	boardMSeq
+             ,cbd.board_d_seq	as	boardDSeq
+             ,cbd.board_p_seq	as	boardPSeq
+             ,cbd.board_f_seq	as	boardFSeq
+             ,cbd.board_count	as	boardCount
+             ,cbd.board_top_yn	as	boardTopYn
+             ,cfn.file_orgnm		as	fileOrgNm
+             ,cfn.file_seq		as	boardFSeq
+             ,CASE WHEN up.user_NAME IS NOT NULL THEN up.user_name ||'('|| up.user_id || ')' END as viewUserId
+             ,cbd.create_user_id	as	createUserId
+             ,to_char(cbd.create_date, 'yyyy-mm-dd hh24:mi:ss') 		as 	createDate
+        from 	cm_board_detail cbd
+                    left join cm_files_new cfn
+                              on cbd.board_f_seq = cfn.file_seq
+                    left join ur_user_profile up
+                              on		cbd.create_user_id = up.user_id
+        where	cbd.board_d_seq = #{boardDSeq}
+        order by cbd.xth asc
+    </select>
+
+    <!-- 2023.06.27 - 데이터 분리 추가 - 다음 BOARD_D_SEQ 구하기 - jingi.kim -->
+    <select id="selectNextBoardDSeq" resultType="int">
+        select 	nvl(max(board_d_seq), 0) + 1 as boardDSeq
+        from 	cm_board_detail
+    </select>
+
+    <!-- 2023.06.27 - 데이터 분리 추가 - jingi.kim -->
+    <insert id="insertXTHBoardDetail" parameterType="BoardMasterDTO">
+        INSERT INTO CM_BOARD_DETAIL (
+        board_d_seq
+        ,board_m_seq
+        ,board_title
+        ,board_contents
+        ,board_p_seq
+        ,board_f_seq
+        ,board_count
+        ,board_top_yn
+        ,status_kind
+        ,create_user_id
+        ,create_date
+        ,modify_user_id
+        ,modify_date
+        <if test="xth != null">,xth</if>
+        ) VALUES (
+        #{boardDSeq}
+        ,#{boardMSeq}
+        ,#{boardTitle}
+        ,#{boardContents}
+        ,#{boardPSeq}
+        ,#{boardFSeq}
+        ,0
+        ,#{boardTopYn}
+        ,'10'
+        ,#{createUserId}
+        ,sysdate
+        ,#{createUserId}
+        ,sysdate
+        <if test="xth != null">,#{xth}</if>
+        )
+    </insert>
+
+    <!-- 2023.06.27 - 데이터 분리 추가 - jingi.kim -->
+    <update id="updateXTHBoardDetail" parameterType="BoardMasterDTO">
+        update 	cm_board_detail
+        set		board_title = #{boardTitle}
+          ,board_contents = #{boardContents}
+          ,board_f_seq = #{boardFSeq}
+          ,board_top_yn = #{boardTopYn}
+          ,modify_user_id = #{modifyUserId}
+          ,modify_date = sysdate
+        where	board_d_seq = #{boardDSeq}
+          and	xth = #{xth}
+    </update>
+
+    <!-- 2023.06.27 - 데이터 분리 추가 - jingi.kim -->
+    <insert id="appendXTHBoardDetail" parameterType="BoardMasterDTO">
+        insert into cm_board_detail (
+                                      board_d_seq
+                                    ,board_m_seq
+                                    ,board_title
+                                    ,board_contents
+                                    ,board_p_seq
+                                    ,board_f_seq
+                                    ,board_count
+                                    ,board_top_yn
+                                    ,status_kind
+                                    ,create_user_id
+                                    ,create_date
+                                    ,modify_user_id
+                                    ,modify_date
+                                    ,xth
+        ) values (
+                   #{boardDSeq}
+                 ,#{boardMSeq}
+                 ,#{boardTitle}
+                 ,#{boardContents}
+                 ,#{boardPSeq}
+                 ,#{boardFSeq}
+                 ,#{boardCount}
+                 ,#{boardTopYn}
+                 ,'10'
+                 ,#{createUserId}
+                 ,#{createDate}
+                 ,#{createUserId}
+                 ,sysdate
+                 ,#{xth}
+                 )
+    </insert>
+
+
+    <!-- 1) 해당 글 댓글(Comment) 삭제 -->
+    <update id="deleteBoardDetailComment" parameterType="BoardMasterDTO">
+        update 	cm_board_comments
+        set		status_kind = '40'
+          ,modify_user_id = #{modifyUserId}
+          ,modify_date = sysdate
+        where	board_d_seq = #{boardDSeq}
+    </update>
+
+    <!-- 2) 해당 글 덧글(Reply) 조회 -->
+    <select id="selectBoardReply" parameterType="int" resultType="BoardMasterDTO">
+        select 	board_d_seq as boardDSeq
+        from 	cm_board_detail
+        where 	status_kind = '10'
+          and board_p_seq = #{boardDSeq}
+    </select>
+
+    <!-- 3) 해당 글 덧글(Reply)의 댓글(Comment) 삭제 -->
+    <update id="deleteCommentOfReply">
+        update 	cm_board_comments
+        set		status_kind = '40'
+        ,modify_user_id = #{modifyUserId}
+        ,modify_date = sysdate
+        where 	board_d_seq in
+        <foreach collection="boardDSeqList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <!-- 4) 해당 글 덧글(Reply) 삭제 -->
+    <update id="deleteBoardDetailReply" parameterType="BoardMasterDTO">
+        update 	cm_board_detail
+        set		status_kind = '40'
+          ,modify_user_id = #{modifyUserId}
+          ,modify_date = sysdate
+        where	board_p_seq = #{boardDSeq}
+    </update>
+
+    <!-- 5) 해당 글 삭제 -->
+    <update id="deleteBoardDetail" parameterType="BoardMasterDTO">
+        update 	cm_board_detail
+        set		status_kind = '40'
+          ,modify_user_id = #{modifyUserId}
+          ,modify_date = sysdate
+        where	board_d_seq = #{boardDSeq}
+    </update>
+
+    <select id="selectBoardDetailComments" parameterType="int" resultType="BoardMasterDTO">
+        select 	board_c_seq 	as boardCSeq
+             ,board_comments as boardComments
+             ,cbc.create_user_id	as createUserId
+             ,CASE WHEN up.user_name IS NOT NULL THEN up.user_name || '(' || up.user_id || ')' end	as	viewUserId
+             ,to_char(cbc.create_date, 'yyyy-mm-dd hh24:mi:ss') as createDate
+        from 	cm_board_comments cbc
+                    left join ur_user_profile up
+                              on		cbc.create_user_id = up.user_id
+        where 	cbc.status_kind = '10'
+          and cbc.board_d_seq = #{boardDSeq}
+        order by cbc.create_date desc
+    </select>
+
+    <select id="selectComment" parameterType="int" resultType="String">
+        select 	board_comments as boardComments
+        from 	cm_board_comments
+        where 	status_kind = '10'
+          and board_c_seq = #{boardCSeq}
+    </select>
+
+    <insert id="insertComment" parameterType="BoardMasterDTO">
+        <selectKey keyProperty="boardCSeq" resultType="int" order="BEFORE">
+            select 	nvl(max(board_c_seq), 0) + 1 as boardCSeq
+            from 	cm_board_comments
+        </selectKey>
+        insert into cm_board_comments (
+        board_c_seq
+        ,board_d_seq
+        ,board_comments
+        ,status_kind
+        ,create_user_id
+        ,create_date
+        ,modify_user_id
+        ,modify_date
+        ) values (
+        #{boardCSeq}
+        ,#{boardDSeq}
+        ,#{boardComments}
+        ,'10'
+        ,#{createUserId}
+        ,sysdate
+        ,#{createUserId}
+        ,sysdate
+        )
+    </insert>
+
+    <update id="updateComment" parameterType="BoardMasterDTO">
+        update 	cm_board_comments
+        set		board_comments = #{boardComments}
+          ,modify_user_id = #{modifyUserId}
+          ,modify_date = sysdate
+        where	board_c_seq = #{boardCSeq}
+    </update>
+
+    <update id="deleteComment" parameterType="BoardMasterDTO">
+        update 	cm_board_comments
+        set		status_kind = '40'
+          ,modify_user_id = #{modifyUserId}
+          ,modify_date = sysdate
+        where	board_c_seq = #{boardCSeq}
+    </update>
+
+    <select id="relatedCount" resultType="int">
+        select	count(rel_seq)
+        from	cm_relt_site
+        where	status_kind = '10'
+    </select>
+
+    <select id="relatedCmnt" parameterType="RelatedDTO" resultType="RelatedDTO">
+        select	tNum
+             ,relSeq
+             ,relTitle
+             ,relUrl
+             ,relContents
+             ,createUserId
+             ,createDate
+             ,fileSeq
+             ,fileOrgnm
+             ,fileStrNm
+             ,fileType
+        from
+            (
+                select	row_number() over (order by rs.rel_seq desc)	as	tNum
+						,rel_seq		as	relSeq
+                     ,rel_title	as	relTitle
+                     ,rel_url	as	relUrl
+                     ,rel_contents	as	relContents
+                     ,CASE WHEN up.user_name IS NOT NULL THEN up.user_name || '(' || up.user_id || ')' end	as	createUserId
+                     ,rs.create_date	as	createDate
+                     ,rs.file_seq	as	fileSeq
+                     ,cfn.file_orgnm  as  fileOrgnm
+                     ,cfn.file_strnm	as	fileStrNm
+                     ,cfn.file_type	as	fileType
+                from	cm_relt_site rs
+                            left join cm_files_new cfn
+                                      on rs.file_seq = cfn.file_seq
+                            left join ur_user_profile up
+                                      on cfn.create_user_id = up.user_id
+                where	rs.status_kind = '10'
+                order by rs.rel_seq desc
+            )
+        where tNum between #{startRow} and #{endRow}
+    </select>
+
+    <select id="relatedSelect" resultType="RelatedDTO" parameterType="RelatedDTO">
+        select
+            rNum
+             ,tNum
+             ,relSeq
+             ,relUrl
+             ,relTitle
+             ,fileSeq
+             ,relContents
+             ,createUserId
+             ,createDate
+             ,(select count(rel_seq) from cm_relt_site where status_kind = '10')	as rtCnt
+        from
+            (
+                select	ROW_NUMBER() OVER (ORDER BY crs.rel_seq asc)	as	rNum
+						,ROW_NUMBER() OVER (ORDER BY crs.rel_seq desc)	as	tNum
+						,crs.rel_seq		as	relSeq
+                     ,crs.rel_title	as	relTitle
+                     ,crs.rel_url	as	relUrl
+                     ,crs.file_seq	as	fileSeq
+                     ,crs.rel_contents	as	relContents
+                     ,CASE WHEN up.user_name IS NOT NULL THEN up.user_name || '(' || up.user_id || ')' end	as	createUserId
+                     ,to_char(crs.create_date, 'YYYY-MM-DD')	as	createDate
+                from	cm_relt_site crs
+                            left join ur_user_profile up on crs.create_user_id = up.user_id
+                where	crs.status_kind = '10'
+                order by crs.rel_seq desc
+            )
+        where	tNum between #{startRow} and #{endRow}
+    </select>
+
+    <select id="relatedDetail" parameterType="int" resultType="RelatedDTO">
+        select	rel_seq		as	relSeq
+             ,rel_title	as	relTitle
+             ,rel_url	as	relUrl
+             ,file_seq	as	fileSeq
+             ,rel_contents	as	relContents
+             ,create_user_id	as	createUserId
+             ,create_date	as	createDate
+        from	cm_relt_site
+        where	status_kind = '10'
+          and		rel_seq = #{relSeq}
+    </select>
+
+    <insert id="relatedInsert" parameterType="RelatedDTO">
+        <selectKey keyProperty="relSeq" resultType="int" order="BEFORE">
+            select 	nvl(max(rel_seq), 0) + 1 as relSeq
+            from 	cm_relt_site
+        </selectKey>
+
+        insert into cm_relt_site	(
+        rel_seq
+        ,rel_title
+        ,rel_url
+        ,file_seq
+        ,rel_contents
+        ,create_user_id
+        ,create_date
+        ,status_kind
+        )
+        values
+        (
+        #{relSeq}
+        ,#{relTitle}
+        ,#{relUrl}
+        ,#{fileSeq}
+        ,#{relContents}
+        ,#{createUserId}
+        ,sysdate
+        ,'10'
+        )
+    </insert>
+
+    <update id="updateRelated" parameterType="RelatedDTO">
+        update	cm_relt_site
+        set		rel_title = #{relTitle}
+          ,rel_url = #{relUrl}
+          ,file_seq = #{fileSeq}
+          ,rel_contents = #{relContents}
+          ,modify_user_id =  #{modifyUserId}
+          ,modify_date = sysdate
+        where	rel_seq = #{relSeq}
+    </update>
+
+    <update id="deleteRelated" parameterType="RelatedDTO">
+        update	cm_relt_site
+        set		status_kind = '40'
+          ,modify_user_id =  #{modifyUserId}
+          ,modify_date = sysdate
+        where	rel_seq = #{relSeq}
+    </update>
+
+    <select id="relDetail" parameterType="int" resultType="RelatedDTO">
+        select	rel_seq		as	relSeq
+             ,rel_title	as	relTitle
+             ,rel_url	as	relUrl
+             ,file_seq	as	fileSeq
+             ,rel_contents	as	relContents
+             ,create_user_id	as	createUserId
+             ,create_date	as	createDate
+        from	cm_relt_site
+        where	status_kind = '10'
+          and		rel_seq = #{relSeq}
+    </select>
+
+    <select id="fileSelect" parameterType="int" resultType="FileMasterDTO">
+        select	file_seq	as	fileSeq
+             ,file_orgnm	as	fileOrgNm
+             ,file_strnm	as	fileStrNm
+             ,file_type	as	fileType
+             ,file_path	as	filePath
+        from	cm_files_new
+        where	file_seq = #{boardFSeq}
+    </select>
+
+    <select id="fileDownLoad" parameterType="int" resultType="RelatedDTO">
+    </select>
+
+    <update id="deleteFile" parameterType="int">
+        update	cm_files_new
+        set		 status = '40'
+          ,modify_date = sysdate
+        where	file_seq = #{boardDSeq}
+    </update>
+
+    <update id="testTran2">
+        update	cm_relt_site
+        set	status_kind = '40'
+        where	rel_seq = 1
+    </update>
+
+    <update id="testTran">
+        update	cm_relt_site
+        set	status_kind = '40'
+        where	rel_seq =
+    </update>
+
+    <insert id="insertBoardDetailMI_T50" parameterType="BoardMasterDTO">
+        <selectKey keyProperty="boardMSeq" resultType="int" order="BEFORE">
+            select	board_m_seq	from cm_board_master where status_kind = '10'
+        </selectKey>
+
+        MERGE INTO cm_board_detail cbd
+        USING DUAL ON ( cbd.board_m_seq = #{boardMSeq} AND cbd.board_title = #{boardTitle} AND cbd.board_contents = #{boardContents} )
+        WHEN MATCHED THEN
+        UPDATE SET
+        board_f_seq 		= 0
+        , modify_user_id 	= #{modifyUserId}
+        , modify_date 		= sysdate
+        WHEN NOT MATCHED THEN
+        INSERT
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            board_d_seq
+            , board_m_seq
+            , board_title
+            , board_contents
+            , board_p_seq
+            , board_f_seq
+            , board_count
+            , board_top_yn
+            , status_kind
+            , create_user_id
+            , create_date
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            (SELECT decode(max(board_d_seq), null, 1, max(board_d_seq)+1) as board_d_seq FROM cm_board_detail )
+            , #{boardMSeq}
+            , #{boardTitle}
+            , #{boardContents}
+            , #{boardPSeq}
+            , 0
+            , #{boardCount}
+            , #{boardTopYn}
+            , #{statusKind}
+            , #{createUserId}
+            , sysdate
+        </trim>
+    </insert>
+
+    <insert id="insertBoardDetailMI_KT1" parameterType="BoardMasterDTO">
+        <selectKey keyProperty="boardMSeq" resultType="int" order="BEFORE">
+            select	board_m_seq	from cm_board_master where status_kind = '10'
+        </selectKey>
+
+        MERGE INTO cm_board_detail cbd
+        USING DUAL ON ( cbd.board_m_seq = #{boardMSeq} AND cbd.board_title = #{boardTitle} AND cbd.board_contents = #{boardContents} )
+        WHEN MATCHED THEN
+        UPDATE SET
+        board_f_seq 		= ( select max(file_seq) from CM_FILES_NEW )
+        , modify_user_id 	= #{modifyUserId}
+        , modify_date 		= sysdate
+        WHEN NOT MATCHED THEN
+        INSERT
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            board_d_seq
+            , board_m_seq
+            , board_title
+            , board_contents
+            , board_p_seq
+            , board_f_seq
+            , board_count
+            , board_top_yn
+            , status_kind
+            , create_user_id
+            , create_date
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            (SELECT decode(max(board_d_seq), null, 1, max(board_d_seq)+1) as board_d_seq FROM cm_board_detail )
+            , #{boardMSeq}
+            , #{boardTitle}
+            , #{boardContents}
+            , #{boardPSeq}
+            , ( select max(file_seq) from CM_FILES_NEW )
+            , #{boardCount}
+            , #{boardTopYn}
+            , #{statusKind}
+            , #{createUserId}
+            , sysdate
+        </trim>
+    </insert>
+</mapper>
+

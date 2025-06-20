@@ -1,0 +1,42 @@
+@charset "utf-8";
+
+/* must over-ride login.css */
+
+/* 로그인 박스 배경 */
+.login-layer {
+    background: url('/img/login/login_bg.png') no-repeat center center fixed;
+}
+
+/* 로그인 박스 스타일 */
+.container {
+    position: absolute;
+    width: 42%;
+    height: 245px;
+    top: 66.7%;
+    left: 28.5%;
+    transform: translateY(-50%);
+}
+
+.btn-login {
+    background: url('/img/login/btn_login.png') no-repeat 0 0;
+    width: 111px;
+    height: 61px;
+    display: block;
+    font-size: 0;
+    text-indent: -999px;
+}
+.btn-login:hover {
+    background: url('/img/login/btn_login_hov.png') no-repeat 0 0;
+}
+
+.btn-join {
+    background: url('/img/login/btn_join.png') no-repeat 0 0;
+    width: 111px;
+    height: 61px;
+    display: block;
+    font-size: 0;
+    text-indent: -999px;
+}
+.btn-join:hover {
+    background: url('/img/login/btn_join_hov.png') no-repeat 0 0;
+}

@@ -1,0 +1,161 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <!-- system: 시스템 항목을 포함한 UL 목록 -->
+    <xsl:template match="system">
+        <section class="py-4">
+            <div class="container">
+                <div class="justify-content-center text-left">
+                    <h3 class="mt-3">
+                        <xsl:value-of select="@name" />
+                    </h3>
+                    <hr/>
+                    <xsl:apply-templates select="descinfo" />
+                    <div class="faultinf"></div>
+                    <div class="fi-link" id="fi-link"></div>
+                </div>
+            </div>
+        </section>
+
+    </xsl:template>
+
+    <!-- descinfo 항목을 처리하는 템플릿 -->
+    <xsl:template match="descinfo">
+        <xsl:apply-templates select="para-seq" />
+    </xsl:template>
+
+    <!-- para-seq 항목을 처리하는 템플릿 -->
+    <xsl:template match="para-seq">
+        <div class="para-seq">
+            <xsl:apply-templates select="para" />
+        </div>
+    </xsl:template>
+
+    <!-- para 항목을 처리하는 템플릿 -->
+    <xsl:variable name="hasFaultinf" select="boolean(//faultinf)"/> <!-- faultinf 태그 존재여부 확인 - osm -->
+    <xsl:template match="para">
+        <div class="row">
+            <div class="col-md-5 col-lg-5 col-xl-5">
+                <xsl:apply-templates select="grphprim" />
+            </div>
+            <div class="col-md-7 col-lg-7 col-xl-7">
+                <xsl:apply-templates select="table" />
+            </div>
+            <xsl:if test="not($hasFaultinf)"> <!-- faultinf 태그가 존재하지 않을 시 alert 호출 -->
+            <xsl:apply-templates select="alert"/>
+            </xsl:if>
+        </div>
+    </xsl:template>
+
+    <!-- table 항목을 처리하는 템플릿 -->
+    <xsl:template match="table">
+        <table class="table table-striped"
+               tabletype="{@tabletype}"
+        >
+            <tbody>
+                <xsl:for-each select="entry[@column='1']">
+                    <tr>
+                        <td column="{@column}"
+                            row="{@row}"
+                            colspan="{@colspan}"
+                            rowspan="{@rowspan}"
+                            dheight="{@height}"
+                            dwidth="{@width}"
+                        >
+                            <xsl:value-of select="text" />
+                        </td>
+                        <td column="{@column}"
+                            row="{@row}"
+                            colspan="{@colspan}"
+                            rowspan="{@rowspan}"
+                            dheight="{@height}"
+                            dwidth="{@width}"
+                        >
+                            <xsl:value-of select="following-sibling::entry[@column='2']" />
+                        </td>
+                    </tr>
+                </xsl:for-each>
+            </tbody>
+        </table>
+    </xsl:template>
+
+    <!-- table/entry 항목을 처리하는 템플릿 -->
+    <xsl:template match="entry">
+
+    </xsl:template>
+
+    <!-- grphprim 항목을 처리하는 템플릿 -->
+    <xsl:variable name="GS_IMG_PATH" select="'/img/ietm/gs/'"/>
+    <xsl:variable name="GRPH_STYLE" select="'gs-grphprim'"/>
+    <xsl:template match="grphprim">
+        <div class="{$GRPH_STYLE}">
+            <!-- external-ptr 속성에서 경로에 'Image' 존재 시 파일명만, 미존재 시 파일명 그대로 추출 -->
+            <xsl:variable name="fileName">
+                <xsl:choose>
+                    <xsl:when test="contains(@external-ptr, 'Image')">
+                        <xsl:value-of select="substring-after(@external-ptr, '\')" />
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="@external-ptr" />
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:variable>
+
+            <!-- 2025.04.15 - osm -->
+            <!-- 이미지 불러오지 못할 시 대체 이미지(noimg) 출력 -> ietm_image.js의 imageEventBind() 함수로 처리하도록 변경 -->
+            <br/><img class="img-control" src="{ $GS_IMG_PATH }{ $fileName }" />
+            <br/><xsl:value-of select="text"/>
+
+            <!-- 이미지 하단 제어 버튼 -->
+            <xsl:variable name="IMG_DOWNLOAD" select="concat('imageDownload(&quot;', $GS_IMG_PATH, $fileName, '&quot;)')" />
+            <xsl:variable name="IMG_PRINT" select="concat('imagePrint(&quot;', $GS_IMG_PATH, $fileName, '&quot;, &quot;', text, '&quot;)')" />
+            <xsl:variable name="IMG_POPUP" select="concat('openPopup({grphId: &quot;', @id, '&quot;})')" />
+            <div id="img_controll" class="img_controll" style="display:none;">
+                <a href="javascript:void(0)" onclick="{$IMG_DOWNLOAD}" class="down" title="이미지 저장" />
+                <a href="javascript:void(0)" onclick="{$IMG_PRINT}" class="print" title="이미지 출력" />
+                <a href="javascript:void(0)" onclick="{$IMG_POPUP}" class="popup" title="새창에서 열기" />
+            </div><br/>
+
+            <!-- 이미지 명 디버깅용 (불필요시 삭제) -->
+            <span id="{$fileName}"/>
+
+            <!-- changebasis존재 시 title 속성 추가 -->
+            <xsl:if test="string(@changebasis)">
+                <xsl:attribute name="title">
+                    <xsl:value-of select="@changebasis"/>
+                </xsl:attribute>
+            </xsl:if>
+        </div>
+    </xsl:template>
+    <!-- -->
+
+    <!-- alert 항목을 처리하는 템플릿 -->
+    <xsl:variable name="alertMessage" select="'para1'"/>
+    <xsl:template match="alert">
+        <xsl:variable name="alertType">
+            <xsl:choose>
+                <!-- type에 따른 css 처리, default = note(주기) -->
+                <xsl:when test="@type = 'warning'">gs-alert-warning</xsl:when>
+                <xsl:when test="@type = 'note'">gs-alert-note</xsl:when>
+                <xsl:when test="@type = 'caution'">gs-alert-caution</xsl:when>
+                <xsl:when test="@type = 'CL_warning'">gs-alert-warning</xsl:when>
+                <xsl:when test="@type = 'CL_note'">gs-alert-note</xsl:when>
+                <xsl:when test="@type = 'CL_caution'">gs-alert-caution</xsl:when>
+                <xsl:otherwise>gs-alert-note</xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+
+        <!-- css 동적 처리 -->
+        <br/>
+        <div class="{$alertType}">
+            <div>
+                <p class="{$alertMessage}}">
+                    <xsl:apply-templates select="text"/>
+                </p>
+                <xsl:apply-templates select="table"/>
+            </div>
+
+
+        </div>
+    </xsl:template>
+    <!-- -->
+
+</xsl:stylesheet>

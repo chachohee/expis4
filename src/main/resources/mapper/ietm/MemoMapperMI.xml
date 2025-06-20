@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.ietm.dao.MemoMapperMI">
+
+	<!-- ResultMap -->
+	<resultMap id="memoResultMapMI" type="com.expis.ietm.dto.MemoDto">
+		<id		property="memoSeq"			column="memo_seq"			javaType="long" />
+		<result	property="toKey"					column="to_key"					javaType="string" />
+		<result property="tocoId" 				column="toco_id" 				javaType="String" />
+		<result property="tocoName" 			column="toco_name" 			javaType="String" />
+		<result	property="subject"				column="subject"					javaType="string" />
+		<result	property="cont"					column="cont"						javaType="string" />
+		<result	property="shareYn"				column="share_yn"				javaType="string" />
+		<result	property="statusKind"			column="status_kind"			javaType="string" />
+		<result	property="createUserId"		column="create_user_id"	javaType="string" />
+		<result	property="createDate"		column="create_date"			javaType="Date" />
+		<result	property="modifyUserId"		column="modify_user_id"	javaType="string" />
+		<result	property="modifyDate"		column="modify_date"			javaType="string" />
+		<result	property="createUserInfo"	column="create_user_info"	javaType="string" />
+<!-- 		<result	property="memoStatus"		column="status_kind"			javaType="string" /> -->
+		<result	property="memoStatus"		column="memoStatus"			javaType="string" />
+	</resultMap>
+	
+	<!-- Select List -->
+	<select id="selectMigrationListDao" parameterType="com.expis.ietm.dto.MemoDto" resultMap="memoResultMapMI">
+	 SELECT MEMO_SEQ		as memoSeq
+	      , SUBJECT			as subject
+	      , CREATE_DATE 	as create_date
+	      , CREATE_USER_ID	as create_user_id
+	      , TOCO_ID			as tocoId
+	      , TO_KEY			as tokey
+	      , CONT			as cont 
+	      , SHARE_YN        as share_yn
+	   FROM (
+		   SELECT BOARD_ID   AS MEMO_SEQ 
+     			, TITLE      AS SUBJECT
+     			, WRITEDAY   AS CREATE_DATE
+     			, USER_ID    AS CREATE_USER_ID
+     			, ID         AS TOCO_ID
+     			, TONAME     AS TO_KEY
+     			, CONTENT    AS CONT
+     			, CASE WHEN NOTICE = '1' THEN 'Y' ELSE 'N' END SHARE_YN
+  			 FROM MEMO1 ) m
+  	</select>
+</mapper>

@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.ietm.dao.MyToMapper">
+
+    <!-- ResultMap -->
+    <resultMap id="mytolistResultMap" type="com.expis.ietm.dto.MyToDto">
+        <id property="userId" column="user_id" javaType="string" />
+        <id property="mytoPSeq" column="myto_p_seq" javaType="long" />
+        <id property="mytoDepth" column="myto_depth" javaType="long" />
+        <id property="mytoSeq" column="myto_seq" javaType="long" />
+
+        <id property="mytocoSeq" column="mytoco_seq" javaType="long" />
+        <result property="mytocoOrd" column="mytoco_ord" javaType="long" />
+
+        <result property="toKey" column="to_key" javaType="string" />
+        <result property="tocoId" column="toco_id" javaType="String" />
+        <result property="pTocoId" column="p_toco_id" javaType="String" />
+        <result property="mytoOrd" column="myto_ord" javaType="long" />
+        <result property="mytoName" column="myto_name" javaType="String" />
+        <result property="statusKind" column="status_kind" javaType="string" />
+        <result property="createUserId" column="create_user_id"		javaType="string" />
+        <result property="createDate" column="create_date" javaType="date" />
+        <result property="modifyUserId" column="modify_user_id"	javaType="string" />
+        <result property="modifyDate" column="modify_date" javaType="date" />
+        <result property="toName" column="to_name" javaType="string" />
+        <result property="tocoName" column="toco_name" javaType="string" />
+        <result property="num" column="num" javaType="int" />
+        <result property="mytoKind" column="myto_kind" javaType="string" />
+        <result property="myId" column="my_id" javaType="string" />
+        <result property="myItemid" column="my_itemid" javaType="string" />
+        <result property="myName" column="my_name" javaType="string" />
+        <result property="myStatus" column="my_status" javaType="string" />
+        <result property="myType" column="my_type" javaType="string" />
+        <result property="myVehicletype"	column="my_vehicletype"	javaType="string" />
+        <result property="myVersion" column="my_version" javaType="string" />
+        <result property="childCnt" column="child_cnt" javaType="string" />
+        <result property="treeKind" column="tree_kind" javaType="string" />
+        <result property="treeRef" column="tree_ref" javaType="string" />
+        <result property="treeXth" column="tree_xth" javaType="int" />
+        <result property="treeXcont" column="tree_xcont" javaType="string" />
+
+        <result property="mytocoName" column="mytoco_name" javaType="String" />
+        <result property="mytocoKind" column="mytoco_kind" javaType="String" />
+
+    </resultMap>
+
+    <resultMap id="mytoTotCnt" type="int">
+        <result property="totCnt" column="tot_cnt" />
+    </resultMap>
+
+
+    <select id="selectMaxValue" resultType="java.util.Map">
+        <!-- 새로운 mytoSeq, mytoOrd 값을 찾기 위해 현재 최대값 조회 -->
+        SELECT
+        COALESCE(MAX(myto_seq), 0) + 1 As mytoSeq,
+        COALESCE(MAX(myto_ord), 0) + 1 AS mytoOrd
+        FROM tm_fn_myto_info
+    </select>
+
+
+    <insert id="insertMyFolder" parameterType="com.expis.ietm.dto.MyToDto">
+        insert into tm_fn_myto_info
+        (
+        user_id
+        ,myto_seq
+        ,myto_p_seq
+        ,myto_ord
+        ,myto_name
+        ,myto_kind
+        ,status_kind
+        ,create_user_id
+        ,create_date
+        )
+        values
+        (
+        #{userId, jdbcType=VARCHAR}
+        ,#{mytoSeq}
+        ,#{mytoPSeq}
+        ,#{mytoOrd}
+        ,#{mytoName, jdbcType=VARCHAR}
+        ,#{mytoKind, jdbcType=VARCHAR}
+        ,'10'
+        ,#{createUserId, jdbcType=VARCHAR}
+        ,sysdate
+        )
+    </insert>
+
+
+    <select id="selectMyFolder" parameterType="com.expis.ietm.dto.MyToDto"
+            resultMap="mytolistResultMap">
+        select
+        *
+        from tm_fn_myto_info
+        where user_id = #{userId}
+        and	status_kind = '10'
+        order by create_date desc
+    </select>
+
+
+    <update id="updateMyFolder" parameterType="com.expis.ietm.dto.MyToDto">
+        UPDATE tm_fn_myto_info
+        SET myto_name = #{mytoName, jdbcType=VARCHAR},
+        modify_user_id = #{modifyUserId, jdbcType=VARCHAR},
+        modify_date = SYSDATE
+        WHERE myto_seq = #{mytoSeq}
+    </update>
+
+
+    <delete id="deleteMyFolder" parameterType="long">
+        DELETE FROM tm_fn_myto_info
+        WHERE myto_seq = #{mytoSeq}
+    </delete>
+    <delete id="deleteMyTocoInfo" parameterType="long">
+        DELETE FROM tm_fn_mytoco_info
+        WHERE myto_seq = #{mytoSeq}
+    </delete>
+    <delete id="deleteMyToXcont" parameterType="long">
+        DELETE FROM tm_fn_myto_xcont
+        WHERE myto_seq = #{mytoSeq}
+    </delete>
+
+
+    <select id="selectMyTocoList" parameterType="com.expis.ietm.dto.MyToDto" resultType="int">
+        SELECT COUNT(*)
+        FROM tm_fn_mytoco_info
+        WHERE user_id = #{userId}
+        AND myto_seq = #{mytoSeq}
+    </select>
+
+
+    <select id="selectTreeDao" parameterType="com.expis.ietm.dto.MyToDto" resultMap="mytolistResultMap">
+        select tree_xcont
+        from tm_fn_myto_xcont
+        where ref_user_id = #{userId}
+        <choose>
+            <when test="treeKind eq '02'">
+                and tree_kind = '02'
+                and myto_seq = #{mytoSeq}
+            </when>
+            <otherwise>
+                and tree_kind = '01'
+            </otherwise>
+        </choose>
+        and status_kind = '10'
+        order by tree_xth
+    </select>
+
+
+    <select id="getMyTocoXmlList" parameterType="com.expis.ietm.dto.MyToDto" resultType="com.expis.ietm.dto.MyToDto">
+        select	tree_kind	as	treeKind
+        ,ref_to_key	as	toKey
+        ,myto_seq	as	mytoSeq
+        ,tree_xcont	as	treeXcont
+        from	tm_fn_myto_xcont
+        where	ref_user_id = #{userId}
+        and		myto_seq = #{mytoSeq}
+        and     tree_kind = '02'
+        order by tree_xth
+    </select>
+
+
+    <select id="dupChkToKey" parameterType="com.expis.ietm.dto.MyToDto" resultType="int">
+        select	count(myto_seq)
+        from	tm_fn_myto_info
+        where	to_key = #{toKey}
+        and		user_id =#{userId}
+        and		myto_kind = '02'
+        and		status_kind = '10'
+    </select>
+
+
+    <select id="selectMytoSeq" resultType="long">
+        select	nvl(max(myto_seq), 0) as mytoSeq
+        from	tm_fn_myto_info
+    </select>
+
+
+    <select id="selectMytocoSeq" resultType="long">
+        select	nvl(max(mytoco_seq), 0) + 1	as mytoSeq
+        from	tm_fn_mytoco_info
+    </select>
+
+
+    <insert id="insertMyTocoAllInfoMDB" parameterType="java.util.List">
+        insert	into	tm_fn_mytoco_info
+        (
+        user_id
+        ,mytoco_seq
+        ,mytoco_ord
+        ,to_key
+        ,toco_id
+        ,p_toco_id
+        ,mytoco_kind
+        ,mytoco_name
+        ,myto_seq
+        ,status_kind
+        ,create_user_id
+        ,create_date
+        )
+        values
+        (
+        #{userId}
+        ,${mytocoSeq}
+        ,${mytocoOrd}
+        ,#{toKey}
+        ,#{tocoId}
+        ,#{pTocoId}
+        ,#{myType}
+        ,#{tocoName}
+        ,${mytoSeq}
+        ,'10'
+        ,#{userId}
+        ,sysdate
+        )
+    </insert>
+
+
+    <insert id="insertMyTocoAllInfo" parameterType="java.util.List">
+        insert all
+        <foreach index="index" item="param" collection="list">
+            into	tm_fn_mytoco_info
+            (
+            user_id
+            ,mytoco_seq
+            ,mytoco_ord
+            ,to_key
+            ,toco_id
+            ,p_toco_id
+            ,mytoco_kind
+            ,mytoco_name
+            ,myto_seq
+            ,status_kind
+            ,create_user_id
+            ,create_date
+            )
+            values
+            (
+            #{param.userId}
+            ,#{param.mytocoSeq}
+            ,#{param.mytocoOrd}
+            ,#{param.toKey}
+            ,#{param.tocoId}
+            ,#{param.pTocoId}
+            ,#{param.myType}
+            ,#{param.tocoName}
+            ,#{param.mytoSeq}
+            ,'10'
+            ,#{param.userId}
+            ,sysdate
+            )
+        </foreach>
+        select * from dual
+    </insert>
+
+
+    <select id="selectToCoListDto" parameterType="com.expis.ietm.dto.MyToDto"
+            resultMap="mytolistResultMap">
+        select toco_id
+        , toco_name
+        from tm_toco_info
+        where to_key = #{toKey}
+        and status_kind != '40'
+    </select>
+
+
+    <delete id="deleteMytoXmlInfo" parameterType="com.expis.ietm.dto.MyToDto">
+        delete	tm_fn_myto_xcont
+        where	ref_user_id	=	#{userId}
+        <choose>
+            <when test="treeKind eq '01'">
+                and	tree_kind = #{treeKind}
+            </when>
+            <when test="treeKind eq '02'">
+                and myto_seq = #{mytoSeq}
+            </when>
+        </choose>
+    </delete>
+
+
+    <insert id="insertMytoXmlInfo" parameterType="com.expis.ietm.dto.MyToDto">
+        insert into tm_fn_myto_xcont
+        (
+        tree_kind
+        <if test="treeKind eq '02'">
+            ,ref_to_key
+            ,myto_seq
+        </if>
+        ,ref_user_id
+        ,tree_xth
+        ,tree_xcont
+        ,status_kind
+        ,create_user_id
+        ,create_date
+        )
+        values
+        (
+        #{treeKind}
+        <if test="treeKind eq '02'">
+            ,#{toKey}
+            ,#{mytoSeq}
+        </if>
+        ,#{userId}
+        ,#{treeXth}
+        ,#{treeXcont}
+        ,'10'
+        ,#{userId}
+        ,sysdate
+        )
+    </insert>
+
+
+    <select id="selectCntMyCo" parameterType="String"
+            resultType="Long">
+        select nvl(max(myto_ord), 0)+1 as mytoOrd
+        from
+        tm_fn_myto_info
+        where user_id = #{userId}
+        and status_kind = '10'
+    </select>
+
+
+    <select id="selectTocoList" parameterType="com.expis.ietm.dto.MyToDto" resultType="com.expis.ietm.dto.MyToDto">
+        select	 mytoco_seq		as	mytocoSeq
+        ,mytoco_name	as	mytocoName
+        ,toco_id		as	tocoId
+        ,p_toco_id		as	pTocoId
+        ,mytoco_kind	as	myType
+        from	tm_fn_mytoco_info
+        where	myto_seq = #{mytoSeq}
+        <if test="toKey != null">
+            and		to_key = #{toKey}
+        </if>
+        order by mytoco_ord
+    </select>
+
+
+    <delete id="delMytoco" parameterType="com.expis.ietm.dto.MyToDto">
+        DELETE FROM tm_fn_mytoco_info
+        WHERE mytoco_seq IN (
+        SELECT mytoco_seq
+        FROM tm_fn_mytoco_info
+        WHERE user_id = #{userId}
+        START WITH toco_id = #{tocoId}
+        CONNECT BY PRIOR toco_id = p_toco_id
+        )
+    </delete>
+
+    <select id="findChildrenMytoSeq" parameterType="long" resultType="java.lang.Long">
+        SELECT myto_seq
+        FROM tm_fn_myto_info
+        WHERE myto_p_seq = #{mytoSeq}
+    </select>
+
+</mapper>

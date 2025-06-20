@@ -1,0 +1,113 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <!-- system: 시스템 항목을 포함한 UL 목록 -->
+    <xsl:template match="system">
+        <section class="py-4">
+            <div class="container">
+                <div class="justify-content-center text-left">
+                    <h3 class="mt-3">
+                        <xsl:value-of select="@name" />
+                    </h3>
+                    <hr/>
+                    <xsl:apply-templates select="descinfo" />
+                    <div class="faultinf"></div>
+                </div>
+            </div>
+        </section>
+    </xsl:template>
+
+    <!-- descinfo 항목을 처리하는 템플릿 -->
+    <xsl:template match="descinfo">
+        <xsl:apply-templates select="para-seq" />
+    </xsl:template>
+
+    <!-- para-seq 항목을 처리하는 템플릿 -->
+    <xsl:template match="para-seq">
+        <div class="para-seq">
+            <xsl:apply-templates select="para" />
+        </div>
+    </xsl:template>
+
+    <!-- para 항목을 처리하는 템플릿 -->
+    <xsl:template match="para">
+        <div class="">
+            <xsl:apply-templates select="table" />
+        </div>
+    </xsl:template>
+
+    <!-- table 항목을 처리하는 템플릿 -->
+    <xsl:template match="table">
+        <table class="table table-striped"
+               tabletype="{@tabletype}"
+        >
+            <tbody>
+                <xsl:for-each select="entry[@column='1']">
+                    <tr>
+                        <td column="{@column}"
+                            row="{@row}"
+                            colspan="{@colspan}"
+                            rowspan="{@rowspan}"
+                            dheight="{@height}"
+                            dwidth="{@width}"
+                        >
+                           <xsl:value-of select="text" />
+                        </td>
+                        <td column="{@column}"
+                            row="{@row}"
+                            colspan="{@colspan}"
+                            rowspan="{@rowspan}"
+                            dheight="{@height}"
+                            dwidth="{@width}"
+                        >
+                            <xsl:value-of select="following-sibling::entry[@column='2']" />
+                        </td>
+                        <!-- column 3: 언더라인 조건 분기 - 2025.06.11 - minhee. yun -->
+                        <xsl:variable name="column_3" select="following-sibling::entry[@column='3'][1]" />
+                        <xsl:choose>
+                            <xsl:when test="$column_3/@underline = '1'">
+                                <td class="lin-underline"
+                                    
+                                    column="{@column}"
+                                    row="{@row}"
+                                    colspan="{@colspan}"
+                                    rowspan="{@rowspan}"
+                                    dheight="{@height}"
+                                    dwidth="{@width}"
+                                >
+                                    <xsl:value-of select="$column_3/text" />
+                                </td>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <td column="{@column}"
+                                    row="{@row}"
+                                    colspan="{@colspan}"
+                                    rowspan="{@rowspan}"
+                                    dheight="{@height}"
+                                    dwidth="{@width}"
+                                >
+                                    <xsl:value-of select="$column_3/text" />
+                                </td>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </tr>
+                </xsl:for-each>
+            </tbody>
+        </table>
+    </xsl:template>
+
+    <!-- table/entry 항목을 처리하는 템플릿 -->
+    <xsl:template match="entry">
+
+    </xsl:template>
+
+    <!-- grphprim 항목을 처리하는 템플릿 -->
+    <xsl:template match="grphprim">
+        <div class="grphprim">
+            <img src="{@external-ptr}"
+                 title="{@changebasis}"
+            >
+
+            </img>
+        </div>
+    </xsl:template>
+
+</xsl:stylesheet>

@@ -1,0 +1,34 @@
+<div th:fragment="airplane" class="modal fade" id="airplane" tabindex="-1" aria-labelledby="airplaneModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="airplaneModalLabel">항공기 타입을 선택해주세요.</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <div class="d-flex justify-content-around align-items-center">
+          <!-- FA-50 -->
+          <div class="text-center">
+            <img src="#" alt="FA-50" class="img-fluid mb-2">
+            <div>
+              <input type="radio" name="airplane" id="fa50" value="FA-50">
+              <label for="fa50">FA-50 [A TYPE]</label>
+            </div>
+          </div>
+          <!-- TA-50 -->
+          <div class="text-center">
+            <img src="#" alt="TA-50" class="img-fluid mb-2">
+            <div>
+              <input type="radio" name="airplane" id="ta50" value="TA-50">
+              <label for="ta50">TA-50 2차 [B TYPE]</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+        <button type="button" class="btn btn-primary" onclick="convertAirplaneType()">변경</button>
+      </div>
+    </div>
+  </div>
+</div>

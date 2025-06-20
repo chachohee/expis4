@@ -1,0 +1,60 @@
+<div th:fragment="memo"
+     id="memoLayer"
+     class="border shadow bg-white"
+     style="position: absolute; top: 100px; left: 80px; width: 370px;
+            z-index: 1050; display: none;">
+
+  <!-- 상단 배경 이미지 영역 -->
+  <div class="px-3" style="background-image: url('/img/ietm/popup/bg_pup_header.gif');
+            background-size: cover;
+            background-position: center;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h5 id="memoLabel" style="color: white; font-weight: bold; margin: 0;">
+        <i class="fas fa-pen-to-square"></i> 메모장
+      </h5>
+      <button type="button"
+              onclick="closeMemoLayer()"
+              style="border: none; color: white; background: transparent; font-size: 2rem;">&times;</button>
+    </div>
+  </div>
+
+  <!-- 바디 -->
+  <div class="p-3">
+    <!-- 내림차순 버튼 & 검색폼 -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <button class="btn btn-outline-secondary btn-sm" id="memoSort" onclick="memoSort()">
+        <i class="fas fa-sort-amount-down"></i> 내림차순
+      </button>
+
+      <div class="input-group" style="width: 70%;">
+        <input type="text" class="form-control form-control-sm" id="searchValue" placeholder="검색">
+        <button class="btn btn-outline-secondary btn-sm" type="button" onclick="getMemoList()">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <input type="text" class="form-control form-control-sm" id="memoSubject" placeholder="메모 제목을 입력하세요.">
+    </div>
+
+    <div class="mb-3">
+      <textarea class="form-control" rows="3" id="memoContent" placeholder="선택된 교범이 없습니다."></textarea>
+    </div>
+
+    <div class="d-flex justify-content-between mb-3">
+      <button class="btn btn-outline-primary btn-sm" id="shareButton" onclick="shareToggleActive()">
+        <i class="fas fa-share"></i> 공유하기
+      </button>
+      <button class="btn btn-outline-primary btn-sm" onclick="writeMemo()">
+        <i class="fas fa-save"></i> 저장하기
+      </button>
+    </div>
+
+    <div id="memoListContainer">
+      <div class="border rounded p-2">
+        <p class="text-muted mb-0">내용없음</p>
+      </div>
+    </div>
+  </div>
+</div>

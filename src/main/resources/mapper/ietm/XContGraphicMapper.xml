@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.ietm.dao.XContGraphicMapper">
+
+	<!-- ResultMap -->
+	<resultMap id="xcontResultMap" type="com.expis.ietm.dto.XContDto">
+		<id		property="toKey"					column="to_key"					javaType="string" />
+		<result	property="tocoId"				column="toco_id"					javaType="string" />
+		<result	property="grphId"				column="grph_id"				javaType="string" />
+		<result	property="grphCaption"		column="grph_caption"		javaType="string" />
+		<result	property="grphType"			column="grph_type"			javaType="string" />
+		<result	property="fileOrgName"		column="file_org_name"		javaType="string" />
+		<result	property="xth"						column="xth"						javaType="long" />
+		<result	property="xcont"					column="xcont"					javaType="string" />
+		<result	property="createUserId"		column="create_user_id"	javaType="string" />
+		<result	property="createDate"		column="create_date"			javaType="date" />
+	</resultMap>
+	
+	
+	<!-- ResultCount -->
+	<resultMap id="xcontResultCount" type="int">
+		<result property="cnt" column="cnt" />
+	</resultMap>
+	
+	
+	<!-- Column -->
+	<sql id="xcontColumn">
+		  tgx.to_key					AS to_key
+		, tgx.toco_id					AS toco_id
+		, tgx.grph_id				AS grph_id
+		, tgx.grph_caption		AS grph_caption
+		, tgx.grph_type			AS grph_type
+		, tgx.file_org_name		AS file_org_name
+		, tgx.xth						AS xth
+		, tgx.xcont					AS xcont
+		, tgx.create_user_id		AS create_user_id
+		, tgx.create_date			AS create_date
+	</sql>
+	
+	
+	<!--  Select List -->
+	<select id="selectListDao" resultMap="xcontResultMap">
+		SELECT
+		<include refid="xcontColumn" />
+		FROM tm_grph_xcont tgx
+		
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			<if test="toKey != null">AND to_key = #{toKey}</if>
+			<if test="tocoId != null">AND toco_id = #{tocoId}</if>
+			<if test="grphId != null">AND grph_id = #{grphId}</if>
+			<if test="grphType != null">AND grph_type = #{grphType}</if>
+			<if test="fileOrgName != null">AND file_org_name = #{fileOrgName}</if>
+		</trim>
+
+		ORDER BY to_key ASC, toco_id ASC, file_org_name ASC, xth ASC
+	</select>
+	
+	
+	<!--  Select One -->
+	<!--
+	<select id="selectDetailDao" resultMap="xcontResultMap">
+		SELECT
+		<include refid="xcontColumn" />
+		FROM tm_grph_xcont tgx
+		WHERE to_key = #{toKey}
+
+		<trim prefix="AND" prefixOverrides="AND | OR">
+			<if test="tocoId != null">AND toco_id = #{tocoId}</if>
+			<if test="grphId != null">AND grph_id = #{grphId}</if>
+		</trim>
+
+	</select>
+	-->
+
+	<!-- 기존 Select One 주석 후 toKey도 WHERE에 동적으로 받도록 변경 - osm -->
+	<!-- toKey, tocoId, grphId 조건이 null이나 빈 문자열("")일 경우 쿼리에서 제외되도록 수정 -->
+	<select id="selectDetailDao" resultMap="xcontResultMap">
+		SELECT
+		<include refid="xcontColumn" />
+		FROM tm_grph_xcont tgx
+
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			<if test="toKey != null and toKey != ''">AND to_key = #{toKey}</if>
+			<if test="tocoId != null and tocoId != ''">AND toco_id = #{tocoId}</if>
+			<if test="grphId != null and grphId != ''">AND grph_id = #{grphId}</if>
+		</trim>
+
+	</select>
+
+	
+	<!--  Select Count -->
+	<select id="selectCountDao" resultMap="xcontResultCount">
+		SELECT
+			COUNT(*) AS cnt
+		FROM tm_grph_xcont tgx
+		
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			<if test="toKey != null">AND to_key = #{toKey}</if>
+			<if test="tocoId != null">AND toco_id = #{tocoId}</if>
+			<if test="grphId != null">AND grph_id = #{grphId}</if>
+			<if test="grphType != null">AND grph_type = #{grphType}</if>
+		</trim>
+		
+	</select>
+	
+	
+	<!-- Insert -->
+	<insert id="insertDao" parameterType="com.expis.ietm.dto.XContDto">
+		INSERT INTO tm_grph_xcont
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			to_key,
+			toco_id,
+			grph_id,
+			<if test="grphCaption != null">grph_caption,</if>
+			<if test="grphType != null">grph_type,</if>
+			<if test="fileOrgName != null">file_org_name,</if>
+			<if test="xth != null">xth,</if>
+			<if test="xcont != null">xcont,</if>
+			<if test="createUserId != null">create_user_id,</if>
+			create_date
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			#{toKey},
+			#{tocoId},
+			#{grphId},
+			<if test="grphCaption != null">#{grphCaption},</if>
+			<if test="grphType != null">#{grphType},</if>
+			<if test="fileOrgName != null">#{fileOrgName},</if>
+			<if test="xth != null">#{xth},</if>
+			<if test="xcont != null">#{xcont},</if>
+			<if test="createUserId != null">#{createUserId},</if>
+			SYSDATE
+		</trim>
+	</insert>
+	
+	
+	<!-- Insert All --><!-- 사용 20160921 -->
+	<insert id="insertAllDao" parameterType="com.expis.ietm.dto.XContDto">
+		<foreach index="index" item="item" collection="list" open="INSERT ALL " separator=" " close="SELECT * FROM DUAL">
+			INTO tm_grph_xcont
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				to_key,
+				toco_id,
+				grph_id,
+				<if test="item.grphCaption != null">grph_caption,</if>
+				<if test="item.grphType != null">grph_type,</if>
+				<if test="item.fileOrgName != null">file_org_name,</if>
+				<if test="item.xth != null">xth,</if>
+				<if test="item.xcont != null">xcont,</if>
+				<if test="item.createUserId != null">create_user_id,</if>
+				create_date
+			</trim>
+			VALUES
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				#{item.toKey},
+				#{item.tocoId},
+				#{item.grphId},
+				<if test="item.grphCaption != null">#{item.grphCaption},</if>
+				<if test="item.grphType != null">#{item.grphType},</if>
+				<if test="item.fileOrgName != null">#{item.fileOrgName},</if>
+				<if test="item.xth != null">#{item.xth},</if>
+				<if test="item.xcont != null">#{item.xcont},</if>
+				<if test="item.createUserId != null">#{item.createUserId},</if>
+				SYSDATE
+			</trim>
+		</foreach>
+	</insert>
+	
+	<insert id="insertAllDaoMDB" parameterType="com.expis.ietm.dto.XContDto">
+			insert into	tm_grph_xcont
+			(
+				to_key,
+				toco_id,
+				grph_id,
+				grph_caption,
+				grph_type,
+				file_org_name,
+				xth,
+				xcont,
+				create_user_id,
+				create_date
+			)
+			values
+			(
+				#{toKey},
+				#{tocoId},
+				#{grphId},
+				#{grphCaption},
+				#{grphType},
+				#{fileOrgName},
+				${xth},
+				#{xcont},
+				#{createUserId},
+				SYSDATE
+			)
+		
+	</insert>
+	
+	
+	<!-- Update -->
+	<update id="updateDao" parameterType="com.expis.ietm.dto.XContDto">
+		UPDATE tm_grph_xcont
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="grphCaption != null">grph_caption = #{grphCaption},</if>
+			<if test="grphType != null">grph_type = #{grphType},</if>
+			<if test="fileOrgName != null">file_org_name = #{fileOrgName},</if>
+			<if test="xth != null">xth = #{xth},</if>
+			<if test="xcont != null">xcont = #{xcont},</if>
+			<if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+			modify_date = SYSDATE
+		</trim>
+
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+				<if test="grphId != null">grph_id = #{grphId}</if>
+			</trim>
+		</where>
+
+	</update>
+
+	
+	<!-- Delete --><!-- 미사용 -->
+	<delete id="deleteDao" parameterType="com.expis.ietm.dto.XContDto">
+		DELETE FROM tm_grph_xcont
+		WHERE to_key = #{toKey}
+		<trim prefix="AND">
+			<if test="toKey != null">to_key = #{toKey}</if>
+			<if test="tocoId != null">toco_id = #{tocoId}</if>
+			<if test="grphId != null">grph_id = #{grphId}</if>
+		</trim>
+	</delete>
+	
+	
+	<!-- Delete --><!-- 사용 20160912 -->
+	<delete id="deleteAllDao">
+		DELETE FROM tm_grph_xcont
+	</delete>
+	
+	<select id="selectGrphTocoId" parameterType="String" resultType="com.expis.ietm.dto.XContDto">
+		select	file_org_name	as	fileOrgName
+				,grph_caption	as	grphCaption
+		from	tm_grph_xcont
+		where	grph_id = #{grphId}
+	</select>
+
+</mapper>

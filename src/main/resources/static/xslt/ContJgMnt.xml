@@ -1,0 +1,384 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <!-- system 시스템 템플릿 -->
+    <xsl:template match="system">
+        <section class="jg-mnt-back">
+            <div class="main frame">
+                <div  class="main frame_view">
+                    <div class="frame_outer" id="frame_contents">
+                        <xsl:apply-templates select="task"/>
+                    </div>
+                </div>
+            </div>
+            <!-- 고치는 중 E: 윤민희-->
+        </section>
+    </xsl:template>
+
+    <!-- para-seq 항목을 처리하는 템플릿 -->
+    <xsl:template match="para-seq">
+        <div class="para-seq">
+            <xsl:apply-templates select="para"/>
+        </div>
+    </xsl:template>
+
+    <!-- para 항목을 처리하는 템플릿 -->
+    <xsl:template match="para">
+        <xsl:choose>
+            <xsl:when test="para-seq">
+                <xsl:apply-templates select="para-seq"/>
+            </xsl:when>
+            <xsl:when test="table">
+                <xsl:apply-templates select="table"/>
+            </xsl:when>
+            <xsl:when test="grphprim">
+                <xsl:apply-templates select="grphprim"/>
+            </xsl:when>
+            <xsl:when test="alert">
+                <xsl:apply-templates select="alert"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <div class="para">
+                    <xsl:attribute name="style">text-align:<xsl:value-of select="text/@align"/>; padding-left:
+                        <xsl:value-of select="./@x1 div 100"/>px;
+                    </xsl:attribute>
+                    <xsl:apply-templates select="text"/>
+                </div>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <!-- table 항목을 처리하는 템플릿 -->
+    <xsl:variable name="tableStyle" select="'gs-table'"/>
+    <xsl:template match="table">
+        <table class="{$tableStyle}">
+            <tbody>
+                <xsl:apply-templates select="rowhddef"/>
+            </tbody>
+        </table>
+    </xsl:template>
+
+    <!-- rowhddef 항목을 처리하는 템플릿 -->
+    <xsl:template match="rowhddef">
+        <tr row="{@row}">
+            <xsl:apply-templates select="entry"/>
+        </tr>
+    </xsl:template>
+
+    <!-- entry 항목을 처리하는 템플릿 -->
+    <xsl:template match="entry">
+        <td column="{@column}"
+            colspan="{@colspan}"
+            rowspan="{@rowspan}"
+            dheight="{@height}"
+            dwidth="{@width}"
+        >
+            <xsl:attribute name="style">text-align:<xsl:value-of select="text/@align"/>;
+            </xsl:attribute>
+            <xsl:for-each select="text">
+                <xsl:value-of select="."/>
+                <br/>
+            </xsl:for-each>
+        </td>
+    </xsl:template>
+
+    <!-- text 항목을 처리하는 템플릿 -->
+    <xsl:template match="text">
+        <!-- linkType(revelationtype) 도해, 목차 링크에 따른 js 적용 -->
+        <xsl:variable name="linkType">
+            <xsl:choose>
+                <xsl:when test="contains(@revelationtype, '도해')">
+                    <xsl:value-of select="concat('openPopup({grphId: &quot;', @linkid, '&quot;})')"/>
+                </xsl:when>
+                <xsl:when test="contains(@revelationtype, '목차')">
+                    <xsl:value-of select="concat('selectTo(&quot;', @tmname, '&quot;); tocoContView(&quot;', @linkid, '&quot;); activateTocLink(&quot;', @linkid, '&quot;);')" />
+                </xsl:when>
+            </xsl:choose>
+        </xsl:variable>
+        <xsl:choose>
+
+            <!-- link -->
+            <xsl:when test="./@linktype='link'">
+                <!-- tmname = to_key, linkid = grphId - osm -->
+                <a href="javascript:void(0)" linkid="{@linkid}" title="{@listname}" tmname="{@tmname}"
+                   viewtype="{@viewtype}" onclick="{$linkType}">
+                    <xsl:value-of select="."/>
+                </a>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="."/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+    <!-- -->
+
+    <!-- grphprim 항목을 처리하는 템플릿 -->
+    <xsl:variable name="GS_IMG_PATH" select="'/img/ietm/gs/'"/>
+    <xsl:variable name="NO_IMG" select="'/img/noimg.png'"/>
+    <xsl:variable name="GRPH_STYLE" select="'gs-grphprim'"/>
+    <xsl:template match="grphprim">
+        <div class="{$GRPH_STYLE}">
+            <!-- external-ptr 속성에서 경로에 'Image' 존재 시 파일명만, 미존재 시 파일명 그대로 추출 -->
+            <xsl:variable name="fileName">
+                <xsl:choose>
+                    <xsl:when test="contains(@external-ptr, 'Image')">
+                        <xsl:value-of select="substring-after(@external-ptr, '\')"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="@external-ptr"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:variable>
+
+            <!-- 기본 파일 경로와 파일 이름 추출, 이미지 불러오지 못할 시 대체 이미지(noimg) 출력 -->
+            <img class="img-control" src="{ $GS_IMG_PATH }{ $fileName }"/>
+            <!-- 충돌 때문에 잠시 주석 처리, 분기 나누고 나서 원복할 것.
+             <img src="{ $GS_IMG_PATH }{ $fileName }" onerror="this.src='{ $NO_IMG }'" />-->
+
+            <!-- 이미지 명 디버깅용 (불필요시 삭제) -->
+            <span id="{$fileName}"/>
+
+            <!-- changebasis존재 시 title 속성 추가 -->
+            <xsl:if test="string(@changebasis)">
+                <xsl:attribute name="title">
+                    <xsl:value-of select="@changebasis"/>
+                </xsl:attribute>
+            </xsl:if>
+
+            <br/>
+            <xsl:value-of select="text"/>
+        </div>
+    </xsl:template>
+    <!-- -->
+
+    <!-- alert 항목을 처리하는 템플릿 -->
+    <xsl:variable name="alertMessage" select="'para1'"/>
+    <xsl:template match="alert">
+        <xsl:variable name="alertType">
+            <xsl:choose>
+                <!-- type에 따른 css 처리, default = note(주기) -->
+                <xsl:when test="@type = 'warning'">gs-alert-warning</xsl:when>
+                <xsl:when test="@type = 'note'">gs-alert-note</xsl:when>
+                <xsl:when test="@type = 'caution'">gs-alert-caution</xsl:when>
+                <xsl:when test="@type = 'CL_warning'">gs-alert-warning</xsl:when>
+                <xsl:when test="@type = 'CL_note'">gs-alert-note</xsl:when>
+                <xsl:when test="@type = 'CL_caution'">gs-alert-caution</xsl:when>
+                <xsl:otherwise>gs-alert-note</xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+
+        <!-- css 동적 처리 -->
+
+        <div class="{$alertType}">
+            <!-- <div>
+                 <p class="{$alertType}">
+                     <xsl:value-of select="@type"/>
+                     <xsl:for-each select="text">
+                         <xsl:value-of select="." /> <br/>
+                     </xsl:for-each>
+
+                </p>
+
+            </div>-->
+        </div>
+    </xsl:template>
+
+
+    <!-- task 항목을 처리하는 템플릿 -->
+    <xsl:template match="task">
+        <div class="frame_inner" id="frame_inner_Con">
+            <xsl:if test="position() = 1">
+                <div class="frame_left_title" >
+                    <xsl:value-of select="ancestor::system[1]/@name"/>
+                </div>
+            </xsl:if>
+            <xsl:apply-templates select="step-seq"/>
+
+        </div>
+        <div class="book_center">
+            <div class="bg">
+                <xsl:variable name="JG_MNT_BOOK_Center_IMG" select="'/img/ietm/jg/book_center_bg.png'"/>
+                <img class="mnt_bg_img" src="{ $JG_MNT_BOOK_Center_IMG }"/>
+            </div>
+        </div>
+    </xsl:template>
+
+    <xsl:template match="step">
+        <div class="row justify-content-center text-left">
+            <!--페이징 처리-->
+            <div class="con_left_contents">
+                
+                <!--전체 출력되는 부분 - hide -->
+                <div class="contents_box">
+                    <!-- title -->
+                    <div class="step_div" style="font-size: 15px; line-height: 20px; letter-spacing: -0.5px;">
+                        <xsl:if test="text">
+                            <xsl:attribute name="style">text-align:
+                                <xsl:value-of select="text/@align"/>
+                                ; <!--padding-left:-->
+                                <xsl:value-of select="./@x1 div 100"/>px;
+                            </xsl:attribute>
+                            <xsl:apply-templates select="text"/>
+                        </xsl:if>
+                     
+                    </div>
+                </div>
+
+                <!--각각 경우에 넣는 게 맞음. 페이지마다 다르므로. 
+                // 현재는 중복 보이는 걸 방지하기 위해 바깥에 빼둠-->
+                <xsl:if test="table">
+                    <xsl:apply-templates select="table"/>
+                </xsl:if>
+                <!-- 정비절차 개발중 : 2025.05.22. 윤민희  //현시점, 들어가는 첫 페이지만 구형, 넥스트는 이전 페이지 내용 제거 -->
+                <!-- 모든 형식들은 아래의 주석에 해당함. / 만약, 모두 바꾸기를 할 경우, [1]붙은 아래부터 실행-->
+                
+                <!-- 위쪽애서 모든 <alert> 포함 형제들을 가져오는 노드 -->
+                <!-- 아레쪽애서 모든 <alert> 포함 형제들을 가져오는 노드 -->
+                <!-- 위쪽 형제 중에서 가장 가까운 노드 중 <alert> 요소를 후손으로 포함한 노드 -->
+                <!-- 아래쪽 형제 중에서 가장 가까운 노드 중 <alert> 요소를 후손으로 포함한 노드 -->
+                <!-- 위쪽 형제 중 가장 가까운 노드 중 <alert>을 포함하는 것 -->
+                <!-- 아래쪽 형제 중 가장 가까운 노드 중 <alert>을 포함하는 것 -->
+                <!--  <alert>  -->
+                <xsl:variable name="allPrevAlerts" select="preceding-sibling::*[descendant::alert]"/>
+                <xsl:variable name="allNextAlerts" select="following-sibling::*[descendant::alert]"/>
+                <xsl:variable name="prevAlert" select="preceding-sibling::*[descendant::alert][1]"/>
+                <xsl:variable name="nextAlert" select="following-sibling::*[descendant::alert][1]"/>
+                <xsl:variable name="pr_Alert" select="preceding-sibling::*[1][descendant::alert]"/>
+                <xsl:variable name="ne_Alert" select="following-sibling::*[1][descendant::alert]"/>
+                <!--  <grphprim>  -->
+                <xsl:variable name="allPrevGrphs" select="preceding-sibling::*[descendant::grphprim]"/>
+                <xsl:variable name="allNextGrphs" select="following-sibling::*[descendant::grphprim]"/>
+                <xsl:variable name="prevGrph" select="preceding-sibling::*[descendant::grphprim][1]"/>
+                <xsl:variable name="nextGrph" select="following-sibling::*[descendant::grphprim][1]"/>
+                <xsl:variable name="pr_Grph" select="preceding-sibling::*[1][descendant::grphprim]"/>
+                <xsl:variable name="ne_Grph" select="following-sibling::*[1][descendant::grphprim]"/>
+
+                
+                <!--앞에 alert이 없는 경우, 직후에 alert이 있는 경우:  1T-50A-2-32JG-90-1 / 2.1.1의 사례-->
+                <div class="noAlertFirstCon">
+                    <xsl:if test="not($allPrevAlerts) and $allNextAlerts">
+                        <div class="nAFChk">
+                            <xsl:if test="text">
+                                <xsl:value-of select="."/>
+                            </xsl:if>
+                        </div>
+                   </xsl:if>
+                </div>
+
+                <!--직전, 직후에  alert이 있는 경우 
+                &&: 직전, 직후에 alert과 그림이 없는 경우. 1T-50A-2-32JG-90-1 / 2.2.1의 사례    
+                    -> 현재, aGCon으로 처리가 되고 있는데, 필요 없으면 나중에 지우기-->
+                <div class="AlertFirstCon" id="AlertFirstCon">
+                    <xsl:if test="$allPrevAlerts and $allNextAlerts
+                              and not($prevAlert and $nextGrph)">
+                        <div class="aFChk">
+                            <xsl:if test="text">
+                                <xsl:apply-templates select="text"/>
+                            </xsl:if>
+                        </div>
+                    </xsl:if>
+                </div>
+
+                <!-- 직전에 alert이 있고 직후에 grphprim이  있는 경우: 1T-50A-2-32JG-90-1 / 2.4.1의 사례-->
+                <div class="Alert_Grph_Con">
+                    <xsl:if test="$prevAlert and $nextGrph">
+                        <div class="a_g_Con">
+                            <xsl:if test="text">
+                                <xsl:apply-templates select="text"/>
+                            </xsl:if>
+                        </div>
+                    </xsl:if>
+                </div>
+                
+                <!-- 위에 alert, 아래에 grphprim인 경우
+                     && 직전, 직후에 grphprim과 alert이 없는 경우 
+                     && 위, 아래에 alert이 있는 경우 : 1T-50A-2-32JG-90-1 / 2.3.1의 사례-->
+                <div class="alertGrphCon">
+                    <xsl:if test="($prevAlert and $nextGrph)
+                             and not($allPrevGrphs and $allNextAlerts)
+                             and ($allPrevAlerts and $allNextAlerts)">
+                        <!-- 여기 하는 중.............-->
+                        <!-- 넓게 직전에 alert이 있고 넓게 직후에 grphprim이 있는 경우: 1T-50A-2-32JG-90-1 / 2.11.1의 사례-->
+                        <div class="AlertGrphCon">
+                            <xsl:if test="$prevAlert and $nextGrph">
+                                <div class="AgCon">
+                                    <xsl:if test="text">
+                                        <xsl:apply-templates select="text"/>
+                                    </xsl:if>
+                                </div>
+                            </xsl:if>
+                        </div>
+                        <div class="aGCon">
+                            <xsl:if test="text">
+                                <xsl:apply-templates select="text"/>
+                            </xsl:if>
+                        </div>
+                    </xsl:if>
+                </div>
+                
+
+                <!-- Next 버튼 처리-->
+               <xsl:choose>
+                   <!-- 직전 노드에 alert이 있고, 직후 노드에 alert이 있는 경우 -->
+                   <xsl:when test="preceding-sibling::*[1][descendant::alert] and following-sibling::*[1][descendant::alert]">
+                       <!--or preceding-sibling::*[descendant::alam] and following-sibling::*[descendant::alam]">-->
+                       <div class="next_branch_content">
+                           <xsl:if test="text">
+                               <xsl:apply-templates select="text"/>
+                           </xsl:if>
+                       </div>
+                   </xsl:when>
+                   <!-- 그 외의 경우 -->
+                   <xsl:otherwise>
+                   </xsl:otherwise>
+               </xsl:choose>
+                <!-- </xsl:if>-->
+                <!-- 그 이후: ALAM이 나오기 전까지 출력 -->
+            </div>
+            <!--</xsl:if>-->
+        </div>
+
+
+        <!-- 니중에 alert 팝업
+            <xsl:for-each select="alert[1]">
+                <div>
+                    <xsl:if test="text">
+                        <xsl:attribute name="style">text-align:
+                            <xsl:value-of select="text/@align"/>
+                            <xsl:value-of select="./@x1 div 100"/>px;
+                        </xsl:attribute>
+                        <xsl:apply-templates select="text"/>
+                    </xsl:if>
+                </div>
+            </xsl:for-each>
+        -->
+
+        <xsl:if test="grphprim">
+            <div class="con_right">
+                <div class="right_contents_box">
+                    <div class="inner1">
+                        <div class="inner2" id="frame_right_content">
+                            <div class="frame_2 ac-object">
+                                <xsl:apply-templates select="grphprim"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xsl:if>
+
+        <xsl:if test="alert">
+            <div class="bottom_btn_box">
+                <ul id="frame_bottom_btn">
+                    <li>
+                        <xsl:apply-templates select="alert"/>
+                    </li>
+                </ul>
+            </div>
+        </xsl:if>
+
+        <xsl:if test="step-seq">
+            <xsl:apply-templates select="step-seq"/>
+        </xsl:if>
+
+    </xsl:template>
+    <!-- 20250409 - JG 정비절차 - Frame - END  -->
+</xsl:stylesheet>

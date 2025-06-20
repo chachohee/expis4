@@ -1,0 +1,44 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <!-- Root Template -->
+    <xsl:template match="/techinfo">
+        <ul class="collapse show nav flex-column ps-3">
+            <xsl:apply-templates select="system"/>
+        </ul>
+    </xsl:template>
+
+    <!-- System 노드 처리 -->
+    <xsl:template match="system">
+        <li class="nav-item"
+            toKey="{$toKey}"
+            id="{@id}"
+            name="{@name}"
+            seq="{@seq}"
+            pTocoId="{@pTocoId}"
+            type="{@type}">
+
+            <!-- 버튼: 폴더 또는 파일 아이콘 -->
+            <button type="button">
+                <xsl:choose>
+                    <xsl:when test="system">
+                        <i class="fa-solid fa-folder-plus"></i>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <i class="fa-solid fa-folder-minus"></i>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </button>
+
+            <!-- 네비게이션 링크 -->
+            <a href="#" class="nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="col-{ @id }">
+                <xsl:value-of select="@name"/>
+            </a>
+
+            <!-- 하위 시스템이 있는 경우 -->
+            <xsl:if test="system">
+                <ul class="collapse nav flex-column ps-3" id="col-{ @id }">
+                    <xsl:apply-templates select="system"/>
+                </ul>
+            </xsl:if>
+        </li>
+    </xsl:template>
+</xsl:stylesheet>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.ietm.dao.OptionMapper">
+
+	<select id="selectOption" parameterType="String" resultType="com.expis.ietm.dto.OptionDto">
+		select
+					explore_mode as exploreMode
+					,output_mode as outputMode
+					,view_mode as viewMode
+					,fi_mode as fiMode
+					,font_size as fontSize
+					,font_family as fontFamily
+		from 		tm_fn_option
+		where 		user_id = #{userId}
+	</select>
+
+	<insert id="insertOption" parameterType="com.expis.ietm.dto.OptionDto">
+		insert into tm_fn_option
+		<trim prefix="(" suffix=")">
+			 user_id
+			,explore_mode
+			,output_mode
+			,view_mode
+			,fi_mode
+			,font_size
+			,font_family
+			,print_word_mode
+			,mobile_menu_mode
+			,cover_type
+			,create_user_id
+			,create_date
+			,modify_user_id
+			,modify_date
+			,status_kind
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")">
+			 #{userId}
+			,#{exploreMode}
+			,#{outputMode}
+			,#{viewMode}
+			,#{fiMode}
+			,#{fontSize}
+			,#{fontFamily}
+			,#{printWordMode}
+			,#{mobileMenuMode}
+			,#{coverType}
+			,#{userId}
+			,sysdate
+			,#{userId}
+			,sysdate
+			,'10'
+		</trim>
+	</insert>
+	
+	<select id="selectUserIdCount" 
+	parameterType="com.expis.ietm.dto.OptionDto" resultType="int">
+		select 	count(user_id) as count
+		from 	tm_fn_option
+		where	user_id = #{userId}
+	</select>
+
+	<update id="updateOption" parameterType="com.expis.ietm.dto.OptionDto">
+		update tm_fn_option
+		<trim prefix="SET" suffixOverrides=",">
+			font_size = #{fontSize}
+			<if test="fontFamily != null and fontFamily != ''">
+				,font_family = #{fontFamily}
+			</if>
+			<if test="printWordMode != null and printWordMode != ''">
+				,print_word_mode = #{printWordMode}
+			</if>
+			,explore_mode = #{exploreMode}
+			,output_mode = #{outputMode}
+			,view_mode = #{viewMode}
+			,fi_mode = #{fiMode}
+			<if test="coverType != null and coverType != ''">
+				,cover_type = #{coverType}
+			</if>
+			<if test="mobileMenuMode != null and mobileMenuMode != ''">
+				,mobile_menu_mode = #{mobileMenuMode}
+			</if>
+			,modify_date = CURRENT_TIMESTAMP  <!-- 현재 시각으로 변경 -->
+		</trim>
+		where user_id = #{userId}
+	</update>
+
+
+	<!-- 2021 12 24 폰트 없을경우 기본  본고딕으로 변경 -->
+	<select id="selectUserFontSize" parameterType="com.expis.ietm.dto.OptionDto"
+		resultType="com.expis.ietm.dto.OptionDto">
+		select	nvl(font_size, '01') as fontSize
+				,nvl(font_family, '03') as fontFamily
+				,nvl(print_word_mode, '01') as printWordMode
+				,nvl(explore_mode, '01') as exploreMode
+				,nvl(output_mode, '01') as outputMode
+				,nvl(view_mode, '01') as viewMode
+				,nvl(fi_mode, '01') as fiMode
+				,nvl(mobile_menu_mode, '01') as mobileMenuMode
+				,nvl(cover_type, '01') as coverType
+		from	tm_fn_option
+		where	user_id = #{userId}			
+	</select>
+	
+</mapper>

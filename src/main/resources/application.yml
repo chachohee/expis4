@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: expis
+
+  #  datasource:
+  #    url: jdbc:oracle:thin:@//localhost:1521/IETM  # PDB ??? ??
+  #    username: fa50                               # PDB ? ??? ??
+  #    password: USR!@Block2                          # ??? ????
+  #    driver-class-name: oracle.jdbc.OracleDriver
+  #    hikari:
+  #      maximum-pool-size: 10                     # HikariCP ?? ? ??
+  #      minimum-idle: 5                           # HikariCP ?? ?? ??? ?
+
+  datasource:
+    t50:
+      url: jdbc:oracle:thin:@//localhost:1521/pdb  # PDB ??? ??
+      username: t50                             # PDB ? ??? ??
+      password: expist50                          # ??? ????
+      driver-class-name: oracle.jdbc.OracleDriver
+    fa50:
+      url: jdbc:oracle:thin:@//localhost:1521/IETM  # PDB ??? ??
+      username: fa50                               # PDB ? ??? ??
+      password: USR!@Block2                          # ??? ????
+      driver-class-name: oracle.jdbc.OracleDriver
+    kt1:
+      url: jdbc:oracle:thin:@//localhost:1521/pdb  # PDB ??? ??
+      username: kt1                              # PDB ? ??? ??
+      password: expiskt1                        # ??? ????
+      driver-class-name: oracle.jdbc.OracleDriver
+
+    hikari:
+      maximum-pool-size: 10                     # HikariCP ?? ? ??
+      minimum-idle: 5                           # HikariCP ?? ?? ??? ?
+
+  mybatis:
+    #    type-aliases-package: com.expis   # DTO ???? ??? ???
+    #    mapper-locations: classpath:mapper/user/**/*.xml  # MyBatis ?? XML ?? ?? (?? ?? ?? XML ?? ??)
+    configuration:
+      log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # MyBatis ?? ?? ?? (??? SQL ??)
+      jdbc-type-for-null: NULL                   # NULL ? ?? ??
+      map-underscore-to-camel-case: true        # DB ???? ?????? ?? ?? (?: user_id ? userId)
+      cache-enabled: false                       # MyBatis ?? ?? ??
+      aggressive-lazy-loading: true             # ?? ?? ?? ???
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG                  # Hibernate? SQL ?? ??
+    org.hibernate.type.descriptor.sql: TRACE   # Hibernate SQL ?? ?? ?? ??
+    org.mybatis: DEBUG                          # MyBatis ?? ??
+    #org.springframework.boot.autoconfigure: DEBUG
+    org.apache.ibatis: DEBUG
+    java.sql: DEBUG
+    jdbc.sqltiming: DEBUG
+
+server:
+  servlet:
+    session:
+      timeout: 300m
+
+#mybatis.configuration.log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+app:
+  expis:
+    bizCode: KT1
+    introPage: CMNT                    #로그인 이후 첫 페이지 : CMNT/IETM
+    language: KO                       #사용 언어 : KO/EN
+    ietmType: T.O.                     #교범 타입 : T.O. / T.M.
+    databaseType: ORACLE               #데이터베이스 타입 : ORACLE / MARIA / MSSQL
+    project: /ExpisWeb/
+    dfSysPath: /web_ietm/ietmdata
+    dfIetmData: /web_ietm/ietmdata
+    filePath: C:/EXPIS3/ietmdata/cmnt/
+    fileUploadPath: C:/EXPIS3/ietmdata/cmnt/
+    fileRelPath: C:/EXPIS3/ietmdata/cmnt/
+    fileExt: xml
+    maxUploadSize: 536870120
+    pagingCnt: 10
+    recordCnt: 10
+    compileType: ide
+    ietmImgFile: classpath:/static

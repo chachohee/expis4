@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{cmnt.notice}">공지사항</title>
+    <link th:href="@{/component/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/component/fontawesome/css/all.css}" rel="stylesheet">
+    <link th:href="@{/css/community/board.css}" rel="stylesheet">
+    <link th:href="@{/css/community/boardDetail.css}" rel="stylesheet">
+    <link th:href="@{/css/community/cmntIntro.css}" rel="stylesheet">
+    <script th:src="@{/component/jquery/jquery-3.7.1.min.js}" type="text/javascript"></script>
+    <script th:src="@{/js/common/messages.js}" type="text/javascript"></script>
+    <script th:src="@{/js/community/cmnt.js}" type="text/javascript"></script>
+    <script th:src="@{/component/bootstrap/js/bootstrap.bundle.min.js}" type="text/javascript"></script>
+</head>
+<body>
+<script th:inline="javascript">
+    var bizCode = [[${bizCode}]];
+    var TOKEY = '';
+    console.log(bizCode);
+</script>
+<div style="display:none;">
+    <input type="hidden" name="bizCode" th:value="${BIZ_CODE}"/>
+    <input type="hidden" name="firstId" th:value="${firstId}"/>
+    <input type="hidden" name="secondId" th:value="${secondId}"/>
+    <input type="hidden" name="userName" th:value="${USER_NAME}"/>
+</div>
+<div class="container-fluid">
+    <div class="row" id="cmnt_root">
+        <div class="col-md-4 col-lg-3 col-xl-2 text-bg-dark min-vh-100">
+            <div th:replace="~{community/fragments/sidebar :: sidebar}"></div>
+        </div>
+        <main class="col-md-8 col-lg-9 col-xl-10">
+            <div th:if="${firstId == 'cmntIntro'}" class="row">
+                <div class="col-5 justify-content-center" id="left-section" th:each="options : ${cmnt.option}">
+                    <h1 class="mb-4" th:text="${options.optCmntTitle}"></h1>
+                    <p th:text="${options.optCmntSubTitle}"></p>
+                </div>
+                <div class="col-7 justify-content-center cmnt-main" id="cmntMain"></div>
+                <input type="hidden" id="cmnt_board_not_exist" value="게시글이 존재하지 않습니다."/>
+            </div>
+            <div th:if="${firstId == 'cmntBoard'}">
+                <div th:replace="~{community/fragments/board :: board}"></div>
+            </div>
+            <div th:if="${firstId == 'cmntRelatedSites'}">
+                <div th:replace="~{community/fragments/relatedSites :: relatedSites}"></div>
+            </div>
+            <div th:if="${firstId == 'cmntAccount'}">
+                <div th:replace="~{community/fragments/userAccount :: userAccount}"></div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

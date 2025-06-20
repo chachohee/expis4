@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.manage.dao.SystemInfoMapper">
+
+    <!-- ResultMap -->
+    <resultMap id="systemResultMap" type="com.expis.manage.dto.SystemInfoDto">
+        <id		property="sysId"					column="sys_id"					javaType="string" />
+        <result	property="pSysId"				column="p_sys_id"				javaType="string" />
+        <result	property="sysOrd"				column="sys_ord"				javaType="long" />
+        <result	property="sysName"			column="sys_name"			javaType="string" />
+        <result	property="sysSubname"		column="sys_subname"		javaType="string" />
+        <result	property="sysType"				column="sys_type"				javaType="string" />
+        <result	property="toKey"					column="to_key"					javaType="string" />
+        <result	property="statusKind"			column="status_kind"			javaType="string" />
+        <result	property="createUserId"		column="create_user_id"	javaType="string" />
+        <result	property="createDate"		column="create_date"			javaType="date" />
+    </resultMap>
+
+
+    <!-- ResultCount -->
+    <resultMap id="systemResultCount" type="int">
+        <result property="cnt" column="cnt" />
+    </resultMap>
+
+
+    <!-- Column -->
+    <sql id="systemColumn">
+        tsi.sys_id					AS sys_id
+        , tsi.p_sys_id				AS p_sys_id
+        , tsi.sys_ord					AS sys_ord
+        , tsi.sys_name				AS sys_name
+        , tsi.sys_subname		AS sys_subname
+        , tsi.sys_type				AS sys_type
+        , tsi.to_key					AS to_key
+        , tsi.status_kind			AS status_kind
+        , tsi.create_user_id		AS create_user_id
+        , tsi.create_date			AS create_date
+    </sql>
+
+
+    <!--  Select Count -->
+    <select id="selectCountDao" parameterType="com.expis.manage.dto.SystemInfoDto" resultMap="systemResultCount">
+        SELECT
+        COUNT(*) AS cnt
+        FROM tm_sys_info tsi
+
+        <where>
+            <choose>
+                <when test="statusKind != null">
+                    status_kind = #{statusKind}
+                </when>
+                <otherwise>
+                    status_kind = '10'
+                </otherwise>
+            </choose>
+        </where>
+
+    </select>
+
+
+    <!--  Select List -->
+    <select id="selectListDao" resultMap="systemResultMap">
+        SELECT
+        sys_id, sys_name
+        FROM tm_sys_info
+    </select>
+
+    <select id="selectListDao2" parameterType="com.expis.manage.dto.SystemInfoDto" resultMap="systemResultMap">
+        SELECT
+        <include refid="systemColumn" />
+        FROM tm_sys_info tsi
+
+        <where>
+            <choose>
+                <when test="statusKind != null">
+                    status_kind = #{statusKind}
+                </when>
+                <otherwise>
+                    status_kind = '10'
+                </otherwise>
+            </choose>
+        </where>
+
+        ORDER BY to_key ASC
+    </select>
+
+
+    <!--  Select List  -  교범목록 추출 -->
+    <select id="selectListSystemToDao" parameterType="com.expis.manage.dto.SystemInfoDto" resultMap="systemResultMap">
+        select
+        <include refid="systemColumn" />
+        from	tm_sys_info tsi
+        where status_kind = '10'
+        and sys_type = '06'
+        order by to_key
+    </select>
+
+
+    <!--  Select List  - 관련교범목록 추출 -->
+    <select id="selectListRelatedToDao" parameterType="com.expis.manage.dto.SystemInfoDto" resultMap="systemResultMap">
+        select
+        <include refid="systemColumn" />
+        from	tm_sys_info tsi
+        where status_kind = '10'
+        and sys_type = '06'
+        and p_sys_id in (select p_sys_id from tm_sys_info where to_key = #{toKey})
+        and to_key != #{toKey}
+        order by to_key
+    </select>
+
+
+    <!--  Select One -->
+    <select id="selectDetailDao" parameterType="String" resultMap="systemResultMap">
+        SELECT
+        <include refid="systemColumn" />
+        FROM tm_sys_info tsi
+        WHERE sys_id = #{sysId}
+    </select>
+
+
+    <!-- Insert -->
+    <insert id="insertDao" parameterType="com.expis.manage.dto.SystemInfoDto">
+        INSERT INTO tm_sys_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            sys_id,
+            p_sys_id,
+            sys_ord,
+            sys_name,
+            <if test="sysSubname != null">sys_subname,</if>
+            <if test="sysType != null">sys_type,</if>
+            <if test="toKey != null">to_key,</if>
+            <if test="statusKind != null">status_kind,</if>
+            <if test="createUserId != null">create_user_id,</if>
+            create_date
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{sysId},
+            #{pSysId},
+            #{sysOrd},
+            #{sysName},
+            <if test="sysSubname != null">#{sysSubname},</if>
+            <if test="sysType != null">#{sysType},</if>
+            <if test="toKey != null">#{toKey},</if>
+            <if test="statusKind != null">#{statusKind},</if>
+            <if test="createUserId != null">#{createUserId},</if>
+            SYSDATE
+        </trim>
+    </insert>
+
+
+    <!-- Insert All -->
+    <insert id="insertAllDaoMDB" parameterType="com.expis.manage.dto.SystemInfoDto">
+        insert into	tm_sys_info
+        (
+        sys_id,
+        p_sys_id,
+        sys_ord,
+        sys_name,
+        sys_subname,
+        sys_type,
+        to_key,
+        status_kind,
+        create_user_id,
+        create_date
+        )
+        values
+        (
+        #{sysId},
+        #{pSysId},
+        ${sysOrd},
+        #{sysName},
+        #{sysSubname},
+        #{sysType},
+        #{toKey},
+        #{statusKind},
+        #{createUserId},
+        sysdate
+        )
+    </insert>
+
+
+    <!-- Insert All -->
+    <insert id="insertAllDao" parameterType="com.expis.manage.dto.SystemInfoDto">
+        <foreach index="index" item="item" collection="list" open="INSERT ALL " separator=" " close="SELECT * FROM DUAL">
+            INTO tm_sys_info
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                sys_id,
+                p_sys_id,
+                sys_ord,
+                sys_name,
+                <if test="item.sysSubname != null">sys_subname,</if>
+                <if test="item.sysType != null">sys_type,</if>
+                <if test="item.toKey != null">to_key,</if>
+                <if test="item.statusKind != null">status_kind,</if>
+                <if test="item.createUserId != null">create_user_id,</if>
+                create_date
+            </trim>
+            VALUES
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                #{item.sysId},
+                #{item.pSysId},
+                #{item.sysOrd},
+                #{item.sysName},
+                <if test="item.sysSubname != null">#{item.sysSubname},</if>
+                <if test="item.sysType != null">#{item.sysType},</if>
+                <if test="item.toKey != null">#{item.toKey},</if>
+                <if test="item.statusKind != null">#{item.statusKind},</if>
+                <if test="item.createUserId != null">#{item.createUserId},</if>
+                SYSDATE
+            </trim>
+        </foreach>
+    </insert>
+
+
+    <!-- Update -->
+    <update id="updateDao" parameterType="com.expis.manage.dto.SystemInfoDto">
+        UPDATE tm_sys_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="pSysId != null">p_sys_id = #{pSysId},</if>
+            <if test="sysOrd != null">sys_ord = #{sysOrd},</if>
+            <if test="sysName != null">sys_name = #{sysName},</if>
+            <if test="sysSubname != null">sys_subname = #{sysSubname},</if>
+            <if test="sysType != null">sys_type = #{sysType},</if>
+            <if test="toKey != null">to_key = #{toKey},</if>
+            <if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+            modify_date = SYSDATE
+        </trim>
+        WHERE sys_id = #{sysId}
+    </update>
+
+
+    <!-- Delete -->
+    <delete id="deleteDao" parameterType="com.expis.manage.dto.SystemInfoDto">
+        DELETE FROM tm_sys_info
+        <where>
+            <if test="sysId != null">sys_id = #{sysId}</if>
+        </where>
+    </delete>
+
+
+    <!-- SysTree 등록 유무 확인 -->
+    <select id="getSysInfoCount" resultType="int">
+        select	count(status_kind)
+        from	tm_sys_info
+        where	status_kind = '10'
+    </select>
+
+</mapper>

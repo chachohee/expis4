@@ -1,0 +1,258 @@
+<div th:fragment="relatedSites">
+    <div th:if="${secondId == 'relatedSites'}">
+        <div class="content">
+            <div class="row">
+                <div class="col-12 banner">
+                    <img src="/img/community/bg_sub_title_05.jpg" alt="배너 이미지">
+                </div>
+                <div class="col-3">
+                    <h1 class="related-site" th:text="#{cmnt.site}">관련사이트</h1>
+                    <hr>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 text-end">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
+                            data-bs-target="#relatedSitesWrite" th:text="#{cmnt.add.related.sites}">
+                        사이트 추가
+                    </button>
+                </div>
+                <div class="col-12 text-center" th:if="${#lists.isEmpty(cmnt.relatedList)}">
+                    <p class="text-muted mt-4" th:text="#{cmnt.related.not.exist}">현재 등록된 사이트가 없습니다.</p>
+                </div>
+                <div class="col-xl-2 col-lg-3 col-sm-4 mb-2 mt-2" th:each="lists : ${cmnt.relatedList}"
+                     th:if="${!#lists.isEmpty(cmnt.relatedList)}">
+                    <div class="card h-80">
+                        <th:block th:if="${lists.fileSeq == 0}">
+                            <img class="img" src="/img/community/kf21.png"/>
+                        </th:block>
+                        <th:block th:if="${lists.fileSeq != 0}">
+                            <img class="img"
+                                 th:src="'/EXPIS/' + ${bizCode} + '/ietmdata/cmnt/' + ${lists.fileStrNm} + '.' + ${lists.fileType}"/>
+                        </th:block>
+
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${lists.relTitle}">사이트 제목</h5>
+                            <p class="card-text">
+                                <a th:href="${lists.relUrl}" target="_blank" th:text="${lists.relUrl}">사이트 링크</a>
+                            </p>
+                            <p class="card-text text">
+                                등록일 : <span th:text="${lists.createDate}"></span>
+                            </p>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle='modal'
+                                    th:attr="data-bs-target='#relatedSitesDetail-' + ${lists.relSeq}"
+                                    th:text="#{cmnt.detail.info}">
+                                상세정보
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 상세페이지 -->
+                    <div class="modal fade" th:id="'relatedSitesDetail-' + ${lists.relSeq}" tabindex="-1"
+                         aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" th:text="#{cmnt.detail.related.sites}">관련 사이트 상세 정보</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <td><label for="relSeqDetail" th:text="#{cmnt.detai.number}">글 번호</label>
+                                            </td>
+                                            <td>
+                                                <div id="relSeqDetail" th:text="${lists.relSeq}"></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><label for="relTitleDetail" th:text="#{cmnt.title}">제목</label></td>
+                                            <td>
+                                                <div id="relTitleDetail" th:text="${lists.relTitle}"></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><label for="relUrlDetail" th:text="#{cmnt.url}">Url 주소</label></td>
+                                            <td>
+                                                <div id="relUrlDetail" th:text="${lists.relUrl}"></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><label for="relContentsDetail" th:text="#{cmnt.explanation}">설명</label>
+                                            </td>
+                                            <td>
+                                                <div id="relContentsDetail" th:text="${lists.relContents}"></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><label for="fileMasterDtosDetail" th:text="#{cmnt.logo}">로고</label></td>
+                                            <td><img id="fileMasterDtosDetail" th:text="${lists.fileOrgNm}"></td>
+                                        </tr>
+                                    </table>
+                                    <div class="modal-footer">
+                                        <button type="button" id="openSecondModalBtn" class="btn btn-outline-secondary"
+                                                data-bs-toggle="modal"
+                                                th:attr="data-bs-target='#relatedSitesEdit-' + ${lists.relSeq}"
+                                                th:text="#{cmnt.modify}">수정
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"
+                                                th:text="#{cmnt.close}">
+                                            닫기
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 수정하기 -->
+                    <div class="modal fade" th:id="'relatedSitesEdit-' + ${lists.relSeq}" data-bs-backdrop="static"
+                         data-bs-keyboard="false" tabindex="-1" aria-labelledby="relatedSitesLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content">
+                                <form th:action="@{/EXPIS/{bizCode}/cmnt/relatedUpdate.do(bizCode=${BIZ_CODE})}"
+                                      method="post" enctype="multipart/form-data">
+                                    <input type="hidden" name="relSeq" th:value="${lists.relSeq}">
+                                    <input type="hidden" name="relSeq" th:value="${lists.fileSeq}">
+                                    <input type="hidden" name="fileTranYn" value="Y">
+                                    <input type="hidden" name="boardKind" value="Modify">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="relatedSitesLabelEdit"
+                                            th:text="#{cmnt.edit.related.sites}">관련사이트 수정</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <table class="table table-bordered">
+                                            <tbody>
+                                            <tr>
+                                                <td><label for="title" class="form-label"
+                                                           th:text="#{cmnt.title}">제목</label></td>
+                                                <td>
+                                                    <input type="text" id="titleEdit" name="relTitle"
+                                                           class="form-control" th:value="${lists.relTitle}"
+                                                           required>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><label for="url" class="form-label"
+                                                           th:text="#{cmnt.url}">URL</label></td>
+                                                <td>
+                                                    <input type="text" id="urlEdit" name="relUrl"
+                                                           class="form-control" th:value="${lists.relUrl}" required>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><label for="attachment" class="form-label"
+                                                           th:text="#{cmnt.logo}">로고</label></td>
+                                                <td>
+                                                    <input type="file" id="attachmentEdit" name="pup_imgFile"
+                                                           class="form-control" accept="image/*">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><label for="content" class="form-label"
+                                                           th:text="#{cmnt.explanation}">설명</label></td>
+                                                <td>
+                                                        <textarea id="contentEdit" name="relContents"
+                                                                  class="form-control" rows="3"
+                                                                  th:text="${lists.relContents}" required></textarea>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-outline-secondary"
+                                                th:text="#{cmnt.modify}">수정
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger"
+                                                onclick="if(confirm('정말 삭제하시겠습니까?')) relatedSitesDelete();"
+                                                th:text="#{cmnt.delete}">삭제
+                                        </button>
+                                        <input type="hidden" id="fileSeqDelete" th:value="${lists.fileSeq}">
+                                        <input type="hidden" id="relSeqDelete" th:value="${lists.relSeq}">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"
+                                                th:text="#{cmnt.close}">
+                                            닫기
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="pagination-container text-center mt-4">
+                        <nav th:replace="community/fragments/pagination :: pagination"></nav>
+                    </div>
+                </div>
+                <div class="modal fade" id="relatedSitesWrite" data-bs-backdrop="static" data-bs-keyboard="false"
+                     tabindex="-1" aria-labelledby="relatedSitesLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <form th:action="@{/EXPIS/{bizCode}/cmnt/relatedInsert.do(bizCode=${BIZ_CODE})}"
+                                  method="post"
+                                  enctype="multipart/form-data">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="relatedSitesLabel"
+                                        th:text="#{cmnt.detail.related.sites}">관련 사이트 상세 정보</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table table-bordered">
+                                        <tbody>
+                                        <tr>
+                                            <td><label for="title" class="form-label"
+                                                       th:text="#{cmnt.table.title}">제목</label></td>
+                                            <td>
+                                                <input type="text" id="title" name="relTitle" class="form-control"
+                                                       placeholder="제목을 입력하세요" required>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><label for="url" class="form-label" th:text="#{cmnt.url}">URL</label>
+                                            </td>
+                                            <td>
+                                                <input type="text" id="url" name="relUrl" class="form-control"
+                                                       placeholder="URL 주소를 입력하세요" required>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><label for="attachment" class="form-label"
+                                                       th:text="#{cmnt.logo}">로고</label></td>
+                                            <td>
+                                                <input type="file" id="attachment" name="pup_imgFile"
+                                                       class="form-control" accept="image/*">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><label for="content" class="form-label"
+                                                       th:text="#{cmnt.explanation}">설명</label></td>
+                                            <td>
+                                                    <textarea id="content" name="relContents" class="form-control"
+                                                              rows="3" placeholder="내용을 입력하세요" required></textarea>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-outline-secondary" th:text="#{cmnt.insert}">
+                                        작성
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"
+                                            th:text="#{cmnt.close}">닫기
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

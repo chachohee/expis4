@@ -1,0 +1,58 @@
+@charset "utf-8";
+
+/* 배경 이미지 및 그라데이션 */
+body {
+    background: url('/img/login/intro_bg.png') no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* 로그인 폼을 화면 중앙에 배치하기 위한 래퍼 */
+.wrapper {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+/* 로그인시 상단 타이틀 이미지 */
+.title-layer {
+    position: absolute;
+    top: 10%;
+}
+
+/* 로그인 박스 배경 */
+.login-layer {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    min-height: 500px;
+    background: url('/img/login/login_bg_block2.png') no-repeat center center fixed;
+    /* box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5); */
+}
+
+/* 로그인 박스 스타일 */
+.container {
+    position: absolute;
+    width: 70%;
+    height: 190px;
+    top: 66.7%;
+    left: calc(50% - 35%);  /* 50% - (너비의 절반) */
+    transform: translateY(-50%);
+}
+
+.air-type-layer {
+    position: absolute;
+    top: -50px;
+    left: 135px;
+}
+
+.form-floating label {
+    color: #6c757d;
+}
+.field-error {
+    color: #dc3545;
+    font-size: 0.875rem;
+}
+

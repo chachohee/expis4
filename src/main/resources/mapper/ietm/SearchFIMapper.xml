@@ -1,0 +1,185 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.expis.ietm.dao.SearchFIMapper">
+
+	<!-- ResultMap -->
+	<resultMap id="searchResultMap" type="searchDto">
+		<id		property="toKey"					column="to_key"					javaType="string" />
+		<result	property="tocoId"				column="toco_id"					javaType="string" />
+		<result	property="fiId"						column="fi_id"						javaType="string" />
+		<result	property="fiCode"				column="fi_code"					javaType="string" />
+		<result	property="createUserId"		column="create_user_id"	javaType="string" />
+		<result	property="createDate"		column="create_date"			javaType="date" />
+	</resultMap>
+	
+	
+	<!-- ResultCount -->
+	<resultMap id="searchResultCount" type="int">
+		<result property="cnt" column="cnt" />
+	</resultMap>
+	
+	
+	<!-- Column -->
+	<sql id="searchColumn">
+		  tsf.to_key					AS to_key
+		, tsf.toco_id					AS toco_id
+		, tsf.fi_code					AS fi_code
+		, tsf.create_user_id		AS create_user_id
+		, tsf.create_date			AS create_date
+	</sql>
+	
+	<sql id="searchCol">
+		tsf.to_key	as	toKey
+		,tsf.toco_id	as	tocoId
+		,tsf.fi_code	as	cont
+		,tsf.create_user_id	as	createUserId
+		,tsf.create_date	as	createDate
+	</sql>
+	
+	
+	<!--  Select List -->
+	<select id="selectListDao" resultType="SearchDto">
+		SELECT
+		<include refid="searchCol" />
+		,#{arrConstResult.[6]} as resultKind
+		FROM tm_sc_fi tsf
+		left join tm_toco_info tti	on tsf.toco_id = tti.toco_id
+	  where tsf.toco_id is not null
+		and tti.toco_id is not null
+		and length(tsf.toco_id) &lt; 40
+			<if test="toKey != ''">and tsf.to_key = #{toKey}</if> 
+			<if test="tocoId != null">and tsf.toco_id = #{tocoId}</if>
+			<if test="searchArray != null">
+				<choose>
+					<when test="chkVal != 'none'">
+						and lower(replace(tsf.fi_code, ' ', '')) like '%' || lower(replace(#{searchArray.[0]}, ' ', '')) || '%'
+						${chkVal}
+						lower(replace(tsf.fi_code, ' ', '')) like '%' || lower(replace(#{searchArray.[1]}, ' ', '')) || '%'
+					</when>
+					<otherwise>
+						and lower(replace(tsf.fi_code, ' ', '')) like '%' || lower(replace(#{searchArray.[0]}, ' ', '')) || '%'
+					</otherwise>
+				</choose>
+			</if>
+		ORDER BY tsf.to_key ASC, tsf.toco_id ASC, tsf.fi_code ASC
+	</select>
+	
+	<select id="">
+		
+	</select>
+	
+	
+	<!--  Select One -->
+	<select id="selectDetailDao" resultMap="searchResultMap">
+		SELECT
+		<include refid="searchColumn" />
+		FROM tm_sc_fi tsf
+		WHERE to_key = #{toKey}
+
+		<trim prefix="AND">
+			<if test="tocoId != null">toco_id = #{tocoId}</if>
+		</trim>
+
+	</select>
+	
+	
+	<!--  Select Count -->
+	<select id="selectCountDao" resultMap="searchResultCount">
+		SELECT
+			COUNT(*) AS cnt
+		FROM tm_sc_fi tsf
+		
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+				<if test="fiCode != null">fi_code = #{fiCode}</if>
+			</trim>
+		</where>
+		
+	</select>
+	
+	
+	<!-- Insert -->
+	<insert id="insertDao" parameterType="com.expis.ietm.dto.SearchDto">
+		INSERT INTO tm_sc_fi
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			to_key,
+			toco_id,
+			<if test="fiCode != null">fi_code,</if>
+			<if test="createUserId != null">create_user_id,</if>
+			create_date
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			#{toKey},
+			#{tocoId},
+			<if test="fiCode != null">#{fiCode},</if>
+			<if test="createUserId != null">#{createUserId},</if>
+			SYSDATE
+		</trim>
+	</insert>
+	
+	
+	<!-- Insert All --><!-- 사용 20160924 -->
+	<insert id="insertAllDao" parameterType="com.expis.ietm.dto.SearchDto">
+		<foreach index="index" item="item" collection="list" open="INSERT ALL " separator=" " close="SELECT * FROM DUAL">
+			INTO tm_sc_fi
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				to_key,
+				toco_id,
+				<if test="item.fiCode != null">fi_code,</if>
+				<if test="item.createUserId != null">create_user_id,</if>
+				create_date
+			</trim>
+			VALUES
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				#{item.toKey},
+				#{item.tocoId},
+				<if test="item.fiCode != null">#{item.fiCode},</if>
+				<if test="item.createUserId != null">#{item.createUserId},</if>
+				SYSDATE
+			</trim>
+		</foreach>
+	</insert>
+	
+	
+	<!-- Update -->
+	<update id="updateDao" parameterType="com.expis.ietm.dto.SearchDto">
+		UPDATE tm_sc_fi
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="fiId != null">fi_id = #{fiId},</if>
+			<if test="fiCode != null">fi_code = #{fiCode},</if>
+			<if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+			modify_date = SYSDATE
+		</trim>
+
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+				<if test="fiId != null">fi_id = #{fiId}</if>
+				<if test="fiCode != null">fi_code = #{fiCode}</if>
+			</trim>
+		</where>
+
+	</update>
+
+	
+	<!-- Delete --><!-- 사용 20160924 -->
+	<delete id="deleteDao" parameterType="com.expis.ietm.dto.SearchDto">
+		DELETE FROM tm_sc_fi
+		WHERE to_key = #{toKey}
+		<trim>
+			<if test="tocoId != null">toco_id = #{tocoId}</if>
+			<if test="fiId != null">fi_id = #{fiId}</if>
+			<if test="fiCode != null">fi_code = #{fiCode}</if>
+		</trim>
+	</delete>
+	
+	
+	<!-- Delete --><!-- 사용 20160924 -->
+	<delete id="deleteAllDao">
+		DELETE FROM tm_sc_fi
+	</delete>
+
+</mapper>

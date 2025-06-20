@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eXPIS-III</title>
+    <link href="/component/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/component/fontawesome/css/all.min.css" rel="stylesheet">
+    <link href="/css/ietm/ietm.css" rel="stylesheet">
+    <script th:src="@{/component/jquery/jquery-3.7.1.min.js}" type="text/javascript"></script>
+    <script th:src="@{/component/bootstrap/js/bootstrap.bundle.min.js}" type="text/javascript"></script>
+</head>
+<div oncontextmenu='return false'>
+<div class="pup_ver_wrap bg-dark" id="ver_link_layer">
+    <div class="pup_form" id="ver_link_div">
+        <div class=" pup_header">
+            <span id="version_title_input" class="text-bg-secondary" title="변경 이전 내용"/>
+                변경전 내용
+        </div>
+
+        <div class="ver_cont">
+            <table cellspacing="0" cellpadding="0" style="table-layout: fixed;">
+                <colgroup>
+                    <col width="200" />
+                    <col />
+                </colgroup>
+                <thead>
+                <tr>
+                    <th>변경 번호 : <span id="chg_number" th:text="${verChgNo}"/></th>
+                    <th>변경 일자 : <span id="chg_date_input" th:text="${verChgDate}"/></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td colspan="2">
+                        <div class="table_scroll" th:style="${not #strings.isEmpty(changebasis)} ? 'max-height:355px;' : ''">
+                            <p th:utext="${verHtml}"></p>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+</html>

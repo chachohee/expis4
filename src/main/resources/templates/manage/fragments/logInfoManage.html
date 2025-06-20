@@ -1,0 +1,50 @@
+<div th:fragment="logInfoManage" xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+
+    <div th:if="${secondId == 'view'}">
+        <div class="d-flex flex-column flex-shrink-0 p-3" id="log_info">
+            <!-- 총 게시글 수 -->
+            <div class="d-flex justify-content-between mb-3">
+                <span class="text-muted">
+                    <span th:text="#{admin.total.posts}">총 게시글</span>
+                    <span id="totalCount">0</span>
+                </span>
+            </div>
+
+            <!-- 날짜 검색 폼 -->
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <label for="start_date" class="form-label mb-0" th:text="#{admin.date.search}">날짜 검색</label>
+
+                <input type="text" class="form-control" id="start_date" th:value="${startDate}" onclick="pickerEvent(event)" title="start date" readonly style="max-width: 160px;"/>
+                <span class="mx-1">~</span>
+                <input type="text" class="form-control" id="end_date" th:value="${endDate}" onclick="pickerEvent(event)" title="end date" readonly style="max-width: 160px;"/>
+
+                <button type="button" class="btn btn-primary" onclick="logInfo()" th:title="#{admin.search}" th:text="#{admin.search}">검색</button>
+            </div>
+
+            <!-- 로그 테이블 -->
+            <table class="table table-striped table-hover" aria-describedby="logTableCaption">
+                <colgroup>
+                    <col width="50"/>
+                    <col width="100"/>
+                    <col width="180"/>
+                    <col width="180"/>
+                    <col width="180"/>
+                </colgroup>
+                <thead>
+                <tr>
+                    <th scope="col" th:title="#{admin.number}" th:text="#{admin.number}"> 순번</th>
+                    <th scope="col" th:title="#{admin.id}" th:text="#{admin.id}"> 아이디(ID)</th>
+                    <th scope="col" th:title="#{admin.oper.date.time}" th:text="#{admin.oper.date.time}"> 작업일시</th>
+                    <th scope="col" th:title="#{admin.oper.type}" th:text="#{admin.oper.type}"> 작업형태</th>
+                    <th scope="col" th:title="#{admin.log.more.info}" th:text="#{admin.log.more.info}"> 상세정보</th>
+                </tr>
+                </thead>
+                <tbody id="logTableContainer"></tbody>
+            </table>
+
+            <!-- 페이징 -->
+            <div class="page_butten" id="paginationContainer"></div>
+        </div>
+    </div>
+
+</div>

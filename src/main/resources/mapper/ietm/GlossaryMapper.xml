@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.ietm.dao.GlossaryMapper">
+
+	<!-- ResultMap -->
+	<resultMap id="glossaryResultMap" type="com.expis.ietm.dto.GlossaryDto">
+		<id		property="glsSeq"				column="gls_key"				javaType="string" />
+		<result	property="glsAbbr"				column="gls_abbr"				javaType="string" />
+		<result	property="glsMark"				column="gls_mark"				javaType="string" />
+		<result	property="glsDesc"				column="gls_desc"				javaType="string" />
+		<result	property="createUserId"			column="create_user_id"			javaType="string" />
+		<result	property="createDate"			column="create_date"			javaType="string" />
+	</resultMap>
+
+	<resultMap id="selectIPBListResultMap" type="com.expis.ietm.dto.IPBSearchDto">
+		<id		property="toKey"				column="to_key"					javaType="string" />
+		<result	property="tocoId"				column="toco_id"				javaType="string" />
+		<result	property="indexNo"				column="index_no"				javaType="string" />
+		<result	property="grphNo"				column="grph_no"				javaType="string" />
+		<result	property="ipbCode"				column="ipb_code"				javaType="string" />
+		<result	property="partNo"				column="part_no"				javaType="string" />
+		<result	property="partName"				column="part_name"				javaType="string" />
+		<result	property="nsn"					column="nsn"					javaType="string" />
+		<result	property="cage"					column="cage"					javaType="string" />
+		<result	property="rdn"					column="rdn"					javaType="string" />
+		<result	property="upa"					column="upa"					javaType="string" />
+		<result	property="smr"					column="smr"					javaType="string" />
+		<result	property="stdMngt"				column="std_mngt"				javaType="string" />
+	</resultMap>
+
+	<!-- ResultCount -->
+	<resultMap id="glossaryResultCount" type="int">
+		<result property="cnt" column="cnt" />
+	</resultMap>
+
+
+	<!-- Column -->
+	<sql id="glossaryColumn">
+		  tgl.gls_seq				AS gls_key
+		, tgl.gls_abbr				AS gls_abbr
+		, tgl.gls_mark				AS gls_mark
+		, tgl.gls_desc				AS gls_desc
+		, tgl.create_user_id		AS create_user_id
+		, tgl.create_date			AS create_date
+	</sql>
+
+
+	<!--  Select List -->
+	<select id="selectListDao" parameterType="glossaryDto" resultMap="glossaryResultMap">
+		SELECT	gls_seq
+				,gls_abbr
+				,gls_desc
+				,gls_mark
+				,create_user_id
+				,create_date
+		FROM	tm_glossary
+		WHERE
+			<choose>
+				<when test="chkVal != 'none'">
+					gls_abbr like '%' || upper(replace(#{searchArray.[0]}, ' ', '')) || '%'
+					${chkVal}		gls_abbr like '%' || upper(replace(#{searchArray.[1]},' ', '')) || '%'
+					OR
+					gls_desc like '%' || upper(replace(#{searchArray.[0]}, ' ', '')) || '%'
+					${chkVal}		gls_desc like '%' || upper(replace(#{searchArray.[1]},' ', '')) || '%'
+				</when>
+				<otherwise>
+					gls_abbr like '%' || upper(replace(#{searchArray.[0]}, ' ', '')) || '%'
+					OR		gls_desc like '%' || upper(replace(#{searchArray.[0]},' ', '')) || '%'
+				</otherwise>
+			</choose>
+		order by gls_seq	asc
+	</select>
+
+
+	<!--  Select One -->
+	<!--  by ejkim 2022.01.14 조건문 중  컬럼값은 gls_key 인데  gls_key 컬럼이 없고, 변수명은  #{glsSeq} 여서 매핑의  오류일 것으로 판단
+	      gls_key 대신 gls_seq 컬럼 조건으로 변경-->
+	<select id="selectDetailDao" resultMap="glossaryResultMap">
+		SELECT
+		<include refid="glossaryColumn" />
+		FROM tm_glossary tgl
+
+		<where>
+			<trim prefix="AND">
+				<if test="glsSeq != null">gls_seq = #{glsSeq}</if>
+				<if test="glsAbbr != null">gls_abbr = #{glsAbbr}</if>
+				<if test="glsDesc != null">gls_desc = #{glsDesc}</if>
+			</trim>
+		</where>
+
+	</select>
+
+
+	<!--  Select Count -->
+	<!--  by ejkim 2022.01.14 조건문 중  컬럼값은 gls_key 인데  gls_key 컬럼이 없고, 변수명은  #{glsSeq} 여서 매핑의  오류일 것으로 판단
+	      gls_key 대신 gls_seq 컬럼 조건으로 변경-->
+	<select id="selectCountDao" resultMap="glossaryResultCount">
+		SELECT
+			COUNT(gls_seq) AS cnt
+		FROM tm_glossary tgl
+
+		<where>
+			<trim prefix="AND">
+				<if test="glsSeq != null">gls_seq = #{glsSeq}</if>
+				<if test="glsAbbr != null">gls_abbr = #{glsAbbr}</if>
+				<if test="glsDesc != null">gls_desc = #{glsDesc}</if>
+			</trim>
+		</where>
+
+	</select>
+
+
+	<!-- Insert -->
+	<insert id="insertDao" parameterType="glossaryDto">
+		INSERT INTO tm_glossary
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			gls_seq,
+			<if test="glsAbbr != null">gls_abbr,</if>
+			<if test="glsMark != null">gls_mark,</if>
+			<if test="glsDesc != null">gls_desc,</if>
+			<if test="createUserId != null">create_user_id,</if>
+			create_date
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			#{glsSeq},
+			<if test="glsAbbr != null">#{glsAbbr},</if>
+			<if test="glsMark != null">#{glsMark},</if>
+			<if test="glsDesc != null">#{glsDesc},</if>
+			<if test="createUserId != null">#{createUserId},</if>
+			SYSDATE
+		</trim>
+	</insert>
+
+
+	<!-- Update -->
+	<!--  by ejkim 2022.01.14 조건문 중  컬럼값은 gls_key 인데  gls_key 컬럼이 없고, 변수명은  #{glsSeq} 여서 매핑의  오류일 것으로 판단
+	      gls_key 대신 gls_seq 컬럼 조건으로 변경-->
+	<update id="updateDao" parameterType="com.expis.ietm.dto.GlossaryDto">
+		UPDATE tm_glossary
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="glsAbbr != null">gls_abbr = #{glsAbbr},</if>
+			<if test="glsMark != null">gls_mark = #{glsMark},</if>
+			<if test="glsDesc != null">gls_desc = #{glsDesc},</if>
+			<if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+			modify_date = SYSDATE
+		</trim>
+
+		<where>
+			<trim prefix="AND">
+				<if test="glsSeq != null">gls_seq = #{glsSeq}</if>
+			</trim>
+		</where>
+
+	</update>
+
+
+	<!-- Delete -->
+	<!--  by ejkim 2022.01.14 조건문 중  컬럼값은 gls_key 인데  gls_key 컬럼이 없고, 변수명은  #{glsSeq} 여서 매핑의  오류일 것으로 판단
+	      gls_key 대신 gls_seq 컬럼 조건으로 변경-->
+	<delete id="deleteDao" parameterType="com.expis.ietm.dto.GlossaryDto">
+		DELETE FROM tm_glossary
+		<where>
+			<trim prefix="AND">
+				<if test="glsSeq != null">gls_seq = #{glsSeq}</if>
+			</trim>
+		</where>
+	</delete>
+
+	<!--  selectIPBListDao List -->
+	<!--  2023.04.11 - searchToKey가 추가된 경우 해당 교범내 데이터만 검색 가능하도록 추가 - jingi.kim -->
+	<select id="selectIPBListDao" parameterType="com.expis.ietm.dto.IPBSearchDto" resultMap="selectIPBListResultMap">
+		SELECT
+			to_key,
+			toco_id,
+			index_no,
+			grph_no,
+			ipb_code,
+			part_no,
+			part_name,
+			nsn,
+			cage,
+			rdn,
+			upa,
+			smr,
+			std_mngt
+		FROM tm_sc_partinfo
+		WHERE
+			<trim suffix="AND">
+				<if test="searchToKey != null">to_key = #{searchToKey} </if>
+			</trim>
+			<choose>
+				<when test="searchType == 1">
+					<choose>
+						<when test="searchKeyWork == ''">
+							part_no is not null and TRIM(part_no) is not null
+						</when>
+						<otherwise>
+							part_no like '%' || upper(replace(#{searchKeyWork}, ' ', '')) || '%'
+						</otherwise>
+					</choose>
+				</when>
+				<when test="searchType == 2">
+					<choose>
+						<when test="searchKeyWork == ''">
+							rdn is not null and TRIM(rdn) is not null
+						</when>
+						<otherwise>
+							rdn like '%' || upper(replace(#{searchKeyWork}, ' ', '')) || '%'
+						</otherwise>
+					</choose>
+				</when>
+				<when test="searchType == 3">
+					<choose>
+						<when test="searchKeyWork == ''">
+							NSN is not null and TRIM(NSN) is not null
+						</when>
+						<otherwise>
+							NSN like '%' || upper(replace(#{searchKeyWork}, ' ', '')) || '%'
+						</otherwise>
+					</choose>
+				</when>
+				<when test="searchType == 4">
+					<choose>
+						<when test="searchKeyWork == ''">
+							part_no is not null and TRIM(part_no) is not null
+						</when>
+						<otherwise>
+							part_no like '%' || upper(replace(#{searchKeyWork}, ' ', '')) || '%'
+						</otherwise>
+					</choose>
+				</when>
+				<when test="searchType == 5">
+					<choose>
+						<when test="searchKeyWork == ''">
+							ipb_code is not null and TRIM(ipb_code) is not null
+						</when>
+						<otherwise>
+							ipb_code like '%' || upper(replace(#{searchKeyWork}, ' ', '')) || '%'
+						</otherwise>
+					</choose>
+				</when>
+				<otherwise>
+					1=1
+				</otherwise>
+			</choose>
+	</select>
+
+</mapper>

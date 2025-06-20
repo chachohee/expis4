@@ -1,0 +1,201 @@
+<div th:fragment="subSearch" class="row">
+    <div class="search-header">
+        <span class="search-title"><i class="fa-solid fa-magnifying-glass"></i>
+            <span th:text="#{ietm.manual.search}"></span>
+        </span>
+        <span class="close-btn" onclick="closeSubSearch()"><i class="fa-solid fa-xmark"></i></span>
+    </div>
+    <hr>
+    <!-- 검색 카테고리 -->
+    <div class="search_form_l">
+        <div class="sel_form">
+            <span class="sel_choice" id="search_selectbox">
+                            <!-- 기본 검색조건을 부품정보로 -->
+                <a href="javascript:void(0);" onclick="selectBoxEvent('search')" th:text="#{ietm.search.partInfo}"></a>
+            </span>
+
+            <ul id="choice_search" class="select_box_form" style="display:none;">
+                <li>
+                    <a href="javascript:void(0);" onclick="changeSelVal('search', '01', '', '현재교범')" th:text="#{ietm.current.manual}"></a>
+                </li>
+                <li>
+                    <a href="javascript:void(0);" onclick="changeSelVal('search', '02', '', '현재계통')" th:text="#{ietm.current.system}"></a>
+                </li>
+                <li>
+                    <a href="javascript:void(0);" onclick="changeSelVal('search', '03', '', '결함코드')" th:text="#{ietm.fault.code}"></a>
+                </li>
+                <li>
+                    <a href="javascript:void(0);" onclick="changeSelVal('search', '04', '', '작업카드(카드번호/카드내용)')" th:text="#{ietm.action.card}"></a>
+                </li>
+                <li>
+                    <a href="javascript:void(0);"
+                       onclick="changeSelVal('search', '05', '', '부품정보(부품명/부품번호/재고번호/RDN/CAGE/KAI규격관리도면)')" th:text="#{ietm.part.info}"></a>
+                </li>
+                <li>
+                    <a href="javascript:void(0);" onclick="changeSelVal('search', '06', '', '작업단위부호(작업코드/작업내용)')" th:text="#{ietm.word.unit.code}"></a>
+                </li>
+                <li>
+                    <a href="javascript:void(0);" onclick="changeSelVal('search', '07', '', '용어검색')" th:text="#{ietm.term.search}"></a>
+                </li>
+            </ul>
+        </div>
+
+
+        <!-- 기본 검색조건을 부품정보 -->
+        <input type="hidden" id="search_cond" value="03"/>
+        <input type="hidden" id="search_sub_cond" value=""/>
+        <label for="search_default" class="search_mult" style="cursor: pointer;" title="DEFAULT"><input type="radio"
+                                                                                                        id="search_default"
+                                                                                                        name="search_radio"
+                                                                                                        checked="checked"
+                                                                                                        value="none"/>
+            DEFAULT</label>
+        <label for="search_and" class="search_mult" style="cursor: pointer;" title="AND"><input type="radio"
+                                                                                                id="search_and"
+                                                                                                name="search_radio"
+                                                                                                value="and"/>
+            AND</label>
+        <label for="search_or" class="search_mult" style="cursor: pointer;" title="OR"><input type="radio"
+                                                                                              id="search_or"
+                                                                                              name="search_radio"
+                                                                                              value="or"/> OR</label>
+        <label title="" class="search_mult"> &nbsp;&nbsp;[식별기호 ',']
+        </label>
+
+        <!-- 검색 창 -->
+        <div class="search_input" style="float:none;">
+
+            <span class="text_input" style="width:82%">
+                <input type="text" id="search_word" title="">
+                <!--                                                              onkeypress="searchEnter('')" onclick="onceFocusing('')">-->
+            </span>
+            <span class="btn_search">
+                <a href="javascript:void(0);" onclick="searchClickExe('')"><i class="fa-solid fa-magnifying-glass"></i></a>
+            </span>
+        </div>
+
+        <!-- 검색 결과 -->
+        <div class="pup_cont">
+            <div class="search_list" >
+                <div class="opacity_search" style="display:none;"></div>
+                <ul class="search_list_ul" style="display:none;">
+                    <li id="result_toco_li" class="result_li comm_class" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('toco',0);">  <b th:text="#{ietm.tablecontents.search.result}"></b> : <b id="result_toco_cnt">0</b>
+                            <span id="result_toco_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_toco_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+                    <li id="result_cont_li" class="result_li comm_class" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('cont',40);"> <b th:text="#{ietm.context.search.results}"></b> : <b id=\'result_cont_cnt\'>0</b>
+                            <span id="result_cont_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_cont_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+                    <li id="result_graph_li" class="result_li comm_class" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('graph',80);"> <b th:text="#{ietm.image.search.results}"></b> : <b id="result_graph_cnt">0</b>
+                            <span id="result_graph_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_graph_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+                    <li id="result_table_li" class="result_li comm_class" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('table',120);"> <b th:text="#{ietm.table.search.results}"></b> : <b id="result_table_cnt">0</b>
+                            <span id="result_table_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_table_html" class="result_comm_html"  style="display: none;">
+                        </ul>
+                    </li>
+                    <li id="result_alert_li" class="result_li comm_class" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('alert',150);"><b th:text="#{ietm.alert.search.results}"></b> : <b id=\'result_alert_cnt\'>0</b>
+                            <span id="result_alert_span"class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_alert_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+                    <!-- 부품검색 결과 -->
+                    <li id="result_part_name_li" class="result_li" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('part_name',0);"><b id="result_part_name_text" th:text="#{ietm.part.name.result}"></b> : <b id="result_part_name_cnt">0</b>
+                            <span id="result_part_name_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_part_name_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+                    <li id="result_part_no_li" class="result_li" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('part_no',40);"><b id="result_part_no_text" th:text="#{ietm.part.number.result}"></b> : <b id="result_part_no_cnt">0</b>
+                            <span id="result_part_no_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_part_no_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+                    <li id="result_nsn_li" class="result_li" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('nsn',80);"><b id="result_nsn_text" th:text="#{ietm.stock.number.result}"></b> : <b id="result_nsn_cnt">0</b>
+                            <span id="result_nsn_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_nsn_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+                    <li id="result_rdn_li" class="result_li" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('rdn',120);"><b id="result_rdn_text" th:text="#{ietm.rdn.results}"></b> : <b id="result_rdn_cnt">0</b>
+                            <span id="result_rdn_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_rdn_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+                    <!-- 2022 09 26 ADD -->
+                    <li id="result_cage_li" class="result_li" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('cage',160);"><b id="result_cage_text" th:text="#{ietm.cage.results}"></b> : <b id="result_cage_cnt">0</b>
+                            <span id="result_cage_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_cage_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+                    <li id="result_std_li" class="result_li" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('std',200);"><b id="result_stg_text" th:text="#{ietm.std.results}"></b> : <b id="result_std_cnt">0</b>
+                            <span id="result_std_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_std_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+                    <!-- 2023.12.08 - IPB에서 WUC 검색 추가 - jingi.kim -->
+                    <li id="result_ipbwuc_li" class="result_li" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('ipbwuc',200);"><b id="result_ipbwuc_text" th:text="#{ietm.work.unitcode.result}"></b> : <b id="result_ipbwuc_cnt">0</b>
+                            <span id="result_ipbwuc_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_ipbwuc_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+
+                    <li id="result_fi_li" class="result_li" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('fi');" th:text="#{ietm.error.code.results}"> : <b id="result_fi_cnt">0</b>
+                            <span id="result_fi_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_fi_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+                    <!-- WC -->
+                    <li id="result_card_no_li" class="result_li" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('card_no',0);"><b id="result_card_no_text" th:text="#{ietm.card.number.result}"></b> : <b id="result_card_no_cnt">0</b>
+                            <span id="result_card_no_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_card_no_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+                    <li id="result_wc_xcont_li" class="result_li" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('wc_xcont',40);"><b id="result_wc_xcont_text" th:text="#{ietm.card.content.result}"></b> : <b id="result_wc_xcont_cnt">0</b>
+                            <span id="result_wc_xcont_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_wc_xcont_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+                    <!-- 작업코드/작업내용 -->
+                    <li id="result_wuc_code_li" class="result_li" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('wuc_code',0);"><b id="result_wuc_code_text" th:text="#{ietm.work.code.result}"></b> : <b id="result_wuc_code_cnt">0</b>
+                            <span id="result_wuc_code_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_wuc_code_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+                    <li id="result_wuc_name_li" class="result_li" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('wuc_name',40);"><b id="result_wuc_name_text" th:text="#{ietm.work.content.results}"></b> : <b id="ietm.work.code.result">0</b>
+                            <span id="result_wuc_name_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_wuc_name_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+
+                    <li id="result_dic_li" class="result_li" style="display: none;">
+                        <a href="javascript:void(0);" onclick="showResult('dic');" th:text="#{ietm.term.search.result}"> : <b id="result_dic_cnt">0</b>
+                            <span id="result_dic_span" class="search_list_open list_comm" th:text="#{ietm.open}"></span></a>
+                        <ul id="result_dic_html" class="result_comm_html" style="display: none;">
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

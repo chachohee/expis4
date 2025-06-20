@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="utf-8">
+    <title>eXPIS-III</title>
+    <link th:href="@{/component/bootstrap/css/bootstrap.min.css}"
+          href="/component/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/login/login.css}"
+          href="/css/login/login.css" rel="stylesheet">
+    <link th:href="@{/css/login/login_kta.css}"
+          href="/css/login/login_kta.css" rel="stylesheet">
+    <script src="/component/jquery/jquery-3.7.1.min.js"></script>
+    <script src="/component/jsencrypt/jsencrypt.min.js"></script>
+    <script src="/js/login/login.js"></script>
+</head>
+<body>
+<div role="doc-toc" style="display:none">
+    <input type="hidden" name="bizCode" th:value="${BIZ_CODE}" />
+</div>
+<div class="wrapper">
+    <div class="title-layer">
+        <div>
+            <img src="/img/login/login_text.png" />
+        </div>
+    </div>
+    <div class="login-layer">
+        <div class="container">
+            <form th:action="@{/EXPIS/{bizCode}/login(bizCode=${bizCode})}" method="post" id="loginForm">
+                <button type="submit" style="display:none"></button>
+
+                <!-- 로그인 ID 입력 -->
+                <div class="form-floating-sm mb-2 ms-3">
+                    <input type="text" id="loginId" class="form-control" placeholder="#{login.userid}">
+                </div>
+
+                <!-- 비밀번호 입력 -->
+                <div class="form-floating-sm mb-2 ms-3">
+                    <input type="password" id="password" class="form-control" placeholder="#{login.password}">
+                </div>
+
+                <hr class="my-2">
+                <!-- 로그인 및 취소 버튼 -->
+                <div class="row gx-2 mt-2">
+                    <div class="col-6">
+                        <button id="submit" class="btn btn-lg btn-login" type="button" th:text="#{login.btn.login}">로그인</button>
+                    </div>
+                    <div class="col-6">
+                        <button id="join" class="btn btn-lg btn-join" type="button" th:text="#{login.btn.join}">계정신청</button>
+                    </div>
+                </div>
+            </form>
+        </div>  <!-- /login-layer -->
+    </div> <!-- /container -->
+</div>
+
+</body>
+</html>

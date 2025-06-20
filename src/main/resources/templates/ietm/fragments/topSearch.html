@@ -1,0 +1,30 @@
+<div th:fragment="topSearch" class="search_fild" xmlns:th="http://www.w3.org/1999/xhtml">
+    <form class="d-flex align-items-center me-1">
+        <!-- 기본 검색조건을 부품정보로 -->
+        <div class="sel_form" style="width: 17.5rem; margin-top: 1px; z-index: 1000;">
+                                <span class="sel_choice" id="top_search_selectbox" onclick="alertSearch();" >
+                                    <a href="javascript:void(0);" title="부품정보" th:text="#{ietm.search.partInfo}"></a>
+                                </span>
+            <ul id="choice_top_search" class="select_box_form" style="display: none;">
+                <li>
+                    <a href="javascript:void(0);" title="현재교범" onclick="changeSelVal('top_search', '01', '', '현재교범');" th:text="#{ietm.current.manual}"></a>
+                </li>
+                <li><a href="javascript:void(0);" title="현재교범" onclick="changeSelVal('top_search', '02', '', '현재교범')" th:text="#{ietm.current.manual}"></a></li>
+                <li><a href="javascript:void(0);" title="결함코드" onclick="changeSelVal('top_search', '04', '', '결함코드')" th:text="#{ietm.fault.code}"></a></li>
+                <li>
+                    <a href="javascript:void(0);" title="작업카드(카드번호/카드내용)" onclick="changeSelVal('top_search', '05', '', '작업카드(카드번호/카드내용)')" th:text="#{ietm.action.card}"></a>
+                </li>
+                <li>
+                    <a href="javascript:void(0);" title="작업단위부호(작업코드/작업내용)" onclick="changeSelVal('top_search', '06', '', '작업단위부호(작업코드/작업내용)')" th:text="#{ietm.word.unit.code}"></a>
+                </li>
+                <li>
+                    <a href="javascript:void(0);" title="용어검색" onclick="changeSelVal('top_search', '07', '', '용어검색')" th:text="#{ietm.term.search}"></a>
+                </li>
+            </ul>
+        </div>
+    </form>
+    <input type="text" id="top_search_word" title="" value="" alt="검색어입력" onkeypress="searchEnter('top_')" onclick="onceFocusing('top_')" style="height: 30px"/>
+    <a href="javascript:void(0);" id="top_search_btn" title="검색" onclick="searchClickExe('top_');" >
+        <i class="fa-solid fa-magnifying-glass" style="color: #ffffff;"></i>
+    </a>
+</div>

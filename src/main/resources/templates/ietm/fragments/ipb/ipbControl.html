@@ -1,0 +1,174 @@
+<div th:fragment="ipbControl" class="container-fluid d-none" id="ipbControl" style="height: auto; margin-top: -35px;">
+    <div class="d-flex justify-content-center w-100 my-3">
+        <a href="#" class="btn me-2" style="background-color: #8892a0; color: white;" onclick="goToTop();" th:text="#{ietm.ipbcontrol.upper}"></a>
+        <a href="#" class="btn me-2" style="background-color: #8892a0; color: white;" onclick="grphViewer();" th:text="#{ietm.ipbcontrol.grphprim}"></a>
+        <a href="#" class="btn me-2" style="background-color: #8892a0; color: white;" onclick="tableViewer();" th:text="#{ietm.ipbcontrol.partinfo}"></a>
+        <a href="#" class="btn me-2" style="background-color: #8892a0; color: white;" onclick="totalViewer();" th:text="#{ietm.ipbcontrol.viewall}"></a>
+        <a href="#" class="btn" style="background-color: #8892a0; color: white;" onclick="ipbColsModal();" th:text="#{ietm.ipbcontrol.selectitem}"></a>
+    </div>
+
+    <!-- IPB 항목선택 모달 -->
+    <div class="modal fade" id="ipbColsModal" tabindex="-1" aria-labelledby="ipbColsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 0 !important; background-color: #f5faff;">
+                <div class="modal-header"
+                     style="background-image: url('/img/ietm/popup/bg_pup_header.gif');
+                            background-size: cover;
+                            background-position: center;
+                            border-radius: 0 !important;"
+                >
+                    <h5 class="modal-title" id="ipbColsModalLabel" style="color: white; font-weight: bold; margin: 0;">IPB <span th:text="#{ietm.ipbcontrol.selectitem}"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- 전체선택 체크박스 -->
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="ipbSelectAll">
+                        <label class="form-check-label" for="ipbSelectAll" style="font-weight: bold;" th:text="#{ietm.ipbcontrol.allselect}"></label>
+                    </div>
+
+                    <!-- 항목 체크박스 -->
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_graphicnum">
+                        <label class="form-check-label" for="checkbox_graphicnum" th:text="#{ietm.partinfo.system} + '-' + #{ietm.partinfo.picture} + #{ietm.partinfo.number} + '/' + #{ietm.partinfo.sheet} + #{ietm.partinfo.number}"></label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_indexnum">
+                        <label class="form-check-label" for="checkbox_indexnum" th:text="#{ietm.partinfo.item} + #{ietm.partinfo.number}"></label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_partnum">
+                        <label class="form-check-label" for="checkbox_partnum" th:text="#{ietm.partinfo.part} + #{ietm.partinfo.number}"></label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_nsn">
+                        <label class="form-check-label" for="checkbox_nsn" th:text="#{ietm.partinfo.national.inventory} + #{ietm.partinfo.number}"></label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_cage">
+                        <label class="form-check-label" for="checkbox_cage" th:text="#{ietm.partinfo.manufacturer} + #{ietm.partinfo.code}"></label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_level">
+                        <label class="form-check-label" for="checkbox_level" th:text="#{ietm.partinfo.assembly} + #{ietm.partinfo.level}"></label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_name">
+                        <label class="form-check-label" for="checkbox_name" th:text="#{ietm.partinfo.description}"></label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_unitsper">
+                        <label class="form-check-label" for="checkbox_unitsper" th:text="#{ietm.partinfo.perunit} + #{ietm.partinfo.component} + #{ietm.partinfo.count}"></label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_retrofit">
+                        <label class="form-check-label" for="checkbox_retrofit">Retrofit</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_usablon">
+                        <label class="form-check-label" for="checkbox_usablon" th:text="#{ietm.partinfo.usability} + #{ietm.partinfo.code}"></label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_smr">
+                        <label class="form-check-label" for="checkbox_smr" th:text="#{ietm.partinfo.overhaul} + #{ietm.partinfo.recoverability} + #{ietm.partinfo.code}"></label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_rdn">
+                        <label class="form-check-label" for="checkbox_rdn"><span th:text="#{ietm.partinfo.reference.directive} + #{ietm.partinfo.number}"></span>(RDN)</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_workunitcode">
+                        <label class="form-check-label" for="checkbox_workunitcode"><span th:text="#{ietm.partinfo.work} + #{ietm.partinfo.unit} + #{ietm.partinfo.code}"></span>(WUC)</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_partsource">
+                        <label class="form-check-label" for="checkbox_partsource" th:text="#{ietm.partinfo.part} + #{ietm.partinfo.source}"></label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_refdata">
+                        <label class="form-check-label" for="checkbox_refdata" th:text="#{ietm.partinfo.reference} + #{ietm.partinfo.data}"></label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_reftono">
+                        <label class="form-check-label" for="checkbox_reftono" th:text="#{ietm.partinfo.reference} + #{ietm.partinfo.manual} + #{ietm.partinfo.number}"></label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_kai_std">
+                        <label class="form-check-label" for="checkbox_kai_std">KAI<span th:text="#{ietm.partinfo.standards.management} + #{ietm.partinfo.drawing}"></span></label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="checkbox_sssn">
+                        <label class="form-check-label" for="checkbox_sssn">SSSN</label>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary" id="ipbColsCheck">확인</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="ipbColsClose">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end IPB 항목선택 Modal -->
+    <script>
+        const selectAllCheckbox = document.getElementById('ipbSelectAll');
+        const itemCheckboxes = document.querySelectorAll('.modal-body input[type="checkbox"]:not(#ipbSelectAll)');
+
+        // 초기 상태에서 전체선택 체크되도록
+        window.addEventListener('DOMContentLoaded', () => {
+            selectAllCheckbox.checked = true;
+            itemCheckboxes.forEach(cb => cb.checked = true);
+        });
+
+        // 전체선택 클릭 시 하위 항목 모두 선택/해제
+        selectAllCheckbox.addEventListener('change', function () {
+            const isChecked = this.checked;
+            itemCheckboxes.forEach(cb => cb.checked = isChecked);
+        });
+
+        // 하위 항목 변경 시 전체선택 상태 업데이트
+        itemCheckboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                const allChecked = Array.from(itemCheckboxes).every(cb => cb.checked);
+                selectAllCheckbox.checked = allChecked;
+            });
+        });
+
+        // 모달 확인/닫기 버튼 클릭 시 테이블 업데이트
+        document.getElementById('ipbColsClose').addEventListener('click', () => {
+            updateTableVisibility();
+        });
+
+        document.getElementById('ipbColsCheck').addEventListener('click', () => {
+            updateTableVisibility();
+        });
+
+        // 테이블 항목 표시/숨김 처리
+        function updateTableVisibility() {
+            const checkedItems = Array.from(document.querySelectorAll('.modal-body input[type="checkbox"]'))
+                .filter(cb => cb.checked && cb.id.startsWith('checkbox_'))
+                .map(cb => cb.id.replace('checkbox_', ''));
+
+            const visibleIds = new Set(checkedItems);
+            const showIpbcode = visibleIds.size > 0;
+
+            const thList = document.querySelectorAll('.partinfo table thead th');
+            thList.forEach(th => {
+                const thId = th.id;
+
+                // ipbcode 고정 처리
+                if (thId === 'ipbcode') {
+                    th.style.display = showIpbcode ? '' : 'none';
+                    document.querySelectorAll(`.partinfo table tbody td[data-role="${thId}"]`)
+                        .forEach(td => td.style.display = showIpbcode ? '' : 'none');
+                    return;
+                }
+
+                const shouldShow = visibleIds.has(thId);
+                th.style.display = shouldShow ? '' : 'none';
+
+                document.querySelectorAll(`.partinfo table tbody td[data-role="${thId}"]`)
+                    .forEach(td => td.style.display = shouldShow ? '' : 'none');
+            });
+        }
+    </script>
+</div>

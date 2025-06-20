@@ -1,0 +1,577 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.expis.ietm.dao.SearchContMapper">
+
+	<!-- ResultMap -->
+	<resultMap id="searchResultMap" type="com.expis.ietm.dto.SearchDto">
+		<id		property="toKey"		column="to_key"			javaType="string" />
+		<result	property="tocoId"		column="toco_id"		javaType="string" />
+		<result	property="pTocoId"		column="p_toco_id"		javaType="string" />
+		<result	property="contId"		column="cont_id"		javaType="string" />
+		<result	property="cont"			column="cont"			javaType="string" />
+		<result	property="resultKind"	column="result_kind"	javaType="string" />
+		<result	property="hasFirst"	column="has_first"	javaType="string" />
+		<result	property="hasSecond"	column="has_second"	javaType="string" />
+		<result	property="hasThird"	column="has_third"	javaType="string" />
+		<result	property="hasFourth"	column="has_fourth"	javaType="string" />
+	</resultMap>
+	
+	<!-- ResultCount -->
+	<resultMap id="searchResultCount" type="int">
+		<result property="cnt" column="cnt" />
+	</resultMap>
+	
+	<!-- Column -->
+	<sql id="searchColumn">
+		  case when tsc.result_kind IS NULL then '' else tsc.result_kind end as result_kind
+		, tsc.to_key				as to_key
+		, tsc.toco_id				as toco_id
+		, tsc.cont					as cont
+	</sql>
+	
+	<!--  Select List
+	  * arrConstResult	- [0]:목차  [1]:본문  [2]:그림  [3]:표  [4]:경고
+	 -->
+	<select id="selectListDao" resultType="com.expis.ietm.dto.SearchDto">
+		select
+				distinct	tsc.toco_id				as tocoId
+				, tsc.result_kind		as resultKind
+				, tsc.to_key				as toKey
+				, tsc.cont					as cont
+				, tsc.cont_id as contId
+		from (
+			select '01' as result_kind
+					,to_key
+					,toco_id
+					,'' as cont_id
+					,toco_name as cont
+			from tm_toco_info tti
+			where	toco_name is not null
+			<if test="searchCond == arrConstCond[0]">and to_key = #{toKey}</if>
+			<if test="searchCond == arrConstCond[1]">
+			and	to_key in	(select to_key
+							from tm_sys_info
+   							where p_sys_id in (select p_sys_id from tm_sys_info where to_key = #{toKey})
+							)
+			</if>
+			<choose>
+				<when test="chkVal != 'none'">
+				<!-- 2023 01 12 jysi EDIT : 현재교범에서 OR 검색 시 다른교범까지 검색되는 현상 수정, 이 아래 when "chkVal!='none'"절 모두 수정  -->
+					and ( lower(toco_name) like lower('%'||#{searchArray.[0]}||'%')
+					${chkVal}	lower(toco_name) like lower('%'||#{searchArray.[1]}||'%') )
+				</when>
+				<otherwise>
+					and lower(toco_name) like lower('%'||#{searchArray.[0]}||'%')
+				</otherwise>
+			</choose>
+			and tti.p_toco_id != 'GrphToco'
+			and tti.p_toco_id != 'TableToco'
+			union all
+			select '02' as result_kind
+					,tsc.to_key
+					,tsc.toco_id
+					,'' as cont_id
+					,tti.toco_name as cont
+			from tm_sc_cont tsc
+			left join tm_toco_info tti
+			on tsc.to_key = tti.to_key
+			and tsc.toco_id = tti.toco_id
+			where	tti.toco_name is not null
+			<if test="searchCond == arrConstCond[0]">AND	tti.to_key = #{toKey}</if>
+			<if test="searchCond == arrConstCond[1]">
+			and	tsc.to_key in	(select to_key
+							from tm_sys_info
+   							where p_sys_id in (select p_sys_id from tm_sys_info where to_key = #{toKey})
+   							)
+			</if>
+			<choose>
+				<when test="chkVal != 'none'">
+					and ( lower(cont) like lower('%'||#{searchArray.[0]}||'%')
+					${chkVal}	lower(cont) like lower('%'||#{searchArray.[1]}||'%') )
+				</when>
+				<otherwise>
+					and lower(cont) like lower('%'||#{searchArray.[0]}||'%')
+				</otherwise>
+			</choose>
+			<!-- 2022 11 09 WC 검색 기능추가 -->
+			union all
+			select '02' as result_kind
+					,tsc.to_key
+					,tsc.toco_id
+					,'' as cont_id
+					,tti.toco_name as cont
+			from tm_wc_xcont tsc
+			left join tm_toco_info tti
+			on tsc.to_key = tti.to_key
+			and tsc.toco_id = tti.toco_id
+			where	tti.toco_name is not null
+			<if test="searchCond == arrConstCond[0]">AND	tti.to_key = #{toKey}</if>
+			<if test="searchCond == arrConstCond[1]">
+			and	tsc.to_key in	(select to_key
+					from tm_sys_info
+					where p_sys_id in (select p_sys_id from tm_sys_info where to_key = #{toKey})
+					)
+			</if>
+			<choose>
+				<when test="chkVal != 'none'">
+					and ( lower(tsc.xcont) like lower('%'||#{searchArray.[0]}||'%')
+					${chkVal}	lower(tsc.xcont) like lower('%'||#{searchArray.[1]}||'%') )
+				</when>
+				<otherwise>
+					and lower(tsc.xcont) like lower('%'||#{searchArray.[0]}||'%')
+				</otherwise>
+			</choose>
+			union all
+			select '03' as result_kind
+					,to_key, toco_id
+					,grph_id as cont_id
+					,grph_caption as cont
+			from tm_grph_xcont tgx
+			where	grph_caption is not null
+			<if test="searchCond == arrConstCond[0]">and	to_key = #{toKey}</if>
+			<if test="searchCond == arrConstCond[1]">
+			and	to_key in	(select to_key
+							from tm_sys_info
+							where p_sys_id in (select p_sys_id from tm_sys_info where to_key = #{toKey})
+							)
+			</if>
+			<choose>
+				<when test="chkVal != 'none'">
+					AND ( lower(grph_caption) like lower('%'||#{searchArray.[0]}||'%')
+					${chkVal}	lower(grph_caption) like lower('%'||#{searchArray.[1]}||'%') )
+				</when>
+				<otherwise>
+					AND lower(grph_caption) like lower('%'||#{searchArray.[0]}||'%')
+				</otherwise>
+			</choose>
+			UNION ALL
+			SELECT '04' as result_kind
+					,to_key
+					,toco_id
+					,tbl_id AS cont_id
+					,tbl_caption AS cont
+			FROM tm_table_xcont tgx
+			WHERE	tbl_caption is not null
+			<if test="searchCond == arrConstCond[0]">AND	to_key = #{toKey}</if>
+			<if test="searchCond == arrConstCond[1]">
+			and	to_key IN	(SELECT to_key
+							FROM tm_sys_info
+   							WHERE p_sys_id in (SELECT p_sys_id FROM tm_sys_info WHERE to_key = #{toKey})
+   							)
+			</if>
+
+			<choose>
+				<when test="chkVal != 'none'">
+					AND ( (lower(tbl_caption) like lower('%'||#{searchArray.[0]}||'%')
+					OR lower(xcont) like lower('%'||#{searchArray.[0]}||'%'))
+
+					${chkVal}
+
+					(lower(tbl_caption) like lower('%'||#{searchArray.[1]}||'%')
+					OR lower(xcont) like lower('%'||#{searchArray.[1]}||'%')) )
+				</when>
+				<otherwise>
+					AND (lower(tbl_caption) like lower('%'||#{searchArray.[0]}||'%')
+					OR lower(xcont) like lower('%'||#{searchArray.[0]}||'%'))
+				</otherwise>
+			</choose>
+			UNION ALL
+			SELECT '05' as result_kind
+					, tgx.to_key
+					, tgx.toco_id
+					, tgx.alt_id AS cont_id
+					, tti.toco_name AS cont
+			FROM tm_alert_xcont tgx
+			LEFT JOIN tm_toco_info tti
+			ON tgx.to_key = tti.to_key
+			AND tgx.toco_id = tti.toco_id
+			WHERE	tti.toco_name IS NOT NULL
+			<if test="searchCond == arrConstCond[0]">AND	tgx.to_key = #{toKey}</if>
+			<if test="searchCond == arrConstCond[1]">
+			and	tgx.to_key IN	(SELECT to_key
+							FROM tm_sys_info
+   							WHERE p_sys_id in (SELECT p_sys_id FROM tm_sys_info WHERE to_key = #{toKey})
+   							)
+			</if>
+
+			<choose>
+				<when test="chkVal != 'none'">
+					AND ( lower(tgx.xcont) like lower('%'||#{searchArray.[0]}||'%')
+					${chkVal}	lower(tgx.xcont) like lower('%'||#{searchArray.[1]}||'%') )
+				</when>
+				<otherwise>
+					AND lower(tgx.xcont) like lower('%'||#{searchArray.[0]}||'%')
+				</otherwise>
+			</choose>
+		) tsc
+		ORDER BY result_kind ASC, to_key ASC, cont ASC
+	</select>
+
+	<!--  Select List
+	  * arrConstResult	- [5]:IPB(부품정보)
+	  * arrConstCond		- null:전체  [0]:부품명  [1]:부품/재고번호  [2]:RDN
+	 -->
+	<select id="selectListIPBDao" resultType="SearchDto">
+		SELECT
+			 tsc.result_kind	as resultKind
+			,tsc.to_key			as toKey
+			,tsc.toco_id		as tocoId
+			,tsc.cont			as cont
+			,tsc.p_toco_id		as pTocoId
+			,tsc.cont_id	 	as contId
+			,has_first			as	hasFirst
+			,has_second			as	hasSecond
+			,has_third			as	hasThird
+			,has_fourth			as	hasFourth
+			,has_fifth			as	hasFifth
+			,has_sixth			as	hasSixth
+			,has_seventh 		as	hasSeventh
+		FROM (
+			SELECT 	distinct tti.toco_name as cont
+					,tti.to_key
+					,tti.toco_id
+					,tti.p_toco_id
+					,'' as cont_id
+					,'06' as result_kind
+					,case 
+						when instr(lower(part_name), lower(#{searchArray.[0]})) &lt;&gt; 0 then 'part_name'
+						<if test="chkVal != 'none'">
+							<if test="chkVal == 'or'">
+								when instr(lower(part_name), lower(#{searchArray.[1]})) &lt;&gt; 0 then 'part_name'
+							</if>
+						</if>
+					 	when instr(lower(part_name), lower(#{searchArray.[0]})) = 0 then '0'
+					 	else '0'
+					 end as has_first
+					 ,case
+					 	when instr(lower(part_no), lower(#{searchArray.[0]})) &lt;&gt; 0 then 'part_no'
+						<if test="chkVal != 'none'">
+							<if test="chkVal == 'or'">
+								when instr(lower(part_no), lower(#{searchArray.[1]})) &lt;&gt; 0 then 'part_no'
+							</if>
+						</if>
+			 			when instr(lower(part_no), lower(#{searchArray.[0]})) = 0 then '0'
+			 			else '0'
+					 	end as has_second
+					 ,case
+					 	when instr(lower(nsn), lower(#{searchArray.[0]})) &lt;&gt; 0 then 'nsn'
+						<if test="chkVal != 'none'">
+							<if test="chkVal == 'or'">
+								when instr(lower(nsn), lower(#{searchArray.[1]})) &lt;&gt; 0 then 'nsn'
+							</if>
+						</if>
+					 	when instr(lower(nsn), lower(#{searchArray.[0]})) = 0 then '0'
+					 	else '0'
+					 	end as has_third
+					 ,case
+					 	when instr(lower(rdn), lower(#{searchArray.[0]})) &lt;&gt; 0 then 'rdn'
+						<if test="chkVal != 'none'">
+							<if test="chkVal == 'or'">
+								when instr(lower(rdn), lower(#{searchArray.[1]})) &lt;&gt; 0 then 'rdn'
+							</if>
+						</if>
+					 	when instr(lower(rdn), lower(#{searchArray.[0]})) = 0 then '0'
+					 	else '0'
+					 	end as has_fourth
+					 ,case
+					 	when instr(lower(cage), lower(#{searchArray.[0]})) &lt;&gt; 0 then 'cage'
+						<if test="chkVal != 'none'">
+							<if test="chkVal == 'or'">
+								when instr(lower(cage), lower(#{searchArray.[1]})) &lt;&gt; 0 then 'cage'
+							</if>
+						</if>
+					 	when instr(lower(cage), lower(#{searchArray.[0]})) = 0 then '0'
+					 	else '0'
+					 	end as has_fifth
+					 ,case
+					 	when instr(lower(std_mngt), lower(#{searchArray.[0]})) &lt;&gt; 0 then 'std_mngt'
+						<if test="chkVal != 'none'">
+							<if test="chkVal == 'or'">
+								when instr(lower(std_mngt), lower(#{searchArray.[1]})) &lt;&gt; 0 then 'std_mngt'
+							</if>
+						</if>
+					 	when instr(lower(std_mngt), lower(#{searchArray.[0]})) = 0 then '0'
+					 	else '0'
+					 	end as has_sixth
+					 ,case
+					 	when instr(lower(wuc), lower(#{searchArray.[0]})) &lt;&gt; 0 then 'wuc'
+						<if test="chkVal != 'none'">
+							<if test="chkVal == 'or'">
+								when instr(lower(wuc), lower(#{searchArray.[1]})) &lt;&gt; 0 then 'wuc'
+							</if>
+						</if>
+					 	when instr(lower(wuc), lower(#{searchArray.[0]})) = 0 then '0'
+					 	else '0'
+					 	end as has_seventh
+			FROM tm_toco_info tti
+				,tm_sc_partinfo tsp
+			
+			<trim prefix="where" prefixOverrides="and | or">
+				AND tti.to_key = tsp.to_key
+				AND tti.toco_id = tsp.toco_id
+				<if test="toKey != ''">AND tsp.to_key = #{toKey}</if>
+				<if test="searchSubCond != arrConstSubCond[0] and searchSubCond != arrConstSubCond[1] and searchSubCond != arrConstSubCond[2]">
+					<choose>
+						<when test="chkVal != 'none'">
+							AND ((lower(part_name) like lower('%'||#{searchArray.[0]}||'%'))
+								${chkVal}
+								(lower(part_name) like lower('%'||#{searchArray.[1]}||'%')))
+							OR
+								((lower(part_no) like lower('%'||#{searchArray.[0]}||'%')
+								${chkVal}
+								lower(part_no) like lower('%'||#{searchArray.[1]}||'%')))
+								
+							OR
+								((lower(nsn) like lower('%'||#{searchArray.[0]}||'%')
+								${chkVal}
+								lower(nsn) like lower('%'||#{searchArray.[1]}||'%')))
+							OR
+								((lower(rdn) like lower('%'||#{searchArray.[0]}||'%')
+								${chkVal}
+								lower(rdn) like lower('%'||#{searchArray.[1]}||'%')))
+								
+							OR
+								((lower(cage) like lower('%'||#{searchArray.[0]}||'%')
+								${chkVal}
+								lower(cage) like lower('%'||#{searchArray.[1]}||'%')))
+							OR
+								((lower(std_mngt) like lower('%'||#{searchArray.[0]}||'%')
+								${chkVal}
+								lower(std_mngt) like lower('%'||#{searchArray.[1]}||'%')))
+							OR
+								((lower(wuc) like lower('%'||#{searchArray.[0]}||'%')
+								${chkVal}
+								lower(wuc) like lower('%'||#{searchArray.[1]}||'%')))
+								
+						</when>
+						<otherwise>
+							AND (lower(part_name) like lower('%'||#{searchArray.[0]}||'%')
+								OR lower(part_no) like lower('%'||#{searchArray.[0]}||'%')
+								OR lower(nsn) like lower('%'||#{searchArray.[0]}||'%')
+								OR lower(rdn) like lower('%'||#{searchArray.[0]}||'%')
+								OR lower(cage) like lower('%'||#{searchArray.[0]}||'%')
+								OR lower(std_mngt) like lower('%'||#{searchArray.[0]}||'%')
+								OR lower(wuc) like lower('%'||#{searchArray.[0]}||'%')
+								)
+						</otherwise>
+					</choose>
+				</if>
+				AND (tti.toco_vehicle_type like '%'|| #{vehicleType}|| '%' or tti.toco_vehicle_type ='' or tti.toco_vehicle_type = 'NONE' or tti.toco_vehicle_type = 'none' or tti.toco_vehicle_type is null or tti.toco_vehicle_type = 'SYSTEM')
+			</trim>
+		) tsc
+		ORDER BY RESULT_KIND ASC, HASSECOND ASC , HASTHIRD ASC , HASFOURTH ASC , hasfifth ASC , hassixth ASC ,  TO_KEY ASC, HASFIRST ASC , CONT ASC
+	</select>
+	
+	
+	<select id="selectListDao22" resultMap="searchResultMap">
+		SELECT
+<!-- 2022.01.17  by ejkim result_kind 컬럼생성(oracle) -->		
+<!-- 		''  as result_kind, -->
+		<include refid="searchColumn" />
+		FROM tm_sc_cont tsc
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null"> tsc.to_key = #{toKey}</if>
+				<if test="tocoId != null">tsc.toco_id = #{tocoId}</if>
+			</trim>
+		</where>
+		ORDER BY tsc.to_key ASC, tsc.toco_id ASC
+	</select>
+	
+	
+	<!--  Select One -->
+	<select id="selectDetailDao" resultMap="searchResultMap">
+		SELECT
+<!-- 2022.01.17  by ejkim result_kind 컬럼생성(oracle) -->
+<!-- 		''  as result_kind, -->
+		<include refid="searchColumn" />
+		FROM tm_sc_cont tsc
+		WHERE tsc.to_key = #{toKey}
+		<trim prefix="AND">
+			<if test="tocoId != null">tsc.toco_id = #{tocoId}</if>
+		</trim>
+
+	</select>
+	
+	
+	<!--  Select Count -->
+	<select id="selectCountDao" resultMap="searchResultCount">
+		SELECT
+			COUNT(tsc.to_key) AS cnt
+		FROM tm_sc_cont tsc
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">tsc.to_key = #{toKey}</if>
+				<if test="tocoId != null">tsc.toco_id = #{tocoId}</if>
+			</trim>
+		</where>
+		
+	</select>
+	
+	
+	<!-- Insert -->
+	<insert id="insertDao" parameterType="com.expis.ietm.dto.SearchDto">
+		INSERT INTO tm_sc_cont
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			to_key,
+			toco_id,
+			<if test="cont != null">cont,</if>
+			<if test="createUserId != null">create_user_id,</if>
+			create_date
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			#{toKey},
+			#{tocoId},
+			<if test="cont != null">#{cont},</if>
+			<if test="createUserId != null">#{createUserId},</if>
+			sysdate
+		</trim>
+	</insert>
+	
+	
+	<!-- Insert All --><!-- 사용 20161004 -->
+	<insert id="insertAllDao" parameterType="com.expis.ietm.dto.SearchDto">
+		<foreach collection="list" index="index" item="item" open="INSERT ALL" separator=" " close="SELECT * FROM DUAL">
+			into tm_sc_cont
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				to_key,
+				toco_id,
+				cont,
+				create_user_id,
+				create_date
+			</trim>
+			values
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				#{item.toKey},
+				#{item.tocoId},
+				<if test="item.cont != null">#{item.cont},</if>
+				<if test="item.cont == null">'',</if>
+				#{item.createUserId},
+				sysdate
+			</trim>
+		</foreach>
+	</insert>
+	
+	<insert id="insertAllDaoMDB" parameterType="com.expis.ietm.dto.SearchDto">
+		insert into	tm_sc_cont
+		(
+			to_key,
+			toco_id,
+			cont,
+			create_user_id,
+			create_date
+		)
+		values
+		(
+			#{toKey},
+			#{tocoId},
+			#{cont},
+			#{createUserId},
+			sysdate
+		)
+	</insert>
+	
+	
+	<!-- Update -->
+	<update id="updateDao" parameterType="com.expis.ietm.dto.SearchDto">
+		UPDATE tm_sc_cont
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="cont != null">cont = #{cont},</if>
+			<if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+			modify_date = sysdate
+		</trim>
+
+		<where>
+			<trim prefix="AND">
+				<if test="toKey != null">to_key = #{toKey}</if>
+				<if test="tocoId != null">toco_id = #{tocoId}</if>
+			</trim>
+		</where>
+
+	</update>
+
+	
+	<!-- Delete --><!-- 사용 20160924 -->
+	<delete id="deleteDao" parameterType="com.expis.ietm.dto.SearchDto">
+		DELETE FROM tm_sc_cont
+		WHERE to_key = #{toKey}
+		<trim prefix="AND">
+			<if test="tocoId != null">toco_id = #{tocoId}</if>
+		</trim>
+	</delete>
+	
+	
+	<!-- Delete --><!-- 사용 20160924 -->
+	<delete id="deleteAllDao">
+		DELETE FROM tm_sc_cont
+	</delete>
+
+
+	<!-- WC TABLE -->
+	<select id="selectWcDao" parameterType="SearchDto" resultType="SearchDto">
+		SELECT	toKey
+				,tocoId
+				,cont
+				,resultKind
+				,has_first	as	hasFirst
+				,has_second	as	hasSecond
+		FROM (
+		select	to_key		as	toKey
+				,toco_id	as	tocoId
+				,card_no	as	cont
+				,'08'	as	resultKind
+				,case 
+					when instr(lower(card_no), lower(#{searchArray.[0]})) &lt;&gt; 0 then 'card_no'
+					<if test="chkVal != 'none'">
+						<if test="chkVal == 'or'">
+							when instr(lower(card_no), lower(#{searchArray.[1]})) &lt;&gt; 0 then 'card_no'
+						</if>
+					</if>
+					when instr(lower(card_no), lower(#{searchArray.[0]})) = 0 then '0'
+					else '0'
+				 end as has_first
+				,case 
+					when instr(lower(xcont), lower(#{searchArray.[0]})) &lt;&gt; 0 then 'wc_xcont'
+					<if test="chkVal != 'none'">
+						<if test="chkVal == 'or'">
+							when instr(lower(xcont), lower(#{searchArray.[1]})) &lt;&gt; 0 then 'wc_xcont'
+						</if>
+					</if>
+		 			when instr(lower(xcont), lower(#{searchArray.[0]})) = 0 then '0'
+		 			else '0'
+ 				 end as has_second 		
+		from	tm_wc_xcont
+		where wc_type = '01'
+			<if test="toKey != ''">and to_key = #{toKey}</if>
+				<choose>
+					<when test="chkVal != 'none'">
+						and ((lower(card_no) like lower('%'||#{searchArray.[0]}||'%'))
+							${chkVal}
+							(lower(card_no) like lower('%'||#{searchArray.[1]}||'%')))
+						
+						or
+						
+							((lower(xcont) like lower('%'||#{searchArray.[0]}||'%'))
+							${chkVal}
+							(lower(xcont) like lower('%'||#{searchArray.[1]}||'%')))
+					</when>
+					<otherwise>
+						and (lower(card_no) like lower('%'||#{searchArray.[0]}||'%')
+						or lower(xcont) like lower('%'||#{searchArray.[0]}||'%')) 
+					</otherwise>
+				</choose>
+		)tb
+		GROUP BY toKey, cont, tocoId, resultKind, has_first, has_second
+		ORDER BY toKey, cont, tocoId, resultKind
+	</select>
+	
+	<update id="updateIPBSearchForKTA" parameterType="com.expis.ietm.dto.SearchPartinfoDto">
+		<!-- updateIPBSearchForKTA 2022 06 28 Park.J.S. ADD -->
+		update tm_sc_partinfo 
+		   set IPB_CODE = #{ipbCode}
+		 where grph_no like '%' || upper(replace(#{grphNo}, ' ', '')) || '%'
+		   and part_no like '%' || upper(replace(#{partNo}, ' ', '')) || '%'
+		   and #{indexNo} like upper('%'||replace(index_no, ' ', '')||'%')
+	</update>
+	
+</mapper>

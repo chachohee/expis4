@@ -1,0 +1,66 @@
+main {
+    /*height: -webkit-fill-available;*/
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.topInfo .nav {
+    --bs-nav-link-padding-x: 0.5rem;
+    --bs-nav-link-padding-y: 0.25rem;
+}
+hr.top {
+    margin: 10px 0px;
+}
+.nav-underline .nav-link {
+    padding-left: var(--bs-nav-link-padding-x);
+}
+
+.subButton {
+    margin-left: 30px;
+}
+.subButton .nav {
+    --bs-nav-link-padding-x: 0.75rem;
+    --bs-nav-link-padding-y: 0.3rem;
+}
+.subButton .nav-underline {
+    --bs-nav-underline-gap: 0rem;
+}
+.subButton .nav-underline .nav-link {
+    padding-left: var(--bs-nav-link-padding-x);
+}
+.breadcrumb {
+    margin: 0.5rem;
+}
+
+#menulist li {
+    cursor: pointer;
+}
+#menulist li label{
+    cursor: pointer;
+}
+
+table thead th {
+    text-align: center;
+}
+table tbody td {
+    text-align: center;
+}
+
+
+/*activateBoardDetail*/
+.board-contents {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #343a40;
+    height: 20vh;
+}
+
+/*activateBoardDetail*/
+.comments-section {
+    background-color: #ffffff;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+}

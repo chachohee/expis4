@@ -1,0 +1,206 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <!-- partinfo 항목을 처리하는 템플릿 -->
+    <xsl:template match="system">
+        <div class="container-fluid d-flex justify-content-between row h-100">
+            <div class="grphprim" style="flex: 4.5;">
+                <xsl:apply-templates select="partinfo/grphprim" />
+                <!-- 모든 grphprim 처리 후에 페이징 div 추가 -->
+                <xsl:if test="partinfo/grphprim[@external-ptr]">
+                    <div aria-label="Page navigation example" class="ipb-pagination-div">
+                        <ul class="ipb-image-pagination pagination" id="ipb-image-pagination"></ul>
+                    </div>
+                </xsl:if>
+            </div>
+            <div class="partinfo table-responsive mt-3" style="flex: 5.5;">
+                <table class="table-light ipb-table">
+                    <thead>
+                        <tr>
+                            <th id="ipbcode"> <br/></th>
+                            <th id="graphicnum"> 계통<br/>-<br/>그림<br/>번호<br/>/<br/>시트번호 </th>
+                            <th id="indexnum"> 품목<br/>번호 </th>
+                            <th id="partnum"> 부품<br/>번호 </th>
+                            <th id="nsn"> 국가재고<br/>번호<br/>(NSN) </th>
+                            <th id="cage"> 생산자<br/>부호<br/>(CAGE) </th>
+                            <th id="level"> 조립체<br/>수준 </th>
+                            <th id="name"> 설명<br/>(NOMENCLATURE) </th>
+                            <th id="unitsper"> 단위당<br/>구성 수량<br/>(UPA) </th>
+                            <th id="retrofit"> Retrofit </th>
+                            <th id="usablon"> 사용성<br/>부호<br/>(UOC) </th>
+                            <th id="smr"> 근원정비<br/>복구성부호<br/>(SMR) </th>
+                            <th id="rdn"> 참조지시<br/>번호<br/>(RDN) </th>
+                            <th id="workunitcode"> 작업단위<br/>부호<br/>(WUC) </th>
+                            <th id="partsource"> 부품<br/>제원 </th>
+                            <th id="refdata"> 참고<br/>자료 </th>
+                            <th id="reftono"> 참고교범<br/>번호 </th>
+                            <th id="kai_std"> KAI<br/>규격관리<br/>도면 </th>
+                            <th id="sssn"> SSSN </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <xsl:apply-templates select="partinfo" />
+                        <xsl:apply-templates select="partinfo/partinfo" />
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </xsl:template>
+
+    <!-- partinfo 항목을 처리하는 템플릿 --> <!-- 품목번호 0번 tr -->
+    <xsl:template match="partinfo">
+        <tr class="text-center"
+            id="@id"
+            childpart="@childpart"
+            p_d_refid="@p_d_refid"
+            pr_graphicnum="@pr_graphicnum"
+            sub_graphicnum="@sub_graphicnum">
+<!--            <td data-role="ipbcode"> <br/></td>-->
+            <td data-role="" style="padding: 0;" xid="{@id}">
+<!--                <xsl:if test="@version and normalize-space(@version) != ''">
+                    <div class="ipb-div-version">
+                        <span class="version_bar_update">
+                            <xsl:attribute name="onClick"/>
+                        </span>
+                    </div>
+                </xsl:if>-->
+            </td>
+            <td data-role="graphicnum">
+                <xsl:if test="@graphicnum"> <xsl:value-of select="@graphicnum" /> </xsl:if>
+                <xsl:if test="@figureno"> <xsl:value-of select="@figureno" /> </xsl:if>
+            </td>
+            <td data-role="indexnum"> 0 </td>
+            <td data-role="partnum"> <xsl:value-of select="partbase/@partnum" /> </td>
+            <td data-role="nsn"> <xsl:value-of select="partbase/@nsn" /> </td>
+            <td data-role="cage"> <xsl:value-of select="partbase/@cage" /> </td>
+            <td data-role="level"> <xsl:value-of select="@level" /> </td>
+            <td class="text-start" data-role="name"> <xsl:value-of select="@name" /> </td>
+            <td data-role="unitsper"> <xsl:value-of select="@unitsper" /> </td>
+            <td data-role="retrofit"> <span id="idxnumchk"><xsl:value-of select="@retrofit" /></span> </td>
+            <td data-role="usablon"></td>
+<!--            <td data-role="usablon"> <span id="idxnumchk"><xsl:value-of select="@usablon" /></span></td>-->
+            <td data-role="smr"> <xsl:value-of select="partbase/@smr" /> </td>
+            <td data-role="rdn"> <xsl:value-of select="@RDN" /> </td>
+            <td data-role="workunitcode"> <xsl:value-of select="@workunitcode" /> </td>
+            <td data-role="partsource"> <xsl:value-of select="@partsource" /> </td>
+            <td data-role="refdata"> <xsl:value-of select="@refdata" /> </td>
+            <td data-role="reftono"> <xsl:value-of select="@reftono" /> </td>
+            <td data-role="kai_std"> <xsl:value-of select="@kai_std" /> </td>
+            <td data-role="sssn"> <xsl:value-of select="@sssn" /> </td>
+        </tr>
+    </xsl:template>
+
+    <!-- partinfo/partinfo 항목을 처리하는 템플릿 -->
+    <xsl:template match="partinfo/partinfo">
+        <tr class="part_tr text-center"
+            name="part_{ @indexnum }"
+            id="{@id}"
+            childpart="@childpart"
+            p_d_refid="@p_d_refid"
+            pr_graphicnum="@pr_graphicnum"
+            sub_graphicnum="@sub_graphicnum"
+        >
+<!--            <td data-role="ipbcode"> <br/> </td>-->
+            <td data-role="" style="padding: 0;" xid="{@id}">
+<!--                <xsl:if test="@version and normalize-space(@version) != ''">
+                    <div class="ipb-div-version">
+                        <span class="version_bar_update">
+                            <xsl:attribute name="onClick"/>
+                        </span>
+                    </div>
+                </xsl:if>-->
+            </td>
+            <td data-role="graphicnum">
+                <xsl:if test="@graphicnum"> <xsl:value-of select="@graphicnum" /> </xsl:if>
+                <xsl:if test="@figureno"> <xsl:value-of select="@figureno" /> </xsl:if>
+            </td>
+            <td data-role="indexnum">
+                <xsl:choose>
+                    <xsl:when test="@indexnum > 0">
+                        <a href="#" id="hotSpot_{ @indexnum }">
+                            <xsl:value-of select="@indexnum" />
+                        </a>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="@indexnum" />
+                    </xsl:otherwise>
+                </xsl:choose>
+            </td>
+<!--            <td data-role="partnum"> <xsl:value-of select="partbase/@partnum" /> </td>-->
+            <td data-role="partnum">
+                <xsl:choose>
+                    <xsl:when test="@kai_std != ''">
+                        <a href="#">
+                            <xsl:value-of select="partbase/@partnum" />
+                        </a>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="partbase/@partnum" />
+                    </xsl:otherwise>
+                </xsl:choose>
+            </td>
+            <td data-role="nsn"> <xsl:value-of select="partbase/@nsn" /> </td>
+            <td data-role="cage"> <xsl:value-of select="partbase/@cage" /> </td>
+            <td data-role="level"> <xsl:value-of select="@level" /> </td>
+            <td class="text-start" data-role="name">
+                <xsl:choose>
+                    <xsl:when test="@childpart = 0">
+                        <xsl:choose>
+                            <xsl:when test="@changebasis">
+                                <a href="#" onclick="tocoContView('{ @id }')">
+                                    <xsl:value-of select="@name" />
+                                </a>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:value-of select="@name" />
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <a href="#" onclick="tocoContView('{ @id }')">
+                            <xsl:value-of select="@name" />
+                        </a>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </td>
+            <td data-role="unitsper"> <xsl:value-of select="@unitsper" /> </td>
+            <td data-role="retrofit"> <xsl:value-of select="@retrofit" /> </td>
+            <td data-role="usablon"> <xsl:value-of select="@usablon" /> </td>
+            <td data-role="smr"> <xsl:value-of select="partbase/@smr" /> </td>
+            <td data-role="rdn"> <xsl:value-of select="@RDN" /> </td>
+            <td data-role="workunitcode"> <xsl:value-of select="@workunitcode" /> </td>
+            <td data-role="partsource"> <xsl:value-of select="@partsource" /> </td>
+            <td data-role="refdata"> <xsl:value-of select="@refdata" /> </td>
+            <td data-role="reftono"> <xsl:value-of select="@reftono" /> </td>
+            <td data-role="kai_std"> <xsl:value-of select="@kai_std" /> </td>
+            <td data-role="sssn"> <xsl:value-of select="@sssn" /> </td>
+        </tr>
+    </xsl:template>
+
+    <!-- text 항목을 처리하는 템플릿 -->
+    <xsl:template match="text">
+        <xsl:choose>
+            <xsl:when test="./@linktype='link'">
+                <a href="#" linkid="{@linkid}" title="{@listname}" tmname="{@tmname}" viewtype="{@viewtype}">
+                    <xsl:value-of select="." />
+                </a>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="." />
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <!-- grphprim 항목을 처리하는 템플릿 -->
+    <xsl:template match="grphprim">
+        <!-- external-ptr 속성이 존재할 때만 태그 만듬 -->
+        <xsl:if test="@external-ptr">
+            <div name="pngDivArea" class="grphprim ipb-image-div" id="{substring-before(substring-after(@external-ptr,'/'), '.')}">
+                <canvas id="ipb-rowactive-canvas" class="ipb-rowactive-canvas"></canvas>
+                <canvas id="ipb-hotspot-canvas" class="ipb-hotspot-canvas"></canvas>
+                <img name="pngImgArea" id= "ipb-image" class="responsive-image" src="{concat('/EXPIS/T50/ietmdata/', substring-after(@external-ptr, 'IPBImage/'))}" tocoid="{@id}"
+                     title="{@changebasis}" >
+                </img>
+            </div>
+        </xsl:if>
+    </xsl:template>
+
+</xsl:stylesheet>

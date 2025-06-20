@@ -1,0 +1,452 @@
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:vertical-align="http://www.w3.org/1999/xhtml">
+    <!-- system 시스템 템플릿 -->
+    <xsl:template match="system">
+        <section class="py-4">
+            <div class="container">
+                <div class="row justify-content-center text-left">
+                    <div class="col-lg-12">
+                        <xsl:apply-templates select="descinfo" />
+                        <xsl:apply-templates select="task" />
+                    </div>
+                </div>
+                <div role="icon" class="d-none">
+                    <xsl:apply-templates select=".//icon" />
+                </div>
+            </div>
+        </section>
+    </xsl:template>
+
+    <!-- descinfo 항목을 처리하는 템플릿 -->
+    <xsl:variable name="titleStyle" select="'gs-title'"/>
+    <xsl:template match="descinfo">
+        <xsl:choose>
+            <xsl:when test="@type!='title'">
+                <xsl:apply-templates select="para-seq" />
+            </xsl:when>
+            <xsl:otherwise>
+                <h3 class="mt-3 {$titleStyle}" xid="{@id}">
+                    <div class="para" xid="{para-seq/para/@id}">
+                        <!-- 텍스트와 아이콘을 나란히 배치할 래퍼 span 추가 -->
+                        <span class="text-with-icon" xid="{para-seq/para/@id}">
+                            <!-- 텍스트 -->
+                            <span class="text-content">
+                                <xsl:apply-templates select="para-seq/para/text"/>
+                            </span>
+                            <!-- 토글 아이콘 -->
+                            <i class="fas fa-arrow-up icon-button" onclick="sectionOpen(this)"></i>
+                        </span>
+                        <!--                        <xsl:apply-templates select="para-seq/para/text" />-->
+                    </div>
+                </h3>
+                <hr/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <!-- para-seq 항목을 처리하는 템플릿 -->
+    <xsl:template match="para-seq">
+        <div class="para-seq">
+            <xsl:apply-templates select="para" />
+        </div>
+    </xsl:template>
+
+    <!-- para 항목을 처리하는 템플릿 -->
+    <xsl:template match="para">
+        <xsl:choose>
+            <xsl:when test="para-seq">
+                <xsl:apply-templates select="para-seq" />
+            </xsl:when>
+            <xsl:when test="table">
+                <xsl:apply-templates select="table" />
+            </xsl:when>
+            <xsl:when test="grphprim">
+                <xsl:apply-templates select="grphprim" />
+            </xsl:when>
+            <xsl:when test="alert">
+                <xsl:apply-templates select="alert" />
+            </xsl:when>
+            <xsl:otherwise>
+                <div class="para" xid="{@id}">
+                    <xsl:attribute name="style">text-align:<xsl:value-of select="text/@align" />; padding-left:<xsl:value-of select="./@x1 div 100" />px;</xsl:attribute>
+                    <xsl:apply-templates select="text" />
+                </div>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <!-- table 항목을 처리하는 템플릿 -->
+    <xsl:template match="table">
+        <div class="mt-3">
+            <table class="table table-sm table-bordered" xid="{@id}">
+                <tbody>
+                    <xsl:apply-templates select="rowhddef"/>
+                </tbody>
+            </table>
+
+            <!-- 테이블 출력 버튼 -->
+            <!-- 2025.06.02 - 주석처리함 - jingi.kim
+            <div id="img_controll" class="img_controll">
+                <a href="javascript:void(0)" onclick="tablePrint(this.closest('.gs-table').outerHTML)" class="print" title="Print Table"/>
+            </div>
+            -->
+        </div>
+    </xsl:template>
+
+    <!-- rowhddef 항목을 처리하는 템플릿 -->
+    <xsl:template match="rowhddef">
+        <tr row="{@row}"
+            xid="{@id}">
+            <xsl:apply-templates select="entry" />
+        </tr>
+    </xsl:template>
+
+    <!-- entry 항목을 처리하는 템플릿 -->
+    <xsl:template match="entry">
+        <td style="padding-left: 10px;"
+            xid="{@id}"
+            column="{@column}"
+            colspan="{@colspan}"
+            rowspan="{@rowspan}"
+            dheight="{@height}"
+            dwidth="{@width}"
+        >
+            <xsl:if test="text/@align">
+                <xsl:attribute name="style">text-align:<xsl:value-of select="text/@align" />;</xsl:attribute>
+            </xsl:if>
+<!--            <xsl:for-each select="text">-->
+                <!-- 저작시스템 확인 결과 큰 동그라미가 맞지만 3버전에서 작은 점으로 나와서 에러사항에 올려서 일단 작은 점으로 표시되게 변경 - cch -->
+<!--                <span xid="{@id}">
+                    <xsl:variable name="text" select="normalize-space(.)"/>
+                    <xsl:choose>
+                        <xsl:when test="starts-with($text, '●')">
+                            <xsl:text>•</xsl:text>
+                            <xsl:value-of select="substring($text, 2)" />
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="$text" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </span>
+                <br/>
+            </xsl:for-each>-->
+
+            <!-- text 템플릿에서 처리되고 있어 주석 후 apply-templates로 불러올 수 있도록 수정 - osm -->
+            <xsl:apply-templates select="text"/>
+            <xsl:apply-templates select="alert" />
+            <xsl:apply-templates select="table" />
+        </td>
+    </xsl:template>
+
+    <!-- text 항목을 처리하는 템플릿 -->
+    <xsl:template match="text">
+        <!-- linkType(revelationtype) 도해, 목차 링크에 따른 js 적용 -->
+        <xsl:variable name="linkType">
+            <xsl:choose>
+                <!-- 다중 링크 - osm -->
+                <xsl:when test="contains(@revelationtype, ',')">
+                    <xsl:value-of select="concat('showLinkMulti(&quot;', @id, '&quot;, event)')" />
+                </xsl:when>
+                <!-- 단일 링크 - osm -->
+                <xsl:when test="contains(@revelationtype, '도해')">
+                    <xsl:value-of select="concat('openPopup({grphId: &quot;', @linkid, '&quot;})')" />
+                </xsl:when>
+                <xsl:when test="contains(@revelationtype, '목차')">
+                    <xsl:value-of select="concat('selectTo(&quot;', @tmname, '&quot;); tocoContView(&quot;', @linkid, '&quot;); activateTocLink(&quot;', @linkid, '&quot;);')" />
+                </xsl:when>
+                <xsl:when test="contains(@revelationtype, 'TO')">
+                    <xsl:value-of select="concat('selectTo(&quot;', @listname, '&quot;)')" />
+                </xsl:when>
+                <xsl:when test="contains(@revelationtype, 'RDN')">
+                    <xsl:value-of select="concat('openPopup({toKey: &quot;', @tmname, '&quot;, tocoId: &quot;', @linkid, '&quot;})')" />
+                </xsl:when>
+                <xsl:when test="contains(@revelationtype, '테이블')">
+                    <xsl:value-of select="concat('openPopup({tblId: &quot;', @linkid, '&quot;})')" />
+                </xsl:when>
+            </xsl:choose>
+        </xsl:variable>
+
+
+        <!-- alert내 줄바꿈 - 2025.06.05. minhee. yun -->
+        <xsl:variable name="orig" select="." />
+
+        <xsl:variable name="hasTxtQuote" select="contains($orig, '&amp;quot;')" />
+        <xsl:variable name="hasTxtQ" select="contains($orig, '&quot;')" />
+        <!-- <xsl:variable name="hasBrEntity" select="contains($orig, '&amp;#13;')" />-->
+        <xsl:choose>
+            <!-- link -->
+            <xsl:when test="./@linktype='link'">
+                <!-- tmname = to_key, linkid = grphId - osm --> <!-- 레이어 팝업 위치 조정을 위해 span태그에 class, style 추가 - cch -->
+                <div class="popup-wrapper" style="position: relative; display: inline-block;">
+                    <a href="javascript:void(0)" xid="{@id}" linkid="{@linkid}" title="{@listname}" tmname="{@tmname}" viewtype="{@viewtype}" onclick="{$linkType}">
+                        <xsl:value-of select="."/>
+                    </a>
+                    <!-- 다중 링크일 경우 div 생성 - osm -->
+                    <xsl:if test="contains(@revelationtype, ',')">
+                        <div class="layer-popup"
+                             linkid="{@linkid}"
+                             tmname="{@tmname}"
+                             listname="{@listname}"
+                             revelationtype="{@revelationtype}"/>
+                    </xsl:if>
+                </div>
+            </xsl:when>
+            <!-- alert내. 방점( • ), 줄바꿈 - 2025.06.09. minhee. yun -->
+            <xsl:when test="ancestor::alert">
+                <xsl:choose>
+                    <xsl:when test="$hasTxtQuote">
+                        <xsl:choose>
+                            <!-- 1. &amp;quot; 있고, &amp;#13; 도 있는 경우 -->
+                            <xsl:when test="contains($orig, '&amp;quot;') and contains($orig, '&amp;#13;')">
+                                <xsl:value-of select="concat('•', substring-before(substring-after($orig, '&amp;quot;'), '&amp;#13;'))" />
+                                <br/>
+                            </xsl:when>
+
+                            <!-- 2. &amp;quot;는 있는데 &amp;#13;는 없는 경우 -->
+                            <xsl:when test="contains($orig, '&amp;quot;')">
+                                <xsl:value-of select="concat(substring-before($orig, '&amp;quot;'), '•', substring-after($orig, '&amp;quot;'))" />
+                                <br/>
+                            </xsl:when>
+                            <!-- 3. 둘 다 없는 경우 -->
+                            <xsl:otherwise>
+                                <xsl:value-of select="$orig" />
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:when>
+                    <xsl:when test="$hasTxtQ">
+                        <xsl:choose>
+                            <!-- 1. 텍스트에 &quot; 와 &amp;#13; 둘 다 있는 경우 -->
+                            <xsl:when test="contains($orig, '&quot;') and contains($orig, '&amp;#13;')">
+                                <xsl:value-of select="concat('•', substring-before(substring-after($orig, '&quot;'), '&amp;#13;'))" />
+                                <br/>
+                            </xsl:when>
+                            <!-- 2. 텍스트에 &quot; 만 있는 경우 -->
+                            <xsl:when test="contains($orig, '&quot;')">
+                                <xsl:value-of select="concat(substring-before($orig, '&quot;'), '•', substring-after($orig, '&quot;'))" />
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:value-of select="$orig"/>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="$orig" />
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:when>
+            <!-- alert내. 방점( • ), 줄바꿈 - 2025.06.09. minhee. yun -->
+            <xsl:otherwise>
+                <!-- 저작시스템 확인 결과 큰 동그라미가 맞지만 3버전에서 작은 점으로 나와서 에러사항에 올려서 일단 작은 점으로 표시되게 변경 - cch -->
+                <span xid="{@id}">
+                    <xsl:variable name="text" select="normalize-space(.)"/>
+                    <xsl:choose>
+                        <xsl:when test="starts-with($text, '●')">
+                            <xsl:text>•</xsl:text>
+                            <xsl:value-of select="substring($text, 2)" />
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="$text" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </span>
+<!--                <span xid="{@id}">-->
+<!--                    <xsl:value-of select="." />-->
+<!--                </span>-->
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+    <!-- -->
+
+    <!-- grphprim 항목을 처리하는 템플릿 -->
+    <xsl:variable name="GS_IMG_PATH" select="'/img/ietm/gs/'"/>
+    <xsl:variable name="GRPH_STYLE" select="'gs-grphprim'"/>
+    <xsl:template match="grphprim">
+        <div class="{$GRPH_STYLE}">
+            <!-- external-ptr 속성에서 경로에 'Image' 존재 시 파일명만, 미존재 시 파일명 그대로 추출 -->
+            <xsl:variable name="fileName">
+                <xsl:choose>
+                    <xsl:when test="contains(@external-ptr, 'Image')">
+                        <xsl:value-of select="substring-after(@external-ptr, '\')" />
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="@external-ptr" />
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:variable>
+
+            <!-- 2025.04.15 - osm -->
+            <!-- 이미지 불러오지 못할 시 대체 이미지(noimg) 출력 -> ietm_image.js의 imageEventBind() 함수로 처리하도록 변경 -->
+            <br/><img class="img-control" src="{ $GS_IMG_PATH }{ $fileName }" />
+            <br/>
+            <span>
+                <xsl:value-of select="text"/>
+            </span>
+
+            <!-- 이미지 하단 제어 버튼 -->
+            <xsl:variable name="IMG_DOWNLOAD" select="concat('imageDownload(&quot;', $GS_IMG_PATH, $fileName, '&quot;)')" />
+            <xsl:variable name="IMG_PRINT" select="concat('imagePrint(&quot;', $GS_IMG_PATH, $fileName, '&quot;, &quot;', text, '&quot;)')" />
+            <xsl:variable name="IMG_POPUP" select="concat('openPopup({grphId: &quot;', @id, '&quot;})')" />
+            <div id="img_controll" class="img_controll" style="display:none;">
+                <a href="javascript:void(0)" onclick="{$IMG_DOWNLOAD}" class="down" title="이미지 저장" />
+                <a href="javascript:void(0)" onclick="{$IMG_PRINT}" class="print" title="이미지 출력" />
+                <a href="javascript:void(0)" onclick="{$IMG_POPUP}" class="popup" title="새창에서 열기" />
+            </div><br/>
+
+            <!-- 이미지 명 디버깅용 (불필요시 삭제) -->
+            <span id="{$fileName}"/>
+
+            <!-- changebasis존재 시 title 속성 추가 -->
+            <xsl:if test="string(@changebasis)">
+                <xsl:attribute name="title">
+                    <xsl:value-of select="@changebasis"/>
+                </xsl:attribute>
+            </xsl:if>
+        </div>
+    </xsl:template>
+    <!-- -->
+
+    <!-- alert 항목을 처리하는 템플릿 -->
+    <xsl:variable name="alertMessage" select="'para1'"/>
+    <xsl:template match="alert">
+        <xsl:variable name="alertType">
+            <xsl:choose>
+                <!-- type에 따른 css 처리, default = note(주기) -->
+                <xsl:when test="@type = 'warning'">gs-alert-warning</xsl:when>
+                <xsl:when test="@type = 'note'">gs-alert-note</xsl:when>
+                <xsl:when test="@type = 'caution'">gs-alert-caution</xsl:when>
+                <xsl:when test="@type = 'CL_warning'">gs-alert-warning</xsl:when>
+                <xsl:when test="@type = 'CL_note'">gs-alert-note</xsl:when>
+                <xsl:when test="@type = 'CL_caution'">gs-alert-caution</xsl:when>
+                <xsl:otherwise>gs-alert-note</xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+
+        <!-- css 동적 처리 -->
+        <br/>
+        <div class="{$alertType}">
+            <div>
+                <p class="{$alertMessage}}">
+                    <xsl:apply-templates select="text"/>
+                </p>
+                <xsl:apply-templates select="table"/>
+            </div>
+        </div>
+    </xsl:template>
+
+    <!-- 준비사항 표 & 링크 -->
+    <xsl:template match="othercond">
+        <tr>
+            <td width="1%" style="border:none"></td>
+            <td style="text-align:left;">
+                <xsl:choose>
+                    <xsl:when test="linkinfo">
+                        <xsl:apply-templates select="linkinfo"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="@othercond_item"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </td>
+            <td style="text-align:left;">
+                <span id="boldNone">
+                    <xsl:value-of select="@othercond_desc"/>
+                </span>
+            </td>
+        </tr>
+    </xsl:template>
+
+    <xsl:template match="linkinfo">
+        <xsl:variable name="linkType">
+            <xsl:choose>
+                <!-- 단일 링크 - osm -->
+                <xsl:when test="contains(@revelationtype, '도해')">
+                    <xsl:value-of select="concat('openPopup({grphId: &quot;', @linkid, '&quot;})')" />
+                </xsl:when>
+                <xsl:when test="contains(@revelationtype, '목차')">
+                    <xsl:value-of select="concat('selectTo(&quot;', @tmname, '&quot;); tocoContView(&quot;', @linkid, '&quot;); activateTocLink(&quot;', @linkid, '&quot;);')" />
+                </xsl:when>
+                <xsl:when test="contains(@revelationtype, 'TO')">
+                    <xsl:value-of select="concat('selectTo(&quot;', @listname, '&quot;)')" />
+                </xsl:when>
+                <xsl:when test="contains(@revelationtype, 'RDN')">
+                    <xsl:value-of select="concat('openPopup({toKey: &quot;', @tmname, '&quot;, tocoId: &quot;', @linkid, '&quot;})')" />
+                </xsl:when>
+                <xsl:when test="contains(@revelationtype, '테이블')">
+                    <xsl:value-of select="concat('openPopup({tblId: &quot;', @linkid, '&quot;})')" />
+                </xsl:when>
+            </xsl:choose>
+        </xsl:variable>
+
+        <!-- link -->
+        <!-- tmname = to_key, linkid = grphId -->
+        <span>
+            <a href="javascript:void(0)" id="{@id}" linkid="{@linkid}" title="{@listname}" tmname="{@tmname}" viewtype="{@viewtype}" onclick="{$linkType}">
+                <xsl:value-of select="../@othercond_item"/>
+            </a>
+        </span>
+    </xsl:template>
+
+    <!-- task 항목을 처리하는 템플릿 -->
+    <xsl:template match="task">
+        <xsl:apply-templates select="step-seq" />
+        <xsl:apply-templates select="follow-on" />
+    </xsl:template>
+
+    <!-- follow-on 항목을 처리하는 템플릿 -->
+    <xsl:template match="follow-on">
+        <xsl:apply-templates select="step" />
+    </xsl:template>
+
+    <!-- step 항목을 처리하는 템플릿 -->
+    <xsl:template match="step">
+        <xsl:variable name="tid" select="text/@id"/>
+        <xsl:if test="text">
+            <div class="step" xid="{@id}">
+                <xsl:attribute name="style">text-align:<xsl:value-of select="text/@align"/>; padding-left:<xsl:value-of select="./@x1 div 100"/>px;</xsl:attribute>
+
+                <!-- KTA CL 교범에서 타입이 CL인 경우 체크박스 표시 -->
+                <xsl:choose>
+                    <xsl:when test="@type = 'CL' ">
+                        <div class="form-check-cl">
+                            <input class="form-check-input m-2" id="{@id}" type="checkbox" value="{@id}">
+                                <xsl:attribute name="onclick">countCL(this)</xsl:attribute>
+                            </input>
+                            <label class="form-check-label">
+                                <xsl:apply-templates select="text"/>
+                            </label>
+                        </div>
+                    </xsl:when>
+
+                    <xsl:otherwise>
+                        <xsl:apply-templates select="text"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </div>
+        </xsl:if>
+
+        <xsl:if test="step-seq">
+            <div class="step" xid="{@id}">
+                <xsl:apply-templates select="step-seq" />
+            </div>
+        </xsl:if>
+
+        <xsl:if test="table">
+            <xsl:apply-templates select="table" />
+        </xsl:if>
+
+        <xsl:if test="grphprim">
+            <xsl:apply-templates select="grphprim" />
+        </xsl:if>
+
+        <xsl:if test="alert">
+            <xsl:apply-templates select="alert" />
+        </xsl:if>
+
+    </xsl:template>
+
+    <!-- icon 항목을 처리하는 템플릿 -->
+    <xsl:template match="icon">
+        <icon class="d-none" filename="{@filename}" id="{@iconid}" />
+    </xsl:template>
+
+</xsl:stylesheet>

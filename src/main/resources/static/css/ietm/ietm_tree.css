@@ -1,0 +1,152 @@
+/* 기본 트리 스타일 */
+.tree {
+    min-height: 20px;
+    padding: 19px;
+    /*margin-bottom: 20px;*/
+    background-color: #f5f5f5;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+/* 트리 항목 li 스타일 */
+.tree .nav-item {
+    list-style-type: none;
+    margin: 0;
+    padding: 5px 0px 0px 5px;
+    position: relative;
+}
+
+/* 트리 항목 버튼과 아이콘 */
+.tree .nav-item button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding-right: 0px;
+    color: inherit;
+}
+
+.tree .nav-item button i {
+    margin-right: 10px;
+}
+
+/* 자식 항목을 연결하는 선 (before, after) */
+.tree .nav-item::before,
+.tree .nav-item::after {
+    content: '';
+    left: -20px;
+    position: absolute;
+    right: auto;
+}
+
+.tree .nav-item::before {
+    border-left: 1px solid #999;
+    bottom: 50px;
+    height: 100%;
+    top: -10px;
+    width: 1px;
+}
+
+.tree .nav-item::after {
+    border-top: 1px solid #999;
+    height: 20px;
+    top: 20px;
+    width: 25px;
+}
+
+/* 항목의 텍스트에 스타일 적용 */
+.tree .nav-item a {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 5px;
+    border: 1px solid #999;
+}
+
+/* 마우스 오버 시 항목 강조 */
+.tree .nav-item:hover > a {
+    background: #eee;
+    border-color: #94a0b4;
+    color: #000;
+}
+
+/* 부모 항목 클릭 가능 스타일 */
+.tree .nav-item.parent_li > a {
+    cursor: pointer;
+}
+
+/* 자식 항목 표시 (collapse 상태) */
+.tree .collapse {
+    display: none;
+}
+
+/* 펼쳐진 상태에서 자식 항목 보이기 */
+.tree .collapse.show {
+    display: block;
+}
+
+/* 부모 항목 아이콘 (폴더 열기/닫기) */
+.tree .nav-item.parent_li > button i.fa-folder-plus {
+    display: inline-block; /* 펼치기 버튼 보이기 */
+}
+
+.tree .nav-item.parent_li > button i.fa-folder-minus {
+    display: none; /* 접기 버튼 숨기기 */
+}
+
+/* 부모 항목이 펼쳐졌을 때 아이콘 변경 */
+.tree .nav-item.parent_li > button i.fa-folder-minus {
+    display: inline-block; /* 접기 버튼 보이기 */
+}
+
+.tree .nav-item.parent_li > button i.fa-folder-plus {
+    display: none; /* 펼치기 버튼 숨기기 */
+}
+
+/* 부모 항목에 padding 추가 (자식 항목 트리 구조) */
+.tree .nav-item.parent_li > ul {
+    padding-left: 20px;
+}
+
+/* 마지막 자식 항목 스타일 */
+.tree .nav-item:last-child::before {
+    height: 30px;
+}
+
+/* 마지막 항목 아이콘 (메모 아이콘) */
+.tree .nav-item > button i.fa-note-sticky {
+    display: inline-block; /* 기본적으로 아이콘 보이기 */
+    margin-right: 10px;
+    color: #6c757d; /* 기본 색상 */
+}
+
+/* 마지막 항목 강조 */
+.tree .nav-item:not(.parent_li) > a {
+    font-weight: bold; /* 텍스트 굵게 */
+    background: #f8f9fa; /* 배경 강조 */
+}
+
+/* 트리 폰트 사이즈 조절 */
+.tree_list .nav-link {
+    font-size: 12px;
+}
+
+/* 선택 하이라이트 */
+.tree .nav-item a.active {
+    background-color: var(--bs-warning);
+}
+
+
+
+/* MYTO 목록에서 폴더 선택시 */
+/* 선택된 폴더에 효과 적용 */
+.selected-folder {
+    font-weight: bold; /* 글씨 굵게 */
+    transition: font-weight 0.3s ease;
+}
+
+.selected-folder span {
+    background-color: #FFD43B; /* 텍스트에만 배경색 적용 */
+    color: #000; /* 글씨 색상 */
+    padding: 2px 5px; /* 텍스트에 여백 추가 */
+    border-radius: 3px; /* 배경에 둥근 모서리 추가 */
+}

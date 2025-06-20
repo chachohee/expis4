@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.ietm.dao.XContAlertMapper">
+
+	<!-- ResultMap -->
+	<resultMap id="xcontResultMap" type="com.expis.ietm.dto.XContDto">
+		<id		property="toKey"					column="to_key"					javaType="string" />
+		<result	property="tocoId"				column="toco_id"					javaType="string" />
+		<result	property="altId"					column="alt_id"					javaType="string" />
+		<result	property="xth"						column="xth"						javaType="long" />
+		<result	property="xcont"					column="xcont"					javaType="string" />
+		<result	property="createUserId"		column="create_user_id"	javaType="string" />
+		<result	property="createDate"		column="create_date"			javaType="date" />
+	</resultMap>
+	
+	
+	<!-- ResultCount -->
+	<resultMap id="xcontResultCount" type="int">
+		<result property="cnt" column="cnt" />
+	</resultMap>
+	
+	
+	<!-- Column -->
+	<sql id="xcontColumn">
+		  tax.to_key					AS to_key
+		, tax.toco_id					AS toco_id
+		, tax.alt_id					AS alt_id
+		, tax.xth						AS xth
+		, tax.xcont					AS xcont
+		, tax.create_user_id		AS create_user_id
+		, tax.create_date			AS create_date
+	</sql>
+	
+	
+	<!--  Select List -->
+	<select id="selectListDao" resultMap="xcontResultMap">
+		SELECT
+		<include refid="xcontColumn" />
+		FROM tm_alert_xcont tax
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			<if test="toKey != null">AND to_key = #{toKey}</if>
+			<if test="tocoId != null">AND toco_id = #{tocoId}</if>
+			<if test="altId != null">AND alt_id = #{altId}</if>
+		</trim>
+		ORDER BY to_key ASC, toco_id ASC, alt_id ASC, xth ASC
+	</select>
+	
+	
+	<!--  Select One -->
+	<select id="selectDetailDao" resultMap="xcontResultMap">
+		SELECT
+		<include refid="xcontColumn" />
+		FROM tm_alert_xcont tax
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			<if test="toKey != null">AND to_key = #{toKey}</if>
+			<if test="tocoId != null">AND toco_id = #{tocoId}</if>
+			<if test="altId != null">AND alt_id = #{altId}</if>
+			<if test="xth != null">AND xth = #{xth}</if>
+		</trim>
+
+	</select>
+	
+	
+	<!--  Select Count -->
+	<select id="selectCountDao" resultMap="xcontResultCount">
+		SELECT
+			COUNT(*) AS cnt
+		FROM tm_alert_xcont tax
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			<if test="toKey != null">AND to_key = #{toKey}</if>
+			<if test="tocoId != null">AND toco_id = #{tocoId}</if>
+			<if test="altId != null">AND alt_id = #{altId}</if>
+		</trim>
+	</select>
+	
+	
+	<!-- Insert -->
+	<insert id="insertDao" parameterType="com.expis.ietm.dto.XContDto">
+		INSERT INTO tm_alert_xcont
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			to_key,
+			toco_id,
+			alt_id,
+			<if test="xth != null">xth,</if>
+			<if test="xcont != null">xcont,</if>
+			<if test="createUserId != null">create_user_id,</if>
+			create_date
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			#{toKey},
+			#{tocoId},
+			#{altId},
+			<if test="xth != null">#{xth},</if>
+			<if test="xcont != null">#{xcont},</if>
+			<if test="createUserId != null">#{createUserId},</if>
+			SYSDATE
+		</trim>
+	</insert>
+	
+	
+	<!-- Insert All --><!-- 사용 20160921 -->
+	<insert id="insertAllDao" parameterType="com.expis.ietm.dto.XContDto">
+		<foreach index="index" item="item" collection="list" open="INSERT ALL " separator=" " close="SELECT * FROM DUAL">
+			INTO tm_alert_xcont
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				to_key,
+				toco_id,
+				alt_id,
+				<if test="item.xth != null">xth,</if>
+				<if test="item.xcont != null">xcont,</if>
+				<if test="item.createUserId != null">create_user_id,</if>
+				create_date
+			</trim>
+			VALUES
+			<trim prefix="(" suffix=")" suffixOverrides=",">
+				#{item.toKey},
+				#{item.tocoId},
+				#{item.altId},
+				<if test="item.xth != null">#{item.xth},</if>
+				<if test="item.xcont != null">#{item.xcont},</if>
+				<if test="item.createUserId != null">#{item.createUserId},</if>
+				SYSDATE
+			</trim>
+		</foreach>
+	</insert>
+	
+	<insert id="insertAllDaoMDB" parameterType="com.expis.ietm.dto.XContDto">
+		
+		insert into tm_alert_xcont
+		(
+			to_key,
+			toco_id,
+			alt_id,
+			xth,
+			xcont,
+			create_user_id,
+			create_date
+		)
+		values
+		(
+			#{toKey},
+			#{tocoId},
+			#{altId},
+			${xth},
+			#{xcont},
+			#{createUserId},
+			sysdate()
+		)
+		
+	</insert>
+	
+	<!-- Update -->
+	<update id="updateDao" parameterType="com.expis.ietm.dto.XContDto">
+		UPDATE tm_alert_xcont
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="xth != null">xth = #{xth},</if>
+			<if test="xcont != null">xcont = #{xcont},</if>
+			<if test="modifyUserId != null">modify_user_id = #{modifyUserId},</if>
+			modify_date = SYSDATE
+		</trim>
+
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			<if test="toKey != null">AND to_key = #{toKey}</if>
+			<if test="tocoId != null">AND toco_id = #{tocoId}</if>
+			<if test="altId != null">AND alt_id = #{altId}</if>
+		</trim>
+
+	</update>
+
+	
+	<!-- Delete --><!-- 사용 20160912 -->
+	<delete id="deleteDao" parameterType="com.expis.ietm.dto.XContDto">
+		DELETE FROM tm_alert_xcont
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			<if test="toKey != null">AND to_key = #{toKey}</if>
+			<if test="tocoId != null">AND toco_id = #{tocoId}</if>
+			<if test="altId != null">AND alt_id = #{altId}</if>
+		</trim>
+	</delete>
+	
+	
+	<!-- Delete --><!-- 사용 20160912 -->
+	<delete id="deleteAllDao">
+		DELETE FROM tm_alert_xcont
+	</delete>
+
+</mapper>

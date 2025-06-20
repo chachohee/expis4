@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.manage.dao.SystemOptionMapper">
+
+    <select id="ipbTypeCheck" resultType="int">
+        select	opt_ipb	as	ipbType
+        from	ad_system_option
+        where	status_kind = '10'
+    </select>
+
+    <select id="selectOptionAll" resultType="com.expis.manage.dto.SystemOptionDto">
+        select	opt_version				as	optVersion
+        ,opt_alert				as	optAlert
+        ,opt_ietm_img			as	optIetmImg
+        ,opt_cmnt_img			as	optCmntImg
+        ,opt_cmnt_title			as	optCmntTitle
+        ,opt_cmnt_sub_title		as	optCmntSubTitle
+        ,opt_cover				as	optCover
+        ,opt_font_resize		as	optFontResize
+        ,opt_intro				as	optIntro
+        ,opt_project_type		as	optProjectType
+        ,opt_remo				as	optRemo
+        ,opt_airplane			as	optAirplane
+        ,opt_unit				as	optUnit
+        ,opt_print				as	optPrint
+        ,opt_ipb				as	optIpb
+        ,opt_pw_validation_info		as	optPwValidationInfo
+        ,opt_pw_validation_msg		as	optPwValidationMsg
+        ,opt_pw_min_length			as	optPwMinLength
+        ,opt_pw_max_length			as	optPwMaxLength
+        ,opt_ctrl_kind			as	optCtrlKind
+        ,opt_print_ip			as	optPrintIp
+        ,opt_to_output			as	optToOutput
+        from	ad_system_option
+    </select>
+
+    <update id="optionUpdate">
+        update	ad_system_option
+        set		opt_cover 				= #{optCover}
+        ,opt_ipb 				= #{optIpb}
+        ,opt_remo 				= #{optRemo}
+        ,opt_airplane	 		= #{optAirplane}
+        ,opt_unit				= #{optUnit}
+        ,opt_print				= #{optPrint}
+        ,opt_version			= #{optVersion}
+        ,opt_font_resize		= #{optFontResize}
+        ,opt_alert				= #{optAlert}
+        ,opt_ctrl_kind			= #{optCtrlKind}
+        ,opt_print_ip			= #{optPrintIp}
+        <if test="optIetmImg != ''">
+            ,opt_ietm_img		= #{optIetmImg}
+        </if>
+        ,opt_to_output			= #{optToOutput}
+        ,modify_user_id			= #{modifyUserId}
+        ,modify_date			= sysdate
+    </update>
+
+    <update id="cmntOptionUpdate" parameterType="com.expis.manage.dto.SystemOptionDto">
+        update	ad_system_option
+        set		opt_cmnt_title			= #{optCmntTitle}
+        ,opt_cmnt_sub_title		= #{optCmntSubTitle}
+        <if test="optCmntImg != 0">
+            ,opt_cmnt_img		= ${optCmntImg}
+        </if>
+        ,modify_user_id			= #{modifyUserId}
+        ,modify_date			= sysdate
+    </update>
+
+    <!-- 표지관리 -->
+    <select id="getCoverCont" resultType="com.expis.manage.dto.CoverManageDto">
+        select	to_key					as	toKey
+        ,cover_title			as	coverTitle
+        ,cover_sub_title		as	coverSubTitle
+        ,cover_img				as	coverImg
+        ,cover_dist_cont		as	coverDistCont
+        ,cover_warnning_cont	as	coverWarnningCont
+        ,cover_cont				as	coverCont
+        ,cover_date				as	coverDate
+        ,cover_ver_date			as	coverVerDate
+        from	ad_cover_manage
+        where	to_key = #{toKey}
+        and		status_kind = '10'
+    </select>
+
+    <select id="getCoverDate" resultType="String">
+        select t1.chg_date
+        from (
+        select  row_number() over(order by length(chg_no) asc, chg_no asc) as tNum
+        , chg_date
+        from tm_ver_info
+        where to_key = #{toKey}
+        ) t1
+        where t1.tnum &lt;= 1
+
+    </select>
+    <select id="getCoverVerDate" resultType="String">
+        select t1.chg_date
+        from (
+        select  row_number() over(order by length(chg_no) desc, chg_no desc) as tNum
+        , chg_date
+        from tm_ver_info
+        where to_key = #{toKey}
+        ) t1
+        where t1.tnum &lt;= 1
+
+    </select>
+
+    <!--
+    cover 변경 넘버 조회 쿼리 생성
+    2025.05.09 - osm
+    -->
+    <select id="getCoverChgNo" resultType="String">
+        select t1.chg_no
+        from (
+            select chg_no
+            from tm_ver_info
+            where to_key = #{toKey}
+            order by length(chg_no) desc, chg_no desc
+             ) t1
+        where rownum = 1
+
+    </select>
+
+    <update id="coverUpdate">
+        update	ad_cover_manage
+        set		cover_title				=	#{coverTitle}
+        ,cover_sub_title		=	#{coverSubTitle}
+        ,cover_dist_cont		=	#{coverDistCont}
+        ,cover_warnning_cont	=	#{coverWarnningCont}
+        <if test="coverImg != '' || coverImg == 0">
+            ,cover_img			=	#{coverImg}
+        </if>
+        ,cover_cont				=	#{coverCont}
+        ,modify_user_id			=	#{modifyUserId}
+        ,modify_date			=	sysdate
+        where	to_key	=	#{toKey}
+        and		status_kind = '10'
+    </update>
+
+    <insert id="insertCoverCont">
+        <selectKey keyProperty="coverSeq" resultType="int" order="BEFORE">
+            select	nvl(max(cover_seq), 0) + 1
+            from	ad_cover_manage
+        </selectKey>
+        insert into ad_cover_manage (
+        cover_seq
+        ,to_key
+        ,create_user_id
+        ,create_date
+        ,status_kind
+        ) values (
+        #{coverSeq}
+        ,#{toKey}
+        ,#{createUserId}
+        ,sysdate
+        ,'10'
+        )
+    </insert>
+</mapper>
+

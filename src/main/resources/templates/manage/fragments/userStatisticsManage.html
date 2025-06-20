@@ -1,0 +1,164 @@
+<div th:fragment="userStatisticsManage" xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+
+    <div th:if="${secondId == 'user'}" class="statistics-container">
+        <!-- 사용자 접속통계 페이지 -->
+        <div class="d-flex flex-column flex-shrink-0 p-3">
+            <!-- 상단 탭 -->
+            <ul class="nav nav-tabs">
+                <li class="nav-item" th:title="#{admin.static}">
+                    <a class="nav-link active" id="tab_statistics" href="javascript:void(0);" onclick="otherTab('statistics')" th:text="#{admin.static}"> 통계 </a>
+                </li>
+                <li class="nav-item" th:title="#{admin.history}">
+                    <a class="nav-link" id="tab_report" href="javascript:void(0);" onclick="otherTab('report')" th:text="#{admin.history}"> 내역 </a>
+                </li>
+            </ul>
+
+            <!-- 통계 탭 -->
+            <div class="mt-4" id="status_user_info">
+
+                <h5 class="fw-bold mb-3" th:text="#{admin.user.access.static}"> 사용자 접속통계 </h5>
+
+                <div class="row g-3 align-items-center mb-4 stat_sel">
+
+                    <div class="col-auto">
+                        <select class="form-select" id="select_id" th:title="#{admin.search.condition}" aria-label="검색조건" onchange="selectBoxEvent();">
+                            <option selected="selected" value="total" th:text="#{ietm.all}"> 전체 </option>
+                            <option value="year" th:text="#{admin.yearly}"> 연도별 </option>
+                            <option value="month" th:text="#{admin.monthly}"> 월별 </option>
+                            <option value="day" th:text="#{admin.glance}"> 일별 </option>
+                        </select>
+                    </div>
+
+                    <select id="select_year" class="form-select select_sub" th:title="#{admin.year.selection}" aria-label="연도 선택" onchange="selectSubEvent('select_year');">
+                        <option th:value="#{admin.year.selection}" th:text="#{admin.year.selection}"> 연도 선택 </option>
+                    </select>
+
+                    <select id="select_month_year" class="form-select select_sub" th:title="#{admin.year.selection}" aria-label="연도 선택" onchange="selectYearEvent();">
+                        <option th:value="#{admin.year.selection}" th:text="#{admin.year.selection}"> 연도 선택 </option>
+                    </select>
+
+                    <select id="select_month_month" class="form-select select_sub" th:title="#{admin.select.month}" aria-label="월 선택" disabled="disabled" onchange="selectSubEvent('select_month');">
+                        <option th:text="#{admin.select.month}">월 선택</option>
+                        <th:block th:each="month : ${#numbers.sequence(1, 12)}">
+                            <option th:value="${month < 10 ? '0' + month : month}" th:text="${month < 10 ? '0' + month : month} + #{admin.month}"></option>
+                        </th:block>
+                    </select>
+
+                    <div id="select_calendar" class="col-auto calendar_gp select_sub">
+                        <input type="text" th:aria-label="#{admin.calendar}" id="search_value" class="form-control img_data" value="" readonly="readonly" onclick="pickerEvent();" onchange="selectSubEvent('select_day');">
+                    </div>
+                </div>
+
+                <section class="stat-section p-4 mb-4 bg-body-tertiary rounded-3 shadow-sm">
+                    <div class="bar_chart" id="user_bar_chart"></div>
+                </section>
+
+                <h5 class="fw-bold mb-3" th:text="#{adminlist.user.id}"> 사용자 아이디(ID) 별 리스트 </h5>
+
+                <section class="stat-section p-4 mb-4 bg-body-tertiary rounded-3 shadow-sm">
+                    <div class="stat_part mt-5">
+                        <div id="user_pie_chart" class="pie_chart"></div>
+
+                        <div class="table-container">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover align-middle">
+                                    <colgroup>
+                                        <col width="80px" />
+                                        <col />
+                                        <col width="150px" />
+                                        <col width="160px" />
+                                    </colgroup>
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th th:title="#{admin.number}"> 순번 </th>
+                                        <th th:title="#{admin.user.id}">
+                                            <span class="text-truncate d-inline-block" style="max-width: 150px;" th:text="#{admin.user.id}"> 사용자ID </span>
+                                        </th>
+                                        <th th:title="#{admin.user.name}"> 사용자명 </th>
+                                        <th th:title="#{admin.connect.count}"> 접속량 </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="user_status_list"></tbody>
+                                </table>
+
+                                <nav>
+                                    <ul class="pagination justify-content-center" id="user_status_paging"></ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 내역 탭 -->
+            <div class="status_tap mt-4" id="status_user_detail_info" style="display:none;">
+                <h5 class="fw-bold mb-3" th:title="#{admin.detail.user.acess}"> 사용자 접속통계 상세내역 </h5>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <colgroup>
+                            <col width="100px" />
+                            <col width="250px" />
+                            <col width="250px" />
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th th:title="#{admin.number}"> 순번</th>
+                            <th th:title="#{admin.id}">
+                                <div class="r_word-container">
+                                    <span class="r_word" th:text="#{admin.id}"> 아이디(ID) </span>
+                                    <button class="search_btn" type="button" onclick="layShowHide('id_search');" th:text="#{admin.search}"> 검색 </button>
+                                </div>
+                                <div class="search_pup_form mt-2" id="id_search" style="display: none">
+                                    <div class="card card-body">
+                                        <span class="mb-2 fw-bold" th:text="#{admin.search.for.id}"></span>
+
+                                        <div class="input-group mb-2">
+                                                <input type="text" class="form-control" aria-label="내용" placeholder="검색 할 아이디(ID) 입력" id="search_id" onkeydown="searchEnter('id');" />
+                                                <button class="btn btn-primary" type="button" onclick="searchEvent('id')" th:title="#{admin.search}"> 검색 </button>
+                                        </div>
+
+                                        <div class="text-end">
+                                            <button class="btn btn-secondary btn-sm" type="button" onclick="closeLay();" th:title="#{admin.close}"> 닫기 </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th th:title="#{admin.name}">
+                                <div class="r_word-container">
+                                    <span class="r_word" th:text="#{admin.name}"> 이름 </span>
+                                    <button class="search_btn" type="button" onclick="layShowHide('name_search');" th:text="#{admin.name.search}"> 이름 검색 </button>
+                                </div>
+                                <div class="search_pup_form mt-2" id="name_search" style="display: none">
+                                    <div class="card card-body">
+                                        <span class="mb-2 fw-bold" th:text="#{admin.name.search}"> 이름 검색 </span>
+
+                                        <div class="input-group mb-2">
+                                            <input type="text" class="form-control" aria-label="내용" placeholder="검색 할 이름 입력" id="search_name" onkeydown="searchEnter('name');"/>
+                                            <button class="btn btn-primary" type="button" onclick="searchEvent('name')" th:title="#{admin.search}"> 검색 </button>
+                                        </div>
+
+                                        <div class="text-end">
+                                            <button class="btn btn-secondary btn-sm" type="button" onclick="closeLay();" th:title="#{admin.close}"> 닫기 </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th th:title="#{admin.access.time}">
+                                <span class="ellipsis" th:text="#{admin.access.time}"> 접속시간 </span>
+                            </th>
+                            <th th:title="#{admin.end.time}">
+                                <span class="ellipsis" th:text="#{admin.end.time}"> 종료 시간 </span>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody id="user_detail_list"></tbody>
+                    </table>
+                </div>
+
+                <div class="page_butten" id="user_detail_page"></div>
+            </div>
+        </div>
+    </div>
+
+</div>

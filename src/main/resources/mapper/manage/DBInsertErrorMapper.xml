@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.expis.manage.dao.DBInsertErrorMapper">
+    <parameterMap type="java.util.HashMap" id="HashMap"></parameterMap>
+
+    <!-- ResultMap -->
+    <resultMap id="errorResultMap" type="com.expis.manage.dto.DBInsertErrorDto">
+        <result	property="toKey"		column="to_key"				javaType="string" />
+        <result	property="tocoId"		column="to_co_id"			javaType="string" />
+        <result	property="type"			column="type"				javaType="string" />
+        <!--
+        <result	property="treeXth"		column="INSERTDATE"			javaType="string" />
+        -->
+        <result	property="errMsg"		column="err_msg"			javaType="string" />
+    </resultMap>
+
+    <!--  Select List -->
+    <select id="selectListDao" resultMap="errorResultMap"  parameterType="com.expis.manage.dto.DBInsertErrorDto">
+        SELECT
+        to_key
+        ,to_co_id
+        ,type
+        ,insertdate
+        ,err_msg
+        FROM temp_db_update_result
+        WHERE 1 = 1
+        <if test="toKey != null">AND to_key = #{toKey}</if>
+        ORDER BY INSERTDATE ASC
+    </select>
+
+    <!-- Insert -->
+    <insert id="insertDao" parameterType="com.expis.manage.dto.DBInsertErrorDto">
+        INSERT INTO temp_db_update_result(
+        to_key
+        ,to_co_id
+        ,type
+        ,insertdate
+        ,err_msg
+        )
+        VALUES
+        (
+        #{toKey},
+        #{tocoId},
+        #{type},
+        SYSDATE,
+        #{errMsg}
+        )
+    </insert>
+    <!-- Insert -->
+    <insert id="deleteSearch" parameterType="com.expis.manage.dto.DBInsertErrorDto">
+        DELETE FROM temp_db_update_result
+        WHERE 1 = 1
+        <if test="toKey != null">AND to_key = #{toKey}</if>
+    </insert>
+
+    <!-- Delete -->
+    <insert id="deletePrintInfo" parameterType="com.expis.manage.dto.DBInsertErrorDto">
+        DELETE FROM print_info
+        WHERE 1 = 1
+        <if test="toKey != null">AND to_key = #{toKey}</if>
+    </insert>
+
+</mapper>
