@@ -75,7 +75,7 @@ function popupData(params) {
             if (params.system) { // WC 테이블
                 renderWCTable(data.returnData)
 
-            } else if (params.grphId) { // 이미지
+            } else if (params.grphId || params.tblId) { // 이미지, 테이블
                 let xmlData = processXmlData(data);
                 $(".main-content").html(xmlData);
 
